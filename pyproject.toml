@@ -4,16 +4,30 @@ build-backend = "hatchling.build"
 
 [project]
 name = "robotframework-tablelibrary"
-version = "0.0.1"
+dynamic = ["version"]
 description = "A Robot Framework library providing generic table keywords for several table file type like csv or excel."
-# authors = [
-#     { name = "Author", email = "Email" }
-# ]
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = [
-    "robotframework>=6.0",
+authors = [
+  { name = "Marvin Klerx", email = "marvinklerx20@gmail.com" }
 ]
+license = { text = "Apache-2.0" }
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "overrides",
+  "robotframework-pythonlibcore"
+]
+
 
 [project.optional-dependencies]
 dev = [
@@ -22,8 +36,43 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MarvKler/robotframework-tablelibrary"
-Repository = "https://github.com/MarvKler/robotframework-tablelibrary"
+Repository = "https://github.com/imbus/robotframework-tablelibrary"
+Documentation = "https://github.com/imbus/robotframework-tablelibrary#readme"
+Issues = "https://github.com/imbus/robotframework-tablelibrary/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["robotframework-tablelibrary"]
+require-runtime-dependencies = true
+only-include = ["src/TableLibrary"]
+sources = ["src"]
+
+[tool.hatch.version]
+path = "src/TableLibrary/__about__.py"
+
+[tool.hatch.build]
+dev-mode-dirs = ["src"]
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/TableLibrary tests}"
+
+[tool.coverage.run]
+source_pkgs = ["TableLibrary", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/TableLibrary/__about__.py",
+]
+
+[tool.coverage.paths]
+robotframework_tablelibrary = ["src/TableLibrary", "*/src/TableLibrary"]
+tests = ["tests", "*/robotframework-tablelibrary/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
