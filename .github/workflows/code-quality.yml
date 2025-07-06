@@ -1,0 +1,57 @@
+name: Check Python Code Quality
+
+on:
+  push:
+    # branches:
+    #   - main
+    paths:
+      - '**.py'
+      - pyproject.toml
+  pull_request:
+    paths:
+      - '**.py'
+      - pyproject.toml
+
+jobs:
+  ruff-linter:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install ruff
+      run: pip install ruff
+
+    - name: Run ruff lint
+      run: ruff check .
+
+  install-package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Build wheel with Hatch
+        run: hatch build
+
+      - name: Install built wheel
+        run: pip install dist/*.whl
+
+      - name: Test import
+        run: python -c "import TableLibrary"

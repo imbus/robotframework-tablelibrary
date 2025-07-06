@@ -1,17 +1,18 @@
 # SPDX-FileCopyrightText: 2025-present Marvin Klerx <marvinklerx20@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-from typing import Union, Any, Optional
+from typing import Union, Any
 from overrides import overrides
 from .__about__ import __version__
 
 from robot.api.deco import library
 from robotlibcore import DynamicCore
 
-from .utils.data_types import FileType, Delimiter, FileEncoding
+from .utils.settings import FileType, Delimiter, FileEncoding
 
 from .keywords import (
-    Configuration
+    Configuration,
+    Getter
 )
 
 @library(
@@ -54,7 +55,8 @@ class TableLibrary(DynamicCore):
         self._ignore_header = ignore_header
         
         libraries = [
-            Configuration()
+            Configuration(self),
+            Getter(self)
         ]
 
         super().__init__(libraries)

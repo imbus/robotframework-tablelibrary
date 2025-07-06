@@ -1,22 +1,23 @@
-from typing import TYPE_CHECKING, Optional, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ...TableLibrary import TableLibrary
+    from .. import TableLibrary
 
-class LibraryComponent:
+class LibraryAttributes:
     
     def __init__(self, library: "TableLibrary") -> None:
-        """Base class exposing attributes from the common context.
-
-        :param library: The library itself as a context object.
+        """
+        Expose library attributes to all classes
         """
         self.library = library
-        self._crypto: Optional[Any] = None
-        self.browser_arg_mapping: dict[int, str] = {}
 
     @property
     def file_type(self):
         return self.library._file_type
+    
+    @file_type.setter
+    def file_type(self, value):
+        self.library._file_type = value
 
     @property
     def delimiter(self):

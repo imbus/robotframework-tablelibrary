@@ -1,9 +1,13 @@
 from robot.api.deco import keyword
+from ..general.library_attributes import LibraryAttributes
 
 
+class Getter(LibraryAttributes):
 
-class Getter():
+    @keyword(tags=["Getter"])
+    def get_file_content(self):
+        self.file_encoding
 
-    @keyword
-    def print_it(self):
-        print("")
+    @keyword(tags=["Getter"])
+    def get_file_type(self):
+        return self.file_type
