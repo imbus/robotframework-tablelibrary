@@ -22,11 +22,23 @@ class LibraryAttributes:
     @property
     def delimiter(self):
         return self.library._delimiter
+    
+    @delimiter.setter
+    def delimiter(self, value):
+        self.library._delimiter = value
 
     @property
     def file_encoding(self):
         return self.library._file_encoding
+    
+    @file_encoding.setter
+    def file_encoding(self, value):
+        self.library._file_encoding = value
 
     @property
     def ignore_header(self):
         return self.library._ignore_header
+    
+    @ignore_header.setter
+    def ignore_header(self, value):
+        self.library._ignore_header = value

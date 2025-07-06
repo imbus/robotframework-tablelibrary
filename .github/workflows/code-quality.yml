@@ -25,33 +25,39 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install ruff
-      run: pip install ruff
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
 
     - name: Run ruff lint
-      run: ruff check .
+      run: hatch run dev:lint
 
-  install-package:
+  check-python-compatibility:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Install Hatch
-        run: pip install hatch
+    - name: Install Hatch
+      run: pip install hatch
 
-      - name: Build wheel with Hatch
-        run: hatch build
+    - name: Install dependencies
+      run: hatch env create dev
 
-      - name: Install built wheel
-        run: pip install dist/*.whl
+    - name: Build wheel with Hatch
+      run: hatch build
 
-      - name: Test import
-        run: python -c "import TableLibrary"
+    - name: Install built wheel
+      run: pip install dist/*.whl
+
+    - name: Test import
+      run: python -c "import TableLibrary"

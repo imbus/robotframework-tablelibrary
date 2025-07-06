@@ -14,3 +14,6 @@ File Type
     TableLibrary.Set File Type    CSV
     ${file_type} =    TableLibrary.Get File Type
     Should Be Equal As Strings    ${file_type}    csv
+
+Delimiter
+    TableLibrary.Set Delimiter    ,

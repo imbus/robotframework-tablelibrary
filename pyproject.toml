@@ -7,7 +7,7 @@ name = "robotframework-tablelibrary"
 dynamic = ["version"]
 description = "A Robot Framework library providing generic table keywords for several table file type like csv or excel."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 authors = [
   { name = "Marvin Klerx", email = "marvinklerx20@gmail.com" }
 ]
@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
   "overrides",
+  "robotframework",
   "robotframework-pythonlibcore"
 ]
 
@@ -77,3 +78,13 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.hatch.envs.dev]
+dependencies = [
+  "ruff",
+  "pytest"
+]
+[tool.hatch.envs.dev.scripts]
+lint = "ruff check ."
+atest = "robot tests/atest/"
+utest = "pytest"
