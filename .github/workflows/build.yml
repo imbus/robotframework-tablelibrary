@@ -1,4 +1,4 @@
-name: Check Python Code Quality
+name: Build & Check Package
 
 on:
   push:
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
     - uses: actions/checkout@v4
 
@@ -61,3 +61,51 @@ jobs:
 
     - name: Test import
       run: python -c "import TableLibrary"
+
+  run-acceptance-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
+
+    - name: Build wheel with Hatch
+      run: hatch build
+
+    - name: Run robot framework acceptance-tests
+      run: hatch run dev:atest
+
+  run-unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
+
+    - name: Build wheel with Hatch
+      run: hatch build
+
+    - name: Run unit tests with pytest
+      run: hatch run dev:utest
