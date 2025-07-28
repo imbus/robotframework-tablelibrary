@@ -1,5 +1,5 @@
 *** Settings ***
-Library   Tables    CSV    UTF8    ,    True
+Library   Tables    file_type=CSV    file_encoding=UTF8    delimiter=,    ignore_header=True
 
 
 *** Test Cases ***
