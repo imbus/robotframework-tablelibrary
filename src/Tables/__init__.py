@@ -35,6 +35,7 @@ class Tables(DynamicCore):
     
     def __init__(
             self,
+            _,
             file_type: Union[FileType, Any],
             file_encoding: Union[FileEncoding] = FileEncoding.UTF8,
             delimiter: Union[Delimiter, Any] = Delimiter[";"],
