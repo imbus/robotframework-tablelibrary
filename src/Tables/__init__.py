@@ -6,7 +6,7 @@ from overrides import overrides
 from .__about__ import __version__
 
 from robot.api.deco import library
-from robotlibcore import DynamicCore
+from robotlibcore import HybridCore
 
 from .utils.settings import FileType, Delimiter, FileEncoding
 
@@ -19,7 +19,7 @@ from .keywords import (
     scope='GLOBAL',
     version=__version__
 )
-class Tables(DynamicCore):
+class Tables(HybridCore):
     """
     Table Library is a generic automation library for working with file types like csv, excel, etc.
 
@@ -36,9 +36,9 @@ class Tables(DynamicCore):
     def __init__(
             self,
             *_,
-            file_type: Union[FileType, Any],
-            file_encoding: Union[FileEncoding] = FileEncoding.UTF8,
-            delimiter: Union[Delimiter, Any] = Delimiter[";"],
+            file_type: FileType,
+            file_encoding: FileEncoding = FileEncoding.UTF8,
+            delimiter: Delimiter = Delimiter[";"],
             ignore_header: bool = False
         ):
         """
@@ -61,8 +61,3 @@ class Tables(DynamicCore):
         ]
 
         super().__init__(libraries)
-
-    @overrides
-    def get_keyword_documentation(self, name):
-        doc = DynamicCore.get_keyword_documentation(self, name)
-        return doc
