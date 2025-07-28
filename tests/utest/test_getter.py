@@ -1,6 +1,6 @@
 import pytest
-from TableLibrary.keywords.getter import Getter
-from TableLibrary.utils.settings import FileEncoding, FileType
+from Tables.keywords.getter import Getter
+from Tables.utils.settings import FileEncoding, FileType
 
 class DummyLibrary:
     _file_encoding = FileEncoding.UTF8

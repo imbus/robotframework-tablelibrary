@@ -7,7 +7,7 @@ name = "robotframework-tablelibrary"
 dynamic = ["version"]
 description = "A Robot Framework library providing generic table keywords for several table file type like csv or excel."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [
   { name = "Marvin Klerx", email = "marvinklerx20@gmail.com" }
 ]
@@ -15,8 +15,6 @@ license = { text = "Apache-2.0" }
 classifiers = [
   "Development Status :: 1 - Planning",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -44,11 +42,11 @@ Issues = "https://github.com/imbus/robotframework-tablelibrary/issues"
 
 [tool.hatch.build.targets.wheel]
 require-runtime-dependencies = true
-only-include = ["src/TableLibrary"]
-sources = ["src"]
+only-include = ["src/Tables"]
+# sources = ["src"]
 
 [tool.hatch.version]
-path = "src/TableLibrary/__about__.py"
+path = "src/Tables/__about__.py"
 
 [tool.hatch.build]
 dev-mode-dirs = ["src"]
@@ -58,18 +56,18 @@ extra-dependencies = [
   "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/TableLibrary tests}"
+check = "mypy --install-types --non-interactive {args:src/Tables tests}"
 
 [tool.coverage.run]
-source_pkgs = ["TableLibrary", "tests"]
+source_pkgs = ["Tables", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/TableLibrary/__about__.py",
+  "src/Tables/__about__.py",
 ]
 
 [tool.coverage.paths]
-robotframework_tablelibrary = ["src/TableLibrary", "*/src/TableLibrary"]
+robotframework_tablelibrary = ["src/Tables", "*/src/Tables"]
 tests = ["tests", "*/robotframework-tablelibrary/tests"]
 
 [tool.coverage.report]

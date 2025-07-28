@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .. import TableLibrary
+    from .. import Tables
 
 class LibraryAttributes:
     
-    def __init__(self, library: "TableLibrary") -> None:
+    def __init__(self, library: "Tables") -> None:
         """
         Expose library attributes to all classes
         """

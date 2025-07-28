@@ -1,6 +1,6 @@
 import pytest
-from TableLibrary.keywords.configuration import Configuration
-from TableLibrary.utils.settings import FileType, FileEncoding, Delimiter
+from Tables.keywords.configuration import Configuration
+from Tables.utils.settings import FileType, FileEncoding, Delimiter
 
 class DummyLibrary:
     pass

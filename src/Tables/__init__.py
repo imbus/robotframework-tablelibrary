@@ -19,7 +19,7 @@ from .keywords import (
     scope='GLOBAL',
     version=__version__
 )
-class TableLibrary(DynamicCore):
+class Tables(DynamicCore):
     """
     Table Library is a generic automation library for working with file types like csv, excel, etc.
 
