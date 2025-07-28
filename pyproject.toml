@@ -43,7 +43,7 @@ Issues = "https://github.com/imbus/robotframework-tablelibrary/issues"
 [tool.hatch.build.targets.wheel]
 require-runtime-dependencies = true
 only-include = ["src/Tables"]
-# sources = ["src"]
+sources = ["src"]
 
 [tool.hatch.version]
 path = "src/Tables/__about__.py"
