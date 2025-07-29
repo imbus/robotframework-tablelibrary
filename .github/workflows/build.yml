@@ -2,8 +2,8 @@ name: Build & Check Package
 
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
     paths:
       - '**.yml'
       - '**.py'
