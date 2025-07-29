@@ -8,15 +8,15 @@ class Getter(LibraryAttributes):
 
     def __init__(self, library):
         self.library = library
-        self.file_reader = FileReader()
+        self.file_reader = FileReader(library)
 
     @keyword(tags=["Getter"])
     def get_file_content(self):
-        self.file_encoding
+        self.file_encoding.value
 
     @keyword(tags=["Getter"])
     def get_file_type(self):
-        return self.file_type
+        return self.file_type.value
     
     @keyword(tags=["Getter"])
     def read_table(

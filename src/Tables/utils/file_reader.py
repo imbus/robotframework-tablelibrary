@@ -6,6 +6,9 @@ import pandas as pd
 
 class FileReader(LibraryAttributes):
 
+    def __init__(self, library):
+        super().__init__(library)
+
     def file_exists(
             self,
             path: str
@@ -18,15 +21,19 @@ class FileReader(LibraryAttributes):
             self,
             path: str
         ) -> list:
-        with open(path, newline='', encoding=self.file_encoding) as f:
-            reader = csv.reader(f)
-            return [row for row in reader]
+        with open(path, newline='', encoding=self.file_encoding.value) as f:
+            reader = csv.reader(f, delimiter=self.delimiter.value)
+            rows = [row for row in reader]
+            if self.ignore_header:
+                return rows[1:]
+            return rows
 
     def read_excel(
             self,
             path: str
         ) -> list:
-        df = pd.read_excel(path, header=None)
+        header = 0 if self.ignore_header else None
+        df = pd.read_excel(path, header=header)
         return df.values.tolist()
     
     def read_parquet(
@@ -34,4 +41,7 @@ class FileReader(LibraryAttributes):
             path: str
         ) -> list:
         df = pd.read_parquet(path)
-        return df.values.tolist()
+        data = df.values.tolist()
+        if not self.ignore_header:
+            data.insert(0, list(df.columns))
+        return data

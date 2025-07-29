@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2025-present Marvin Klerx <marvinklerx20@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-from typing import Union, Any
-from overrides import overrides
 from .__about__ import __version__
 
 from robot.api.deco import library

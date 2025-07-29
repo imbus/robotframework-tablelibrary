@@ -26,7 +26,9 @@ dependencies = [
   "robotframework",
   "robotframework-pythonlibcore",
   "pandas",
-  "pyarrow"
+  "pyarrow",
+  "openpyxl",
+  "xlrd",
 ]
 
 

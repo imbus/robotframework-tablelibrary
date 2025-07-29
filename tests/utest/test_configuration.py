@@ -11,19 +11,19 @@ def config():
     return Configuration(DummyLibrary())
 
 def test_set_file_type(config):
-    config.set_file_type(FileType.CSV)
-    assert config.file_type == FileType.CSV.value
+    config.configure_file_type(FileType.CSV)
+    assert config.file_type == FileType.CSV
 
 def test_set_delimiter(config):
-    config.set_delimiter(Delimiter[","])
-    assert config.delimiter == Delimiter[","].value
+    config.configure_delimiter(Delimiter[","])
+    assert config.delimiter == Delimiter[","]
 
 def test_set_file_encoding(config):
-    config.set_file_encoding(FileEncoding.UTF8)
-    assert config.file_encoding == FileEncoding.UTF8.value
+    config.configure_file_encoding(FileEncoding.UTF8)
+    assert config.file_encoding == FileEncoding.UTF8
 
 def test_set_ignore_header(config):
-    config.set_ignore_header(True)
+    config.configure_ignore_header(True)
     assert config.ignore_header is True
-    config.set_ignore_header(False)
+    config.configure_ignore_header(False)
     assert config.ignore_header is False
