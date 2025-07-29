@@ -36,7 +36,10 @@ dependencies = [
 dev = [
     "hatch",
     "ruff",
-    "pytest"
+    "pytest",
+    "pre-commit",
+    "mypy",
+    "robotframework-robocop"
 ]
 
 [project.urls]
@@ -90,3 +93,77 @@ dependencies = [
 lint = "ruff check ."
 atest = "robot tests/atest/"
 utest = "pytest"
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+no_implicit_optional = true
+strict_optional = true
+warn_return_any = true
+warn_no_return = true
+warn_unreachable = true
+pretty = true
+
+[tool.ruff]
+fix = false
+target-version = "py310"
+line-length = 110
+exclude = [
+  "__pycache__",
+  ".venv",
+  "tools",
+  "model",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint]
+ignore = [
+  "N815",  # mixedCase variable in class scope
+  "N803",  # argument name should be lowercase
+  "T201",  # Print statements
+  "INP001",  # part of an implicit namespace package
+]
+select = [
+  "E",
+  "F",
+  "W",
+  "C90",
+  "I",
+  "N",
+  "B",
+  "PYI",
+  "PL",
+  "PTH",
+  "UP",
+  "A",
+  "C4",
+  "DTZ",
+  "ISC",
+  "ICN",
+  "INP",
+  "PIE",
+  "T20",
+  "PYI",
+  "PT",
+  "RSE",
+  "RET",
+  "SIM",
+  "RUF",
+]
+
+[tool.robocop.lint]
+select = [
+  "LEN04",
+  "NAME02",
+]
+ignore = [
+  "DOC01",
+  "DOC02",
+  "DOC03",
+]
+reports = [
+  "rules_by_id",
+  "scan_timer",
+]
