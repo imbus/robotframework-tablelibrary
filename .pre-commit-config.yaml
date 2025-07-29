@@ -32,13 +32,13 @@ repos:
   # Robocop formatter and linter for Robot Framework (.robot and .resource files)
   - repo: local
     hooks:
-      - id: robocop-format
-        name: robocop-format
-        description: "Run 'robocop format' for RobotFramework source code formatting"
-        entry: robocop format
-        files: \.(robot|resource)$
-        language: python
-        require_serial: true
+      # - id: robocop-format
+      #   name: robocop-format
+      #   description: "Run 'robocop format' for RobotFramework source code formatting"
+      #   entry: robocop format
+      #   files: \.(robot|resource)$
+      #   language: python
+      #   require_serial: true
 
       - id: robocop
         name: robocop
