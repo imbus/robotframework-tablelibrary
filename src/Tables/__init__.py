@@ -30,7 +30,7 @@ class Tables(HybridCore):
     | Excel   | Classic Excel file |
     | Parquet | Parquet file       |
     """
-    
+
     def __init__(
             self,
             *_,
@@ -52,7 +52,7 @@ class Tables(HybridCore):
         self._delimiter = delimiter
         self._file_encoding = file_encoding
         self._ignore_header = ignore_header
-        
+
         libraries = [
             Configuration(self),
             Getter(self)

@@ -107,7 +107,7 @@ pretty = true
 [tool.ruff]
 fix = false
 target-version = "py310"
-line-length = 110
+line-length = 130
 exclude = [
   "__pycache__",
   ".venv",
@@ -124,6 +124,8 @@ ignore = [
   "N803",  # argument name should be lowercase
   "T201",  # Print statements
   "INP001",  # part of an implicit namespace package
+  "N999",  # Invalid module name
+  "I001",  # Import block is un-sorted or un-formatted
 ]
 select = [
   "E",
