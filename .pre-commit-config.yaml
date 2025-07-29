@@ -47,3 +47,18 @@ repos:
         files: \.(robot|resource)$
         language: python
         require_serial: true
+
+  - repo: local
+    hooks:
+      - id: acceptance-tests
+        name: Acceptance Tests via hatch
+        entry: hatch run dev:atest
+        language: system
+        types: []
+        pass_filenames: false
+      - id: unit-tests
+        name: Unit Tests via hatch
+        entry: hatch run dev:utest
+        language: system
+        types: []
+        pass_filenames: false
