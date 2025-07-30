@@ -24,6 +24,9 @@ class Writer(LibraryAttributes):
         ) -> str:
         """
         Keyword to write data to the configured tables file.
+
+        === File Type ===
+        File type is taken from the library-wide configuration.
         """
         dir_name = Path(file_path).parent
         self._fs.ensure_directory_exists(dir_name)
