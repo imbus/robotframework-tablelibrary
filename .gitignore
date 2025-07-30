@@ -210,3 +210,7 @@ __marimo__/
 log.html
 report.html
 output.xml
+
+
+**/atest/results/**
+**/utest/results/**

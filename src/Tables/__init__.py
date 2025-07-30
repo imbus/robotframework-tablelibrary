@@ -10,7 +10,8 @@ from .utils.settings import FileType, Delimiter, FileEncoding
 
 from .keywords import (
     Configuration,
-    Getter
+    Getter,
+    Writer
 )
 
 @library(
@@ -55,7 +56,8 @@ class Tables(HybridCore):
 
         libraries = [
             Configuration(self),
-            Getter(self)
+            Getter(self),
+            Writer(self)
         ]
 
         super().__init__(libraries)
