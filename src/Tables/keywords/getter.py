@@ -12,14 +12,6 @@ class Getter(LibraryAttributes):
         self.file_reader = FileReader(library)
 
     @keyword(tags=["Getter"])
-    def get_file_content(self):
-        return self.file_encoding.value
-
-    @keyword(tags=["Getter"])
-    def get_file_type(self):
-        return self.file_type.value
-
-    @keyword(tags=["Getter"])
     def read_table(
             self,
             path: str

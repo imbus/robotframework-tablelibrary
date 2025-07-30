@@ -17,7 +17,7 @@ class FileEncoding(Enum):
     LATIN1 = "latin-1"
 
 Delimiter = Enum(
-    "Delimiters",
+    "Delimiter",
     {
         ";": ";",
         ",": ",",
