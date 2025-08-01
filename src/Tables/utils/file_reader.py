@@ -2,8 +2,9 @@ from ..general.library_attributes import LibraryAttributes
 
 import csv
 import pandas as pd
+from pandas import DataFrame
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 
 class FileReader(LibraryAttributes):
@@ -22,12 +23,19 @@ class FileReader(LibraryAttributes):
                 return rows[1:]
             return rows
 
-    def read_excel(self, path: str) -> list[list[Any]]:
+    def read_excel(self,
+            path: str,
+            sheet_name: str | list[str | int] | None = None
+        ) -> dict[str, DataFrame]:
         header = 0 if self.ignore_header else None
-        df = pd.read_excel(path, header=header)
-        return cast(list[list[Any]], df.values.tolist())
+        dict_df = pd.read_excel(path, header=header, sheet_name=sheet_name)
+        if type(sheet_name) is str:
+            dict_df = {
+                sheet_name: dict_df
+            }
+        return dict_df
 
-    def read_parquet(self, path: str) -> Any:
+    def read_parquet(self, path: str) -> list:
         df = pd.read_parquet(path)
         data = df.values.tolist()
         if not self.ignore_header:

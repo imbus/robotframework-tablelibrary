@@ -27,14 +27,14 @@ Read Excel File - With Header
     Tables.Configure File Type    Excel
     Tables.Configure Ignore Header    False
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_02.xlsx
-    ${result} =    BuiltIn.Evaluate    "${content}[0][0]" == "_time"
+    ${result} =    BuiltIn.Evaluate    "${content}[Sheet1][0][0]" == "_time"
     BuiltIn.Should Be True    ${result}
 
 Read Excel File - Without Header
     Tables.Configure File Type    Excel
     Tables.Configure Ignore Header    True
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_02.xlsx
-    ${result} =    BuiltIn.Evaluate    "_time" not in "${content}"
+    ${result} =    BuiltIn.Evaluate    "_time" not in "${content}[Sheet1]"
     BuiltIn.Should Be True    ${result}
 
 Read Parquet File - With Header - Raw Timestamp Object

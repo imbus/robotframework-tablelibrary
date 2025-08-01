@@ -24,6 +24,7 @@ classifiers = [
 dependencies = [
   "overrides",
   "robotframework",
+  "robotframework-assertion-engine",
   "robotframework-pythonlibcore",
   "pandas",
   "pyarrow",
@@ -154,6 +155,9 @@ select = [
   "SIM",
   "RUF",
 ]
+
+[tool.ruff.pylint]
+max-args = 10
 
 [tool.robocop.lint]
 select = [
