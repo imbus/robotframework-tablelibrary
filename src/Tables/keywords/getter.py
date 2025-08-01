@@ -20,6 +20,12 @@ class Getter(LibraryAttributes):
         ) -> Any:
         """
         Keyword to read the table data for the supported file types.
+
+        | =`Arguments`= | =`Description`= |
+        | ``path`` | The path where the tables file is actually stored. |
+
+        == Example ==
+        | Read Table    ${CURDIR}/readable_files/statistics.csv
         """
         self.file_reader.file_exists(path)
 
@@ -47,6 +53,34 @@ class Getter(LibraryAttributes):
         ):
         """
         Keyword reads the table cell with the given row & column index.
+
+        | =`Arguments`= | =`Description`= |
+        | ``data`` | The table data - must be reat via ``Read`` keywords first |
+        | ``row`` | Row to read the cell from |
+        | ``column`` | Column to read the cell from |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details |
+        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
+        | ``message`` | Custom error message for failed assertion |
+
+        == Return Value / Errors ==
+        Keyword returns the value of the given cell.\n
+        In case of a failed assertion, the keyword will just fail without returning anything.
+
+        == Example ==
+        | CSV:
+        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
+        |
+        | ${cell_value} =    Read Table Cell    ${data}    0    1    # without assertion
+        | Read Table Cell    ${data}    0    1    ==    27    # with assertion
+        |
+        |
+        | Excel:
+        | Excel Open    excel_01    ${CURDIR}/testdata/example_06.xlsx
+        |
+        | ${data} =    Excel Sheet Read    Personen
+        |
+        | ${cell_value} =    Read Table Cell    ${data}   0    1    # without assertion
+        | Read Table Cell    ${data}    0    1    ==    Bob    # with assertion
         """
         # if header is not ignored, we need to increase the row index
         if not self.ignore_header:
@@ -76,9 +110,23 @@ class Getter(LibraryAttributes):
         """
         Keyword to read the given table column.
 
-        == Arguments ==
-        ``data`` : Pass the previously returned table data.
-        ``column`` : Column header name as string value or column header index as integer value.
+        | =`Arguments`= | =`Description`= |
+        | ``data`` | The table data - must be reat via ``Read`` keywords first |
+        | ``column`` | Column header name (str) or index (int) to return values from |
+
+        == Example ==
+        | CSV:
+        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
+        |
+        | ${cell_value} =    Read Table Column    ${data}    0    # header index
+        |
+        |
+        | Excel:
+        | Excel Open    excel_01    ${CURDIR}/testdata/example_06.xlsx
+        |
+        | ${data} =    Excel Sheet Read    Personen
+        |
+        | ${cell_value} =    Read Table Column    ${data}   Names    # header name
         """
         if self.ignore_header and isinstance(column, str):
             raise TypeError(

@@ -8,12 +8,6 @@ from ..general.library_attributes import LibraryAttributes
 from ..utils.file_reader import FileReader
 from ..utils.settings import FileType
 
-# def config_validation(func):
-#     def wrapper(self, *args, **kwargs):
-#         self._file_type_validation()
-#         return func(self, *args, **kwargs)
-#     return wrapper
-
 class Excel(LibraryAttributes):
 
     def __init__(self, library):
@@ -59,10 +53,20 @@ class Excel(LibraryAttributes):
         """
         Keyword to open the given excel file.
 
-        == Arguments ==
-        ``path`` : Path to the excel file to open
-        ``sheet_name`` : If specified, only the given sheets are opened - default is ``None``.
+        Opened file will be stored internally & further keywords can be executed to read & validate the excel data.
+
+        | =`Arguments`= | =`Description`= |
+        | ``alias`` | Define a alias name to identified the open excel file |
+        | ``path`` | Path to the excel file |
+        | ``sheet_name`` | Define one or more sheet names to read only specific sheets from the file - default is ``None``to read the complete file |
+
+        == Return Value ==
+        Keyword will return the given alias name.
+
+        == Example ==
+        | Excel Open    ${directory_to_file}/excel_file.xlsx
         """
+        self._file_type_validation()
         self.file_reader.file_exists(path)
 
         _df = self.file_reader.read_excel(path, sheet_name)

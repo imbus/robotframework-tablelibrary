@@ -21,22 +21,33 @@ from .keywords import (
 )
 class Tables(HybridCore):
     """
-    Table Library is a generic automation library for working with file types like csv, excel, etc.
+    Table Library is a generic automation library for working with files like csv, excel, etc.
 
     == Table of content ==
 
     %TOC%
 
-    === Supported file types ===
-    | CSV     | Classic CSV file   |
-    | Excel   | Classic Excel file |
-    | Parquet | Parquet file       |
+    == Supported file types ==
+    - CSV
+    - Excel
+    - Parquet
+
+    == Supported File Encoding ==
+    - utf-8
+    - utf-16
+    - latin-1
+
+    == Excel Handling ==
+    Handling excel files is slightly different because of excel features like using multiple sheets in one excel file.\n
+    Therefore, we have extra ``Excel`` keywords.\n
+
+    Generic features, like reading one specific table cell, can be used for other file types as well.
     """
 
     def __init__(
             self,
             *_,
-            file_type: FileType,
+            file_type: FileType = FileType.CSV,
             file_encoding: FileEncoding = FileEncoding.UTF8,
             delimiter: Delimiter = Delimiter[";"],
             ignore_header: bool = False
@@ -44,7 +55,7 @@ class Tables(HybridCore):
         """
         Table Library can be controlled by the following arguments:
 
-        | =`Argument`=      | =Description= |
+        | =`Argument`=      | =`Description`= |
         | ``file_type``     | Choose the file type to test initially. |
         | ``file_encoding`` | Defiine the file encoding. |
         | ``delimiter``     | Define a delimiter for parsing the files. |

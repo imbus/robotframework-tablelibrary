@@ -108,7 +108,7 @@ pretty = true
 [tool.ruff]
 fix = false
 target-version = "py310"
-line-length = 130
+line-length = 150
 exclude = [
   "__pycache__",
   ".venv",

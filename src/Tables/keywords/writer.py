@@ -23,10 +23,14 @@ class Writer(LibraryAttributes):
             file_path: str
         ) -> str:
         """
-        Keyword to write data to the configured tables file.
+        Keyword to write the given data to a new file.
 
-        === File Type ===
-        File type is taken from the library-wide configuration.
+        | =`Arguments`= | =`Description`= |
+        | ``data`` | Data object to store in a new file |
+        | ``file_path`` | The full path of your file system to store the file. |
+
+        == Example ==
+        | Write Table    ${data}    ${CURDIR}/output/statistics.csv
         """
         dir_name = Path(file_path).parent
         self._fs.ensure_directory_exists(dir_name)
