@@ -4,7 +4,7 @@ import csv
 import pandas as pd
 from pandas import DataFrame
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 class FileReader(LibraryAttributes):
@@ -29,15 +29,11 @@ class FileReader(LibraryAttributes):
         ) -> dict[str, DataFrame]:
         header = 0 if self.ignore_header else None
         dict_df = pd.read_excel(path, header=header, sheet_name=sheet_name)
-        if type(sheet_name) is str:
-            dict_df = {
-                sheet_name: dict_df
-            }
-        return dict_df
+        return {sheet_name: dict_df} if isinstance(sheet_name, str) else cast(dict[str, DataFrame], dict_df)
 
     def read_parquet(self, path: str) -> list:
         df = pd.read_parquet(path)
-        data = df.values.tolist()
+        data = cast(list[list[Any]], df.values.tolist())
         if not self.ignore_header:
             data.insert(0, list(df.columns))
         return data

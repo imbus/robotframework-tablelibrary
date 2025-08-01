@@ -2,7 +2,7 @@ from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_reader import FileReader
 from ..utils.settings import FileType
-from typing import Any
+from typing import Any, cast
 from pandas import DataFrame
 from assertionengine import verify_assertion, AssertionOperator
 
@@ -91,4 +91,4 @@ class Getter(LibraryAttributes):
         # Read column via str or int identifier
         if isinstance(column, int):
             column = df.columns[column]
-        return df[column].tolist()
+        return cast(list[Any], df[column].tolist())

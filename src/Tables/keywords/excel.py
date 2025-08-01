@@ -1,7 +1,7 @@
 from robot.api.deco import keyword
 from robot.api import logger
 
-from typing import Any
+from typing import Any, cast
 from pandas import DataFrame
 
 from ..general.library_attributes import LibraryAttributes
@@ -139,7 +139,10 @@ class Excel(LibraryAttributes):
         """
         Keyword to read the content of the given ``sheet``.
         """
-        return self.data[self.current_file].get(sheet_name).values.tolist()
+        df = self.data[self.current_file].get(sheet_name)
+        if df is None:
+            raise ValueError(f"Sheet '{sheet_name}' not found in current file.")
+        return cast(list[list[Any]], df.values.tolist())
 
     @keyword(tags=["Excel", "Getter"])
     #v@config_validation
@@ -149,4 +152,4 @@ class Excel(LibraryAttributes):
         """
         Keyword returns the available sheets within the currently opened excel file.
         """
-        return self.data[self.current_file].keys()
+        return list(self.data[self.current_file].keys())
