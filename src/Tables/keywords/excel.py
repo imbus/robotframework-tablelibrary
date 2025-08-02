@@ -53,7 +53,7 @@ class Excel(LibraryAttributes):
         """
         Keyword to open the given excel file.
 
-        Opened file will be stored internally & further keywords can be executed to read & validate the excel data.
+        Opened file will be stored internally & further keywords can be executed to read & validate the excel data from this data.
 
         | =`Arguments`= | =`Description`= |
         | ``alias`` | Define a alias name to identified the open excel file |
@@ -78,35 +78,47 @@ class Excel(LibraryAttributes):
     #v@config_validation
     def excel_close(
             self,
-            file_alias: str | None = None
-        ):
+            alias: str | None = None
+        ) -> bool:
         """
         Keyword to close all or just the given excel file.
+
+        | =`Arguments`= | =`Description`= |
+        | ``alias`` | Optional: If given, only the file with this alias is closed. |
+
+        == Example ==
+        | ${alias} =    Excel Open    statistics    ${directory_to_file}/excel_file.xlsx
+        |
+        | Excel Close    ${alias}    # close only one file
+        | Excel Close    # close all opened files
         """
         if not self.df:
             logger.info("Nothing to close - no file is opened!")
             return False
-        if not file_alias:
+        if not alias:
             self.df = {}
             self.current_file = None
             logger.info("Closed all opened excel files!")
             return True
-        if file_alias in self.df:
-            del self.df[file_alias]
+        if alias in self.df:
+            del self.df[alias]
             if len(self.df) == 0:
                 self.current_file = None
-            logger.info(f"Excel file '{file_alias}' is closed!")
+            logger.info(f"Excel file '{alias}' is closed!")
             return True
         raise KeyError(
-            f"Given file alias '{file_alias}' does not exist - check all opened files and their alias first!"
+            f"Given file alias '{alias}' does not exist - check all opened files and their alias first!"
         )
 
     @keyword(tags=["Excel", "Getter"])
     #v@config_validation
     def excel_get_open_files(self) -> list:
         """
-        Keyword returns a list of opened excel files.\n
-        It returns the file name alias, defined when the files was opened
+        Keyword returns a list of all currently opened excel files.\n
+        It returns the file name alias, defined when the files were opened.
+
+        == Example ==
+        | @{files} =    Excel Get Open Files
         """
         files = []
         try:
@@ -120,19 +132,23 @@ class Excel(LibraryAttributes):
     #v@config_validation
     def excel_file_switch(
             self,
-            file_alias: str
+            alias: str
         ):
         """
-        Keyword to switch between opened excel files.
+        Keyword to switch between opened excel files - only if more than one file is opened.
 
-        == Arguments ==
-        ``file_alias`` : File alias defined in ``Excel Open`` keyword.
+        | =`Arguments`= | =`Description`= |
+        | ``alias`` | The defined ``alias`` of the file to switch to. |
+
+        == Example ==
+        | Excel File Switch    file_a
+        | Excel File Switch    file_b
         """
         if len(self.data) <= 1:
             raise KeyError(
                 "No or only one file is opened at the moment - please open at least two excel files to use this keyword!"
             )
-        self.current_file = file_alias
+        self.current_file = alias
 
     @keyword(tags=["Excel", "Getter"])
     #v@config_validation
@@ -141,7 +157,15 @@ class Excel(LibraryAttributes):
             sheet_name: str
         ) -> list[list[Any]]:
         """
-        Keyword to read the content of the given ``sheet``.
+        Keyword to read the data / content of the given ``sheet``.
+
+        The currently opened excel file is taken for reading the data - see ``File Open`` & ``File Switch`` keywords.
+
+        | =`Arguments`= | =`Description`= |
+        | ``sheet_name`` | Excel sheet name to read the data from - must be read during file open keyword. |
+
+        == Example ==
+        | ${sheet_data} =    Excel Sheet Read    Sheet_Persons
         """
         df = self.data[self.current_file].get(sheet_name)
         if df is None:
@@ -155,5 +179,8 @@ class Excel(LibraryAttributes):
         ) -> list:
         """
         Keyword returns the available sheets within the currently opened excel file.
+
+        == Example ==
+        | @{sheets} =    Excel Get Available Sheets
         """
         return list(self.data[self.current_file].keys())
