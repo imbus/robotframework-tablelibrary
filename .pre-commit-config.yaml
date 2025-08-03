@@ -10,6 +10,16 @@ repos:
         types_or: [python, pyi]
         require_serial: true
 
+  # try generating the libdoc documentation
+  - repo: local
+    hooks:
+      - id: libdoc
+        name: libdoc
+        entry: libdoc src/Tables results/keyword_docs.html
+        language: system
+        require_serial: true
+        pass_filenames: false
+
   # Ruff linter for Python files
   - repo: local
     hooks:
