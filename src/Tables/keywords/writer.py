@@ -55,3 +55,30 @@ class Writer(LibraryAttributes):
             raise ValueError(f"Unsupported file type: {self.file_type}")
         return file_path
 
+    @keyword(tags=["Writer"])
+    def write_cell(
+            self,
+            alias: str,
+            row: int,
+            column: int
+        ) -> list[list[Any]]:
+        """
+        Keyword to (over-) write the value of a specific cell.
+        """
+        return [[None]]
+
+    @keyword(tags=["Writer"])
+    def write_column(
+            self,
+            alias: str,
+            column: int
+        ) -> list[list[Any]]:
+        return [[None]]
+
+    @keyword(tags=["Writer"])
+    def write_row(
+            self,
+            alias: str,
+            row: int,
+        ) -> list[list[Any]]:
+        return [[None]]

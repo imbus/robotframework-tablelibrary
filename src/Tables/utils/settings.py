@@ -25,7 +25,12 @@ Delimiter = Enum(
     }
 )
 Delimiter.__doc__ = """
-    Predefined delimiters to use within the library.
+    Available delimiters for splitting data columns in any table file - default is ``,``.
+    | = Delimiter = | = Description = |
+    | ``;`` | Using the semicolon as delimiter. |
+    | ``,`` | Using the comma as delimiter. |
+    | ``\\t`` | Using the ``tab`` character as delimiter. |
+    | ... | In case of any missing delimiter, feel free to add it... |
 """
 
 DecimalSeperator = Enum(

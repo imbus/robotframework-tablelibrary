@@ -27,7 +27,7 @@ class Tables(HybridCore):
 
     %TOC%
 
-    == Supported file types ==
+    == Supported File Types ==
     - CSV
     - Excel
     - Parquet
@@ -41,7 +41,8 @@ class Tables(HybridCore):
     Handling excel files is slightly different because of excel features like using multiple sheets in one excel file.\n
     Therefore, we have extra ``Excel`` keywords.\n
 
-    Generic features, like reading one specific table cell, can be used for other file types as well.
+    Generic features, like reading one specific table cell,
+    can be used for other file types as well using the generic table keywords.
 
     == Examples ==
     === Excel ===
