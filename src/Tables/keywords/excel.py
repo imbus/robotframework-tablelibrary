@@ -43,7 +43,6 @@ class Excel(LibraryAttributes):
     ###
 
     @keyword(tags=["Excel", "Getter"])
-    #v@config_validation
     def excel_open(
             self,
             alias: str,
@@ -75,7 +74,6 @@ class Excel(LibraryAttributes):
         return alias
 
     @keyword(tags=["Excel", "Getter"])
-    #v@config_validation
     def excel_close(
             self,
             alias: str | None = None
@@ -111,7 +109,6 @@ class Excel(LibraryAttributes):
         )
 
     @keyword(tags=["Excel", "Getter"])
-    #v@config_validation
     def excel_get_open_files(self) -> list:
         """
         Keyword returns a list of all currently opened excel files.\n
@@ -129,7 +126,6 @@ class Excel(LibraryAttributes):
         return files
 
     @keyword(tags=["Excel", "Getter"])
-    #v@config_validation
     def excel_file_switch(
             self,
             alias: str
@@ -151,7 +147,6 @@ class Excel(LibraryAttributes):
         self.current_file = alias
 
     @keyword(tags=["Excel", "Getter"])
-    #v@config_validation
     def excel_sheet_read(
             self,
             sheet_name: str
@@ -173,7 +168,6 @@ class Excel(LibraryAttributes):
         return cast(list[list[Any]], df.values.tolist())
 
     @keyword(tags=["Excel", "Getter"])
-    #v@config_validation
     def excel_get_available_sheets(
             self
         ) -> list:

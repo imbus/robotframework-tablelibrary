@@ -41,7 +41,6 @@ class Getter(LibraryAttributes):
         raise ValueError(f"Not supported data type - file path: {path}")
 
     @keyword(tags=["Getter"])
-    #v@config_validation
     def read_table_cell(
             self,
             data: list[list[Any]],
@@ -140,3 +139,27 @@ class Getter(LibraryAttributes):
         if isinstance(column, int):
             column = df.columns[column]
         return cast(list[Any], df[column].tolist())
+
+    @keyword(tags=["Getter"])
+    def read_table_row(
+            self,
+            data: list[list[Any]],
+            row: int
+        ) -> list[Any]:
+        """
+        Keyword to read a specific row from the table data - row is specified by its index.
+
+        | =`Arguments`= | =`Description`= |
+        | ``data`` | The table data - must be reat via ``Read`` keywords first |
+        | ``row`` | Row index (int) to read values from |
+
+        == Example ==
+        """
+        if len(data) == 0:
+            raise ValueError(
+                f"Data object ccontains no data! Length of given list: {len(data)}"
+            )
+        df = DataFrame(data[1:], columns=data[0]) if not self.ignore_header else DataFrame(data)
+        if row < 0 or row >= len(df):
+            raise IndexError(f"Row index {row} out of range (0-{len(df)-1})")
+        return cast(list[Any], df.iloc[row].tolist())

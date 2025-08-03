@@ -57,3 +57,14 @@ Read Parquet File - Without Header
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
     ${result} =    BuiltIn.Evaluate    "_time" not in "${content}"
     BuiltIn.Should Be True    ${result}
+
+Read Table Row - CSV
+    
+    Tables.Configure Ignore Header    False
+    Tables.Configure File Type    CSV
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    ${row_01} =    Tables.Read Table Row    ${content}    0
+    ${row_02} =    Tables.Read Table Row    ${content}    1
+    BuiltIn.Should Contain    ${row_01}    alex
+    BuiltIn.Should Contain    ${row_02}    30
+
