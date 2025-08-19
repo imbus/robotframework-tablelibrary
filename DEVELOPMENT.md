@@ -24,3 +24,8 @@ pre-commit run --all-files
 
 If you're working with a virtual environment, you might get problems with committing changes with the VS Code Git Controls.     
 In that case, please open a shell where your virtual environment is activated & add, commit & push your changes via git shell commands!
+
+
+### VS Code custom Docstring template
+
+If you want to use the custom docstring template for this project you have to get [autoDocstring](https://marketplace.visualstudio.com/items?itemName=njpwerner.autodocstring) first. Add the path to the custom template under [Custom Template Path](vscode://settings/autoDocstring.customTemplatePath) './vsc_plugins/autoDocstring/robotDoc.mustache' 

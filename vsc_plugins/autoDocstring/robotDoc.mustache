@@ -1,0 +1,45 @@
+{{! Template according https://dorukkilitcioglu.com/2018/08/18/python-better-docstring.html }}
+{{! RobotFramework Docstring Template }}
+{{summaryPlaceholder}}
+
+{{extendedSummaryPlaceholder}}
+
+{{#argsExist}}
+Args:
+{{#args}}
+    {{&var}}::{{&typePlaceholder}}
+        {{descriptionPlaceholder}}
+{{/args}}
+{{/argsExist}}
+
+{{#kwargsExist}}
+Keyword args:
+{{#kwargs}}
+    {{var}}::{{typePlaceholder}}(={{&default}})
+        {{descriptionPlaceholder}}
+{{/kwargs}}
+{{/kwargsExist}}
+
+{{#returnsExist}}
+Returns:
+{{#returns}}
+    {{typePlaceholder}}
+        {{descriptionPlaceholder}}
+{{/returns}}
+{{/returnsExist}}
+
+{{#yieldsExist}}
+Yields:
+{{#yields}}
+    {{typePlaceholder}}
+        {{descriptionPlaceholder}}
+{{/yields}}
+{{/yieldsExist}}
+
+{{#exceptionsExist}}
+Raises:
+{{#exceptions}}
+    {{type}}
+        {{descriptionPlaceholder}}
+{{/exceptions}}
+{{/exceptionsExist}}
