@@ -13,32 +13,21 @@ class Getter(LibraryAttributes):
         self.library = library
         self.file_reader = FileReader(library)
 
+
     @keyword(tags=["Getter"])
     def read_table(
             self,
             path: str
-        ) -> Any:
+    ) -> list[list[Any]]:
         """
-        Keyword to read the table data for the supported file types.
-
-        | =`Arguments`= | =`Description`= |
-        | ``path`` | The path where the tables file is actually stored. |
-
-        == Example ==
-        | Read Table    ${CURDIR}/readable_files/statistics.csv
         """
-        self.file_reader.file_exists(path)
+        table_df = self.file_reader.read_table_file(path)
+        data = cast(list[list[Any]], table_df.values.tolist())
 
-        if self.file_type == FileType.CSV:
-            return self.file_reader.read_csv(path)
-        if self.file_type == FileType.Excel:
-            dict_df = self.file_reader.read_excel(path)
-            for sheet in dict_df:
-                dict_df[sheet] = DataFrame(dict_df[sheet]).values.tolist()
-            return dict_df
-        if self.file_type == FileType.Parquet:
-            return self.file_reader.read_parquet(path)
-        raise ValueError(f"Not supported data type - file path: {path}")
+        if self.file_type == FileType.Parquet and not self.ignore_header:
+            data.insert(0, list(table_df.columns))
+
+        return data
 
     @keyword(tags=["Getter"])
     def read_table_cell(
