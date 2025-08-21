@@ -74,7 +74,6 @@ class FileReader(LibraryAttributes):
             )
         return True
 
-
     def read_csv(self, path: str) -> DataFrame:
         """
         """

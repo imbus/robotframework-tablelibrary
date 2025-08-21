@@ -71,10 +71,34 @@ Read Table Cell - Parquet - With Header - Column Name
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
     ${cell_value} =    Read Table Cell    ${content}    1    _strom    ==    ${4.76}
 
-Read Table Row - CSV
+Read Table Column - CSV - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    Read Table Column    ${content}    1    contains    alex
+    Read Table Column    ${content}    1    not contains    franz
+
+Read Table Column - CSV - With Header
     Tables.Configure Ignore Header    False
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
-    ${row_01} =    Tables.Read Table Row    ${content}    0
-    ${row_02} =    Tables.Read Table Row    ${content}    1
-    BuiltIn.Should Contain    ${row_01}    alex
-    BuiltIn.Should Contain    ${row_02}    30
+    Read Table Column    ${content}    name    contains    alex
+    Read Table Column    ${content}    name    not contains    franz
+
+Read Table Column - Parquet - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    Read Table Column    ${content}    1    contains    ${4.0}
+
+Read Table Column - Parquet - With Header
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    Read Table Column    ${content}    _strom    contains    ${4.0}
+
+Read Table Row - CSV - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Read Table Row    ${content}    0    contains    alex
+
+Read Table Row - CSV - With Header
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Read Table Row    ${content}    0    contains    age
