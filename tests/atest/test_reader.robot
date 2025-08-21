@@ -41,6 +41,36 @@ Read Parquet File - Without Header
     ${result} =    BuiltIn.Evaluate    "_time" not in "${content}"
     BuiltIn.Should Be True    ${result}
 
+Read Table Cell - CSV - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    Read Table Cell    ${content}    1    0    ==    1
+
+Read Table Cell - CSV - With Header
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    ${cell_value} =    Read Table Cell    ${content}    1    1    ==    alex
+
+Read Table Cell - CSV - With Header - Column Name
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    Read Table Cell    ${content}    1    name    ==    sascha
+
+Read Table Cell - Parquet - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    ${cell_value} =    Read Table Cell    ${content}    1    1    ==    ${3.82}
+
+Read Table Cell - Parquet - With Header
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    ${cell_value} =    Read Table Cell    ${content}    1    1    ==    ${0.81}
+
+Read Table Cell - Parquet - With Header - Column Name
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    ${cell_value} =    Read Table Cell    ${content}    1    _strom    ==    ${4.76}
+
 Read Table Row - CSV
     Tables.Configure Ignore Header    False
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv

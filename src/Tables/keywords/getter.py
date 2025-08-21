@@ -29,16 +29,17 @@ class Getter(LibraryAttributes):
 
         return data
 
+
     @keyword(tags=["Getter"])
     def read_table_cell(
             self,
             data: list[list[Any]],
             row: int,
-            column: int,
+            column: int | str,
             assertion_operator: AssertionOperator | None = None,
             assertion_expected: Any = None,
             message: str = "",
-        ):
+        ) -> Any:
         """
         Keyword reads the table cell with the given row & column index.
 
@@ -61,25 +62,21 @@ class Getter(LibraryAttributes):
         | ${cell_value} =    Read Table Cell    ${data}    0    1    # without assertion
         | Read Table Cell    ${data}    0    1    ==    27    # with assertion
         |
+        | Read Table Cell    ${data}    1    name    ==    sascha
+        | # using column name 'name' and 1st index row and checking if its value is 'sascha'
         |
-        | Excel:
-        | Excel Open    excel_01    ${CURDIR}/testdata/example_06.xlsx
-        |
-        | ${data} =    Excel Sheet Read    Personen
-        |
-        | ${cell_value} =    Read Table Cell    ${data}   0    1    # without assertion
-        | Read Table Cell    ${data}    0    1    ==    Bob    # with assertion
         """
-        # if header is not ignored, we need to increase the row index
-        if not self.ignore_header:
-            row += 1
+        table_df = DataFrame(data)
+        column = self.file_reader.cast_column_type(column)
+        cell = None
 
-        try:
-            cell = data[row][column]
-        except IndexError as err:
-            raise IndexError(
-                f"Row / column index '{row} ; {column}' does not exist in your data object:\n{data}"
-            ) from err
+        if self.file_reader.validate_column(table_df, column) and self.file_reader.validate_row(table_df, row):
+            if isinstance(column, str):
+                table_df = DataFrame(data[1:], columns=data[0])
+                cell = table_df.loc[row, column]
+            else:
+                cell = table_df.iloc[row, column]
+
         if assertion_expected:
             verify_assertion(
                 cell,
@@ -122,12 +119,15 @@ class Getter(LibraryAttributes):
             )
 
         # Convert to DataFrame with / without column headers
+
         df = DataFrame(data[1:], columns=data[0]) if not self.ignore_header else DataFrame(data)
 
         # Read column via str or int identifier
         if isinstance(column, int):
             column = df.columns[column]
         return cast(list[Any], df[column].tolist())
+
+
 
     @keyword(tags=["Getter"])
     def read_table_row(

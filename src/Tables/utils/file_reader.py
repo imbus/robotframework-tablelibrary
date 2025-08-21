@@ -17,6 +17,9 @@ class FileReader(LibraryAttributes):
         return True
 
     def read_data_type(self, path:str) -> FileType:
+        """
+        Converts the file types depending on the ending of the filename
+        """
         data_type = None
         if path.endswith(".csv"):
             data_type = FileType.CSV
@@ -26,6 +29,50 @@ class FileReader(LibraryAttributes):
             raise TypeError(f"Invalid file type of {Path(path).name}. Allowed files are {[file_type.value for file_type in FileType]}")
 
         return data_type
+
+    def cast_column_type(self, column_value: int | str) -> int | str:
+        """
+        Converts the value into int first (if possible) then to string. This way indexing and column names
+        are stricktly sperated for further process.
+        """
+        try:
+            return int(column_value)
+        except (ValueError, TypeError):
+            return str(column_value)
+
+
+    def validate_column(self, data: DataFrame, column_value: int | str) -> bool:
+        """
+        1) Validates whether the column value which should be extracted is int (index) or str(name of the column).
+        Str type should only work if header is involed (!= ignore_header).
+        2) Checks if column index is out of bound of the table.
+        3) Checks if the column name is inside the table columns (only if != ignore header).
+        """
+        column_value = self.cast_column_type(column_value)
+
+        if self.ignore_header and isinstance(column_value, str):
+            raise TypeError(
+                "Column identifier cannot be 'str' type, when library setting 'ignore_header' is 'True'!"
+            )
+        if isinstance(column_value, int) and column_value + 1 > data.shape[1]:
+            raise IndexError(
+                f"Selected column is out of bounds. The size of the table is: {data.shape[1]} columns."
+            )
+        if not self.ignore_header and \
+            isinstance(column_value, str) and \
+            column_value not in list(data.iloc[0]):
+            raise ValueError(f"Couldn't find column {column_value} in the table. Current columns are: {list(data.iloc[0])}")
+        return True
+
+    def validate_row(self, data: DataFrame, row_value: int) -> bool:
+        """
+        Validates whether the row is out of bound.
+        """
+        if row_value + 1 > data.shape[0]:
+            raise IndexError(
+                f"Selected row is out of bounds. The size of the table is: {data.shape[0]} columns."
+            )
+        return True
 
 
     def read_csv(self, path: str) -> DataFrame:
