@@ -59,7 +59,7 @@ Read Table Cell - CSV - With Header - Column Name
 Read Table Cell - Parquet - Without Header
     Tables.Configure Ignore Header    True
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
-    ${cell_value} =    Read Table Cell    ${content}    1    1    ==    ${3.82}
+    ${cell_value} =    Read Table Cell    ${content}    1    1    ==    ${4.76}
 
 Read Table Cell - Parquet - With Header
     Tables.Configure Ignore Header    False
@@ -102,3 +102,38 @@ Read Table Row - CSV - With Header
     Tables.Configure Ignore Header    False
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
     Tables.Read Table Row    ${content}    0    contains    age
+
+Read Table Row - Parquet - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Read Table Row    ${content}    0    contains    ${0.81}
+
+Read Table Row - Parquet - With Header
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Read Table Row    ${content}    0    contains    _strom
+
+Get Row and Column Count - CSV - With Header
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Count Table    Rows        ${content}    ==    ${6}
+    Tables.Count Table    Columns     ${content}    ==    ${3}
+
+Get Row and Column Count - CSV - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Count Table    Rows        ${content}    ==    ${5}
+    Tables.Count Table    Columns     ${content}    ==    ${3}
+
+Get Row and Column Count - Parquet - With Header
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Count Table    Rows        ${content}    ==    ${1001}
+    Tables.Count Table    Columns     ${content}    ==    ${2}
+
+Get Row and Column Count - Parquet - Without Header
+    Tables.Configure Ignore Header    True
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Count Table    Rows        ${content}    ==    ${1000}
+    Tables.Count Table    Columns     ${content}    ==    ${2}
+

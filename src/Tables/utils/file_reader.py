@@ -5,7 +5,11 @@ import pandas as pd
 from pandas import DataFrame
 from pathlib import Path
 from typing import cast
+from enum import Enum
 
+class Axis(Enum):
+            Columns = "columns"
+            Rows = "rows"
 
 class FileReader(LibraryAttributes):
     def __init__(self, library):
@@ -116,12 +120,6 @@ class FileReader(LibraryAttributes):
         else:
             raise ValueError(f"Not supported data type - file path: {path}")
 
-        if self.ignore_header:
+        if self.ignore_header and self.file_type != FileType.Parquet:
                 table_df = table_df.iloc[1:]
         return table_df
-
-
-
-
-
-

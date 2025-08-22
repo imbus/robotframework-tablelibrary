@@ -1,6 +1,7 @@
 from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_reader import FileReader
+from ..utils import file_reader
 from ..utils.settings import FileType
 from typing import Any, cast
 from pandas import DataFrame
@@ -105,6 +106,10 @@ class Getter(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``data`` | The table data - must be reat via ``Read`` keywords first |
         | ``column`` | Column header name (str) or index (int) to return values from |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
+        |                          Only numerical operators are allowed |
+        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
+        | ``message`` | Custom error message for failed assertion |
 
         == Example ==
         | CSV:
@@ -164,6 +169,10 @@ class Getter(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``data`` | The table data - must be reat via ``Read`` keywords first |
         | ``row`` | Row index (int) to read values from |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
+        |                          Only numerical operators are allowed |
+        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
+        | ``message`` | Custom error message for failed assertion |
 
         == Example ==
         | CSV
@@ -193,3 +202,46 @@ class Getter(LibraryAttributes):
             )
 
         return row_list
+
+    @keyword(tags=["Getter"])
+    def count_table(self,
+                    axis: file_reader.Axis,
+                    data: list[list[Any]],
+                    assertion_operator: AssertionOperator | None = None,
+                    assertion_expected: Any = None,
+                    message: str = "",
+                        ) -> int:
+        """
+        Keywod for counting rows or columns in the provided table.
+
+        | =`Arguments`= | =`Description`= |
+        | ``axis`` | Select 'Columns' or 'Rows' depending which axis should be checked |
+        | ``data`` | The table data - must be reat via ``Read`` keywords first |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
+        |                          Only numerical operators are allowed |
+        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
+        | ``message`` | Custom error message for failed assertion |
+
+        == Example ==
+        | CSV:
+        | ${content} =    Tables.Read Table    example_01.csv
+        | Tables.Count Table    Rows        ${content}    ==    ${6}
+        | Tables.Count Table    Columns     ${content}    ==    ${3}
+        """
+
+        table_df = DataFrame(data)
+        shape_index = 0 if axis == file_reader.Axis.Rows else 1
+
+        axis_count = cast(int, table_df.shape[shape_index])
+
+        if assertion_expected:
+            if assertion_operator not in NumericalOperators:
+                raise ValueError(f"Unexpected operator for assertion: {assertion_operator}. Use only {list(NumericalOperators)}.")
+            verify_assertion(
+                axis_count,
+                assertion_operator,
+                assertion_expected,
+                message
+            )
+
+        return axis_count
