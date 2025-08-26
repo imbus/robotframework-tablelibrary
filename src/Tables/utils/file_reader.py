@@ -4,7 +4,7 @@ from ..utils.settings import FileType
 import pandas as pd
 from pandas import DataFrame
 from pathlib import Path
-from typing import cast
+from typing import cast, Any
 from enum import Enum
 
 class Axis(Enum):
@@ -15,12 +15,16 @@ class FileReader(LibraryAttributes):
     def __init__(self, library):
         super().__init__(library)
 
-    def file_exists(self, path: str) -> bool | FileNotFoundError:
+    def file_exists(self,
+                    path: str
+        ) -> bool | FileNotFoundError:
         if not Path(path).is_file():
             raise FileNotFoundError(f"File not found: {path}")
         return True
 
-    def read_data_type(self, path:str) -> FileType:
+    def read_data_type(self,
+                       path:str
+        ) -> FileType:
         """
         Converts the file types depending on the ending of the filename
         """
@@ -34,7 +38,9 @@ class FileReader(LibraryAttributes):
 
         return data_type
 
-    def cast_column_type(self, column_value: int | str) -> int | str:
+    def cast_column_type(self,
+                         column_value: int | str
+        ) -> int | str:
         """
         Converts the value into int first (if possible) then to string. This way indexing and column names
         are stricktly sperated for further process.
@@ -45,7 +51,10 @@ class FileReader(LibraryAttributes):
             return str(column_value)
 
 
-    def validate_column(self, data: DataFrame, column_value: int | str) -> bool:
+    def validate_column(self,
+                        data: DataFrame,
+                        column_value: int | str
+        ) -> bool:
         """
         1) Validates whether the column value which should be extracted is int (index) or str(name of the column).
         Str type should only work if header is involed (!= ignore_header).
@@ -68,7 +77,10 @@ class FileReader(LibraryAttributes):
             raise ValueError(f"Couldn't find column {column_value} in the table. Current columns are: {list(data.iloc[0])}")
         return True
 
-    def validate_row(self, data: DataFrame, row_value: int) -> bool:
+    def validate_row(self,
+                     data: DataFrame,
+                     row_value: int
+        ) -> bool:
         """
         Validates whether the row is out of bound.
         """
@@ -78,7 +90,9 @@ class FileReader(LibraryAttributes):
             )
         return True
 
-    def read_csv(self, path: str) -> DataFrame:
+    def read_csv(self,
+                 path: str
+        ) -> DataFrame:
         """
         """
         return pd.read_csv(path,
@@ -86,9 +100,30 @@ class FileReader(LibraryAttributes):
                          encoding=self.file_encoding.value,
                          header=None)
 
+    def validate_table_to_dataframe(self,
+                                    data: list[list[Any]],
+                                    row: None | int = None,
+                                    column: None | str | int = None,
+                                    ) -> DataFrame:
+        """Formats an already read table to dataframe. Also checks
+        if provided row or column are valid (see validate_row/ validate_column)."""
+        df = DataFrame(data)
+
+        if row:
+            self.validate_row(df, row)
+
+        if column:
+            casted_column = self.cast_column_type(column)
+            self.validate_column(df, casted_column)
+            if isinstance(casted_column, str):
+                df = DataFrame(data[1:], columns=data[0])
+        return df
+
+
+
     def read_excel(self,
-            path: str,
-            sheet_name: str | list[str | int] | None = None
+                   path: str,
+                   sheet_name: str | list[str | int] | None = None
         ) -> dict[str, DataFrame]:
         header = 0 if self.ignore_header else None
         dict_df = pd.read_excel(path, header=header, sheet_name=sheet_name)

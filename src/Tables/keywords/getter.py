@@ -4,7 +4,6 @@ from ..utils.file_reader import FileReader
 from ..utils import file_reader
 from ..utils.settings import FileType
 from typing import Any, cast
-from pandas import DataFrame
 from assertionengine import verify_assertion, AssertionOperator
 from assertionengine.assertion_engine import NumericalOperators
 
@@ -69,16 +68,15 @@ class Getter(LibraryAttributes):
         | # using column name 'name' and 1st index row and checking if its value is 'sascha'
         |
         """
-        column = self.file_reader.cast_column_type(column)
         cell = None
-        table_df = DataFrame(data)
+        table_df = self.file_reader.validate_table_to_dataframe(
+            data= data,
+            row= row,
+            column= column)
 
-        if self.file_reader.validate_column(table_df, column) and self.file_reader.validate_row(table_df, row):
-            if isinstance(column, str):
-                table_df = DataFrame(data[1:], columns=data[0])
-                cell = table_df.loc[row, column]
-            else:
-                cell = table_df.iloc[row, column]
+        column = self.file_reader.cast_column_type(column)
+
+        cell = table_df.loc[row, column] if isinstance(column, str) else table_df.iloc[row, column]
 
         if assertion_expected:
             if assertion_operator not in NumericalOperators:
@@ -129,18 +127,14 @@ class Getter(LibraryAttributes):
             AssertionOperator["not contains"],
             AssertionOperator["validate"],
             ]
-        column = self.file_reader.cast_column_type(column)
         column_list = []
-        table_df = DataFrame(data)
+        table_df = self.file_reader.validate_table_to_dataframe(
+            data= data,
+            column= column)
+        column = self.file_reader.cast_column_type(column)
 
-        if self.file_reader.validate_column(table_df, column):
-            if isinstance(column, str):
-                table_df = DataFrame(data[1:], columns=data[0])
-                column_list = table_df.loc[:,column]
-            else:
-                column_list = table_df.iloc[:,column]
-
-            column_list = cast(list[Any], column_list.to_list())
+        column_df = table_df.loc[:,column] if isinstance(column, str) else table_df.iloc[:,column]
+        column_list = cast(list[Any], column_df.to_list())
 
         if assertion_expected:
             if assertion_operator not in valid_assertions:
@@ -186,10 +180,11 @@ class Getter(LibraryAttributes):
             AssertionOperator["validate"],
             ]
         row_list = []
-        table_df = DataFrame(data)
+        table_df = self.file_reader.validate_table_to_dataframe(
+            data= data,
+            row= row)
 
-        if self.file_reader.validate_row(table_df, row):
-            row_list = cast(list[Any], table_df.iloc[row].to_list())
+        row_list = cast(list[Any], table_df.iloc[row].to_list())
 
         if assertion_expected:
             if assertion_operator not in valid_assertions:
@@ -229,7 +224,8 @@ class Getter(LibraryAttributes):
         | Tables.Count Table    Columns     ${content}    ==    ${3}
         """
 
-        table_df = DataFrame(data)
+        table_df = self.file_reader.validate_table_to_dataframe(
+            data= data)
         shape_index = 0 if axis == file_reader.Axis.Rows else 1
 
         axis_count = cast(int, table_df.shape[shape_index])
