@@ -133,8 +133,9 @@ jobs:
     - name: Generate keyword docs with libdoc
       run: hatch run dev:docs
     
-    - name: Upload libdoc artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: libdoc
-        path: results/keyword_docs.html
+    # - name: Upload libdoc artifact
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: libdoc
+    #     path: results/keyword_docs.html
+    #     retention-days: 2
