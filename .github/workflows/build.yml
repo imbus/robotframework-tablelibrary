@@ -138,3 +138,4 @@ jobs:
       with:
         name: libdoc
         path: results/keyword_docs.html
+        retention-days: 2
