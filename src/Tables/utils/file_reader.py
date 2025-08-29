@@ -1,5 +1,6 @@
 from ..general.library_attributes import LibraryAttributes
 from ..utils.settings import FileType
+from ..utils.file_system import FileSync
 
 import pandas as pd
 from pandas import DataFrame
@@ -12,8 +13,17 @@ class Axis(Enum):
             Rows = "rows"
 
 class FileReader(LibraryAttributes):
-    def __init__(self, library):
+    def __init__(self, library, file_sync: FileSync):
         super().__init__(library)
+        self.file_sync = file_sync
+
+    @property
+    def opened_table(self)-> str:
+        if not self.file_sync.current_file:
+            raise ValueError(
+                "No file open - use `Read Table` to read a file first!"
+            )
+        return self.file_sync.current_file
 
     def file_exists(self,
                     path: str
@@ -142,6 +152,9 @@ class FileReader(LibraryAttributes):
         """
         table_df: DataFrame = {}
         self.file_exists(path)
+
+        self.file_sync.current_file = path
+
 
         read_type = self.read_data_type(path)
         self.file_type = read_type

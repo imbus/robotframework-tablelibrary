@@ -7,6 +7,7 @@ from pandas import DataFrame
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_reader import FileReader
 from ..utils.settings import FileType
+from ..utils.file_system import FileSync
 
 class Excel(LibraryAttributes):
 
@@ -22,7 +23,7 @@ class Excel(LibraryAttributes):
 
     @property
     def file_reader(self):
-        return FileReader(self.library)
+        return FileReader(self.library, FileSync)
 
     @property
     def data(self) -> DataFrame:

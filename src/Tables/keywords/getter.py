@@ -1,6 +1,7 @@
 from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_reader import FileReader
+from ..utils.file_system import FileSync
 from ..utils import file_reader
 from ..utils.settings import FileType
 from typing import Any, cast
@@ -12,7 +13,7 @@ class Getter(LibraryAttributes):
 
     def __init__(self, library):
         self.library = library
-        self.file_reader = FileReader(library)
+        self.file_reader = FileReader(library, FileSync)
 
 
     @keyword(tags=["Getter"])

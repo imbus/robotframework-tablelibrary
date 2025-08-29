@@ -1,16 +1,16 @@
 from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
-from ..utils.settings import FileType
 from ..utils.file_system import FileSystem
+from ..utils.file_writer import FileWriter
+from ..utils.file_system import FileSync
 
 from typing import Any
-import pandas as pd
-from pathlib import Path
 
 class Writer(LibraryAttributes):
 
     def __init__(self, library):
         self.library = library
+        self.file_writer = FileWriter(library, FileSync)
 
     @property
     def _fs(self):
@@ -32,39 +32,28 @@ class Writer(LibraryAttributes):
         == Example ==
         | Write Table    ${data}    ${CURDIR}/output/statistics.csv
         """
-        dir_name = Path(file_path).parent
-        self._fs.ensure_directory_exists(dir_name)
-
-        if not self.ignore_header:
-            headers = data[0]
-            rows = data[1:]
-            df = pd.DataFrame(rows, columns=headers)
-        else:
-            df = pd.DataFrame(data)
-
-        writers = {
-            FileType.CSV: lambda: df.to_csv(file_path, index=False),
-            FileType.Excel: lambda: df.to_excel(file_path, index=False),
-            FileType.Parquet: lambda: df.to_parquet(file_path, index=False)
-        }
-
-        writer = writers.get(self.file_type)
-        if writer:
-            writer()
-        else:
-            raise ValueError(f"Unsupported file type: {self.file_type}")
+        self.file_writer.write_table(
+            data,
+            file_path
+        )
         return file_path
 
     @keyword(tags=["Writer"])
-    def write_cell(
+    def write_table_cell(
             self,
-            alias: str,
+            data: str,
             row: int,
             column: int
         ) -> list[list[Any]]:
         """
         Keyword to (over-) write the value of a specific cell.
         """
+        self.file_writer.write_table_file_cell(
+            data,
+            row,
+            column
+        )
+
         return [[None]]
 
     @keyword(tags=["Writer"])

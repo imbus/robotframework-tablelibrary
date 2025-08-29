@@ -25,3 +25,10 @@ Write Parquet File
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
     Tables.Configure File Type    Parquet
     Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.parquet
+
+Write CSV cell With Header
+    Tables.Configure Ignore Header    False
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
+    ${content_old} =    Tables.Read Table    ${csv_path}
+    Tables.Write Table Cell    25    1    1
+    ${content_new} =    Tables.Read Table    ${csv_path}
