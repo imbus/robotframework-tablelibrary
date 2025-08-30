@@ -4,6 +4,7 @@ from ..utils.settings import FileType
 from ..utils.file_system import FileSystem, FileSync
 
 from pathlib import Path
+import pandas as pd
 from pandas import DataFrame
 from typing import Any
 
@@ -27,15 +28,18 @@ class FileWriter(LibraryAttributes):
         if not file_path:
             file_path = self.file_reader.opened_table
 
+        if not isinstance(data, DataFrame):
+            data = pd.DataFrame(data)
+
         dir_name = Path(file_path).parent
         self._fs.ensure_directory_exists(dir_name)
 
         if not self.ignore_header:
-            headers = data[0]
-            rows = data[1:]
-            df = DataFrame(rows, columns=headers)
+            headers = data.iloc[0].tolist()
+            rows = data.iloc[1:]
+            df = pd.DataFrame(rows.values, columns=headers)
         else:
-            df = DataFrame(data)
+            df = pd.DataFrame(data)
 
         writers = {
             FileType.CSV: lambda: df.to_csv(file_path, index=False),
@@ -64,7 +68,7 @@ class FileWriter(LibraryAttributes):
             table_df = self.file_reader.read_table_file(self.file_reader.opened_table)
 
         axis_row = row if row else slice(None)
-        axis_column = self.file_reader.cast_column_type(column) if column else slice(None)
+        axis_column = self.file_reader.cast_column_type(column) if column is not None else slice(None)
 
         if column:
             self.file_reader.validate_column(table_df, axis_column)

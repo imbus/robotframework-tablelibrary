@@ -31,4 +31,5 @@ Write CSV cell With Header
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     ${content_old} =    Tables.Read Table    ${csv_path}
     Tables.Write Table Cell    25    1    1
+    Tables.Write Table Cell    2029    2    0
     ${content_new} =    Tables.Read Table    ${csv_path}
