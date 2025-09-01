@@ -73,31 +73,37 @@ class FileReader(LibraryAttributes):
         """
         column_value = self.cast_column_type(column_value)
 
-        if self.ignore_header and isinstance(column_value, str):
-            raise TypeError(
-                "Column identifier cannot be 'str' type, when library setting 'ignore_header' is 'True'!"
-            )
-        if isinstance(column_value, int) and column_value + 1 > data.shape[1]:
-            raise IndexError(
-                f"Selected column is out of bounds. The size of the table is: {data.shape[1]} columns."
-            )
-        if not self.ignore_header and \
-            isinstance(column_value, str) and \
-            column_value not in list(data.iloc[0]):
-            raise ValueError(f"Couldn't find column {column_value} in the table. Current columns are: {list(data.iloc[0])}")
+        if isinstance(column_value, str):
+            if self.ignore_header:
+                raise TypeError(
+                    "Column identifier cannot be 'str' type when library setting 'ignore_header' is 'True'!"
+                )
+            if column_value not in list(data.iloc[0]):
+                raise ValueError(
+                    f"Couldn't find column '{column_value}' in the table. "
+                    f"Current columns are: {list(data.iloc[0])}"
+                )
+
+        elif isinstance(column_value, int):
+            if column_value + 1 > data.shape[1]:
+                raise IndexError(
+                    f"Selected column is out of bounds. The size of the table is: "
+                    f"{data.shape[1]} columns."
+                )
+
         return True
 
     def validate_row(self,
-                     data: DataFrame,
-                     row_value: int
+                    data: DataFrame,
+                    row_value: int | list[Any]
         ) -> bool:
         """
         Validates whether the row is out of bound.
         """
-        if row_value + 1 > data.shape[0]:
+        if isinstance(row_value, int) and row_value + 1 > data.shape[0]:
             raise IndexError(
-                f"Selected row is out of bounds. The size of the table is: {data.shape[0]} columns."
-            )
+                    f"Selected row is out of bounds. The size of the table is: {data.shape[0]} rows."
+                )
         return True
 
     def read_csv(self,
@@ -168,6 +174,4 @@ class FileReader(LibraryAttributes):
         else:
             raise ValueError(f"Not supported data type - file path: {path}")
 
-        if self.ignore_header and self.file_type != FileType.Parquet:
-                table_df = table_df.iloc[1:]
         return table_df

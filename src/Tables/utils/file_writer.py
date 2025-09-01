@@ -25,26 +25,20 @@ class FileWriter(LibraryAttributes):
                     data: DataFrame | list[list[Any]],
                     file_path: str | None = None):
         """"""
-        if not file_path:
+        if file_path is None:
             file_path = self.file_reader.opened_table
 
-        if not isinstance(data, DataFrame):
-            data = pd.DataFrame(data)
+        data_df = data if isinstance(data, DataFrame) else pd.DataFrame(data)
 
         dir_name = Path(file_path).parent
         self._fs.ensure_directory_exists(dir_name)
 
-        if not self.ignore_header:
-            headers = data.iloc[0].tolist()
-            rows = data.iloc[1:]
-            df = pd.DataFrame(rows.values, columns=headers)
-        else:
-            df = pd.DataFrame(data)
+        csv_header = not isinstance(data, list) #lists automatically add index in to_csv compared to dataframe
 
         writers = {
-            FileType.CSV: lambda: df.to_csv(file_path, index=False),
-            FileType.Excel: lambda: df.to_excel(file_path, index=False),
-            FileType.Parquet: lambda: df.to_parquet(file_path, index=False)
+            FileType.CSV: lambda: data_df.to_csv(file_path, index=False, header=csv_header),
+            FileType.Excel: lambda: data_df.to_excel(file_path, index=False),
+            FileType.Parquet: lambda: data_df.to_parquet(file_path, index=False)
         }
 
         writer = writers.get(self.file_type)
@@ -60,14 +54,27 @@ class FileWriter(LibraryAttributes):
                     data: Any,
                     row: None | int = None,
                     column: None | str | int = None,
+                    file_path: None | str  = None,
                     ) -> str:
         """"""
-        # TODO: add path to skip current file
         table_df: DataFrame = {}
-        if self.file_reader.opened_table:
-            table_df = self.file_reader.read_table_file(self.file_reader.opened_table)
 
-        axis_row = row if row else slice(None)
+        table_df = self.file_reader.read_table_file(
+            path = file_path if file_path is not None
+                   else self.file_reader.opened_table)
+
+        if isinstance(data, list) and len(data) != table_df.shape[1]:
+            size_difference = "big" if len(data) > table_df.shape[1] else "small"
+            raise ValueError(
+                f"Selected list is too {size_difference} for the table ({len(data)}). "
+                f"The size of the table is: {table_df.shape[0]} rows and  {table_df.shape[1]} columns."
+            )
+
+        headers = table_df.iloc[0].tolist()
+        rows = table_df.iloc[1:]
+        table_df = pd.DataFrame(rows.values, columns=headers)
+
+        axis_row = row if row is not None else slice(None)
         axis_column = self.file_reader.cast_column_type(column) if column is not None else slice(None)
 
         if column:

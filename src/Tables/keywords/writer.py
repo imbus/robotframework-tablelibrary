@@ -49,25 +49,37 @@ class Writer(LibraryAttributes):
         Keyword to (over-) write the value of a specific cell.
         """
         self.file_writer.write_table_file_cell(
-            data,
-            row,
-            column
+            data = data,
+            row = row,
+            column = column
         )
 
         return [[None]]
 
     @keyword(tags=["Writer"])
-    def write_column(
+    def write_table_column(
             self,
-            alias: str,
+            data: list[Any],
             column: int
         ) -> list[list[Any]]:
+
+        self.file_writer.write_table_file_cell(
+            data = data,
+            column = column
+        )
+
         return [[None]]
 
     @keyword(tags=["Writer"])
-    def write_row(
+    def write_table_row(
             self,
-            alias: str,
+            data: list,
             row: int,
         ) -> list[list[Any]]:
+
+        self.file_writer.write_table_file_cell(
+            data = data,
+            row = row
+        )
+
         return [[None]]
