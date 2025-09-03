@@ -1,5 +1,40 @@
 # Development
 
+## Table of Content
+
+- Hatch
+- Pre-commit
+- Twine Upload to Pypi / TestPypi
+
+## hatch
+
+You will need the python package tool ``hatch`` for several operations in this repository.
+Hatch can be used to execute the linter, the tests or to build a wheel package.
+
+Use the following command:
+```shell
+pip install hatch
+```
+
+### Ececute Linting Checks via ruff
+
+```shell
+hatch run dev:lint
+```
+
+### Execute Acceptance Tests via Robot Framework
+
+```shell
+hatch run dev:atest
+hatch run dev:utest
+```
+
+### Generate Docs via libdoc
+
+```shell
+hatch run dev:docs
+```
+
 ## pre-commit
 
 When starting to work on this library, please ensure you have installed the development requirements from the ``readme.md``.    
