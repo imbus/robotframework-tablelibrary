@@ -93,7 +93,7 @@ password = pypi-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
 > [!CAUTION]
-> Set ``password`` with our real ``API Token``, but do not publish this file to GitHub!!!
+> Set ``password`` with your real ``API Token``, but do not publish this file to GitHub!!!
 
 ### Tools
 
