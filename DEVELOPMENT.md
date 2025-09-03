@@ -24,3 +24,68 @@ pre-commit run --all-files
 
 If you're working with a virtual environment, you might get problems with committing changes with the VS Code Git Controls.     
 In that case, please open a shell where your virtual environment is activated & add, commit & push your changes via git shell commands!
+
+## Upload to PyPi
+
+### Requirements
+
+You are required to have a account for each pypi server - production & test server.   
+- **[Test PyPi](https://test.pypi.org/)**
+- **[Prod PyPi](https://pypi.org/)**
+
+### Authentication
+
+Please generate an ``API Token`` for each ``PyPi`` instance (prod & test server).
+
+Create the following ``.pypirc`` file in your ``HOME`` directory:
+
+```
+[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+repository = https://upload.pypi.org/legacy/
+username = __token__
+password = pypi-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+[testpypi]
+repository = https://test.pypi.org/legacy/
+username = __token__
+password = pypi-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+
+> [!CAUTION]
+> Set ``password`` with our real ``API Token``, but do not publish this file to GitHub!!!
+
+### Tools
+
+To upload a package to pypi, you need to install ``twine`` using the following command:
+```shell
+pip install twine
+```
+
+### Build Python Package
+
+Navigate to the repository root directy and execute the following command:
+```shell
+hatch build
+```
+
+The built package is stored into the directory ``dist``.
+
+### Upload Package
+
+Use the one of the following commands to upload the package to ``prod pypi`` or ``test pypi``.
+
+```shell
+twine upload -r testpypi dist/*
+```
+
+```shell
+twine upload -r pypi dist/*
+```
+
+The parameter ``-r`` takes the configued registry from your ``.pypirc`` file.
