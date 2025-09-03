@@ -21,7 +21,7 @@ from .keywords import (
 )
 class Tables(HybridCore):
     """
-    Table Library is a generic automation library for working with files like csv, excel, etc.
+    Table Library is a generic automation library for working with files like csv, parquet, etc.
 
     == Table of content ==
 
@@ -29,7 +29,7 @@ class Tables(HybridCore):
 
     == Supported File Types ==
     - CSV
-    - Excel
+    - Excel (not supported at the moment)
     - Parquet
 
     == Supported File Encoding ==
@@ -37,25 +37,10 @@ class Tables(HybridCore):
     - utf-16
     - latin-1
 
-    == Excel Handling ==
-    Handling excel files is slightly different because of excel features like using multiple sheets in one excel file.\n
-    Therefore, we have extra ``Excel`` keywords.\n
-
-    Generic features, like reading one specific table cell,
-    can be used for other file types as well using the generic table keywords.
+    == Excel Files ==
+    Please visit the following to handle excel files: [https://pypi.org/project/robotframework-excelsage|robotframework-sageexcel]
 
     == Examples ==
-    === Excel ===
-    | Tables.Excel Open    excel_01    ${CURDIR}/testdata/example_06.xlsx    Produkte
-    |
-    | ${sheets} =    Tables.Excel Get Available Sheets
-    | Should Contain    ${sheets}    Produkte
-    |
-    | ${sheet_content} =    Tables.Excel Sheet Read    Produkte
-    | Should Contain    ${sheet_content}[1]    Apfel
-    |
-    | Tables.Excel Close    excel_01
-
     === CSV ===
     | # Reading CSV file with header column
     | ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
@@ -64,7 +49,7 @@ class Tables(HybridCore):
     |
     |
     | # Reading CSV file without header column
-    |     Tables.Configure Ignore Header    True
+    | Tables.Configure Ignore Header    True
     | ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
     | ${result} =    BuiltIn.Evaluate    "index" not in "${content}"
     | BuiltIn.Should Be True    ${result}

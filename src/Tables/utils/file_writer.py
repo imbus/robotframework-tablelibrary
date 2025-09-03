@@ -57,8 +57,6 @@ class FileWriter(LibraryAttributes):
             raise ValueError(f"Unsupported file type: {self.file_type}")
         return file_path
 
-
-
     def write_table_file_cells(self,
                     data: Any,
                     row: None | int = None,

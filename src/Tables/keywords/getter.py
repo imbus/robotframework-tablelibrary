@@ -22,6 +22,17 @@ class Getter(LibraryAttributes):
             path: str
     ) -> list[list[Any]]:
         """
+        Keyword reads a table from the given path & returns the content.
+
+        | =`Arguments`= | =`Description`= |
+        | ``path`` | Specify the path of the given tables file. |
+
+        == Return Value ==
+        Keyword returns the complete content of the given file.\n
+        Raises an error if the file does not exist!
+
+        == Example ==
+        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
         """
         table_df = self.file_reader.read_table_file(path)
         data = cast(list[list[Any]], table_df.values.tolist())
