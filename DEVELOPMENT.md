@@ -102,6 +102,10 @@ To upload a package to pypi, you need to install ``twine`` using the following c
 pip install twine
 ```
 
+### Increase Version
+
+Open the file [_about__.py](src/Tables/__about__.py) and increase the version (0.0.5 = major.minor.path) before building & uploading the new python wheel package!
+
 ### Build Python Package
 
 Navigate to the repository root directy and execute the following command:

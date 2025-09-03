@@ -9,6 +9,9 @@ description = "A Robot Framework library providing generic table keywords for se
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
+  { name = "imbus AG" }
+]
+maintainers = [
   { name = "Marvin Klerx", email = "marvinklerx20@gmail.com" }
 ]
 license = { text = "Apache-2.0" }
