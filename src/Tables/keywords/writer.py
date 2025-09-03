@@ -43,7 +43,9 @@ class Writer(LibraryAttributes):
             self,
             data: str,
             row: int,
-            column: int
+            column: int,
+            header: bool = True,
+            file_path: str | None = None,
         ) -> list[list[Any]]:
         """
         Keyword to (over-) write the value of a specific cell.
@@ -51,7 +53,9 @@ class Writer(LibraryAttributes):
         self.file_writer.write_table_file_cell(
             data = data,
             row = row,
-            column = column
+            column = column,
+            header= header,
+            file_path = file_path
         )
 
         return [[None]]
@@ -60,12 +64,16 @@ class Writer(LibraryAttributes):
     def write_table_column(
             self,
             data: list[Any],
-            column: int
+            column: int,
+            header: bool = True,
+            file_path: str | None = None,
         ) -> list[list[Any]]:
 
         self.file_writer.write_table_file_cell(
             data = data,
-            column = column
+            column = column,
+            header= header,
+            file_path = file_path
         )
 
         return [[None]]
@@ -75,11 +83,15 @@ class Writer(LibraryAttributes):
             self,
             data: list,
             row: int,
+            header: bool = True,
+            file_path: str | None = None,
         ) -> list[list[Any]]:
 
         self.file_writer.write_table_file_cell(
             data = data,
-            row = row
+            row = row,
+            header= header,
+            file_path = file_path
         )
 
         return [[None]]

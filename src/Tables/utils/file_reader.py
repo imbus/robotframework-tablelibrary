@@ -43,6 +43,8 @@ class FileReader(LibraryAttributes):
             data_type = FileType.CSV
         elif path.endswith(".parquet"):
             data_type = FileType.Parquet
+        elif path.endswith(".xlsx"):
+            data_type = FileType.Excel
         else:
             raise TypeError(f"Invalid file type of {Path(path).name}. Allowed files are {[file_type.value for file_type in FileType]}")
 
@@ -105,6 +107,26 @@ class FileReader(LibraryAttributes):
                     f"Selected row is out of bounds. The size of the table is: {data.shape[0]} rows."
                 )
         return True
+
+    def validate_data_list_with_table(self,
+                                       data: list,
+                                       table: DataFrame,
+                                       row: Any | None = None,
+                                       column: Any | None = None,
+                                       ):
+        """"""
+        if row is not None and column is not None:
+            raise ValueError("Cannot select both row and column if selected data is a list for manipulation.")
+
+        selected_axis = 1 if row is not None else 0
+        if len(data) != table.shape[selected_axis]:
+            size_difference = "big" if len(data) > table.shape[selected_axis] else "small"
+            raise ValueError(
+                f"Selected list is too {size_difference} for the table ({len(data)}). "
+                f"The size of the table is: {table.shape[0]} rows and  {table.shape[1]} columns."
+            )
+        return True
+
 
     def read_csv(self,
                  path: str

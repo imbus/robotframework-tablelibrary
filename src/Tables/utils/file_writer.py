@@ -13,6 +13,8 @@ class FileWriter(LibraryAttributes):
         super().__init__(library)
         self.file_sync = file_sync
 
+        self.header:bool = True
+
     @property
     def file_reader(self):
         return FileReader(self.library, FileSync)
@@ -28,17 +30,24 @@ class FileWriter(LibraryAttributes):
         if file_path is None:
             file_path = self.file_reader.opened_table
 
-        data_df = data if isinstance(data, DataFrame) else pd.DataFrame(data)
-
         dir_name = Path(file_path).parent
         self._fs.ensure_directory_exists(dir_name)
+        self.file_type = self.file_reader.read_data_type(file_path)
 
-        csv_header = not isinstance(data, list) #lists automatically add index in to_csv compared to dataframe
+        if isinstance(data, list) and self.file_type == FileType.Parquet:
+            data_df = pd.DataFrame(data[1:], columns=data[0])
+        elif isinstance(data, list) and self.file_type != FileType.Parquet:
+            data_df = pd.DataFrame(data)
+        else:
+            data_df = data
+
+        #lists or 'headless' dataframes automatically add index in to_csv
+        csv_header = self.header and not isinstance(data, list)
 
         writers = {
             FileType.CSV: lambda: data_df.to_csv(file_path, index=False, header=csv_header),
             FileType.Excel: lambda: data_df.to_excel(file_path, index=False),
-            FileType.Parquet: lambda: data_df.to_parquet(file_path, index=False)
+            FileType.Parquet: lambda: data_df.to_parquet(file_path)
         }
 
         writer = writers.get(self.file_type)
@@ -54,25 +63,29 @@ class FileWriter(LibraryAttributes):
                     data: Any,
                     row: None | int = None,
                     column: None | str | int = None,
+                    header: bool = True,
                     file_path: None | str  = None,
                     ) -> str:
         """"""
         table_df: DataFrame = {}
-
         table_df = self.file_reader.read_table_file(
             path = file_path if file_path is not None
                    else self.file_reader.opened_table)
 
-        if isinstance(data, list) and len(data) != table_df.shape[1]:
-            size_difference = "big" if len(data) > table_df.shape[1] else "small"
-            raise ValueError(
-                f"Selected list is too {size_difference} for the table ({len(data)}). "
-                f"The size of the table is: {table_df.shape[0]} rows and  {table_df.shape[1]} columns."
-            )
+        self.header = header if self.file_type != FileType.Parquet else False   #disable header for Parquet
 
-        headers = table_df.iloc[0].tolist()
-        rows = table_df.iloc[1:]
-        table_df = pd.DataFrame(rows.values, columns=headers)
+        if self.header:
+            headers = table_df.iloc[0].tolist()
+            rows = table_df.iloc[1:]
+            table_df = pd.DataFrame(rows.values, columns=headers)
+
+        if isinstance(data, list):
+            self.file_reader.validate_data_list_with_table(
+                data=data,
+                table=table_df,
+                row=row,
+                column=column,
+            )
 
         axis_row = row if row is not None else slice(None)
         axis_column = self.file_reader.cast_column_type(column) if column is not None else slice(None)
@@ -89,7 +102,7 @@ class FileWriter(LibraryAttributes):
 
         self.write_table(
             table_df,
-            self.file_sync.current_file
+            file_path
         )
 
         return self.file_sync.current_file
