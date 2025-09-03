@@ -26,7 +26,7 @@ class FileWriter(LibraryAttributes):
     def write_table(self,
                     data: DataFrame | list[list[Any]],
                     file_path: str | None = None):
-        """"""
+        """Keyword to create/overwrite table using dataframe tables."""
         if file_path is None:
             file_path = self.file_reader.opened_table
 
@@ -59,14 +59,24 @@ class FileWriter(LibraryAttributes):
 
 
 
-    def write_table_file_cell(self,
+    def write_table_file_cells(self,
                     data: Any,
                     row: None | int = None,
                     column: None | str | int = None,
                     header: bool = True,
                     file_path: None | str  = None,
                     ) -> str:
-        """"""
+        """Keyword to manipulate data.
+           data = if it is a list it can change complete row/column if the size
+           of data matches the lenght of row/column.
+           row = using for index of the row where in the table the cell should be manipulated.
+                 If it is None then it will be all rows.
+           column = Using for index/column name of the columns where in the table the cell should be manipulated.
+                    If it is None then it will be all columns.
+           header = if it is True then the header during manipulation will be included. Meaning index 0 will be manipulated.
+                    If it is False then the 1st index will be treated as 0 index.
+           file_path = Path where the table is located which should be manipulated. If it is None then it searches for 'read_table'."""
+
         table_df: DataFrame = {}
         table_df = self.file_reader.read_table_file(
             path = file_path if file_path is not None

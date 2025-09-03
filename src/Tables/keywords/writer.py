@@ -50,7 +50,7 @@ class Writer(LibraryAttributes):
         """
         Keyword to (over-) write the value of a specific cell.
         """
-        self.file_writer.write_table_file_cell(
+        self.file_writer.write_table_file_cells(
             data = data,
             row = row,
             column = column,
@@ -69,7 +69,7 @@ class Writer(LibraryAttributes):
             file_path: str | None = None,
         ) -> list[list[Any]]:
 
-        self.file_writer.write_table_file_cell(
+        self.file_writer.write_table_file_cells(
             data = data,
             column = column,
             header= header,
@@ -87,7 +87,7 @@ class Writer(LibraryAttributes):
             file_path: str | None = None,
         ) -> list[list[Any]]:
 
-        self.file_writer.write_table_file_cell(
+        self.file_writer.write_table_file_cells(
             data = data,
             row = row,
             header= header,
