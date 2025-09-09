@@ -12,7 +12,7 @@ from .keywords import (
     Configuration,
     Getter,
     Writer,
-    Excel
+    # Excel
 )
 
 @library(
@@ -87,7 +87,7 @@ class Tables(HybridCore):
             Configuration(self),
             Getter(self),
             Writer(self),
-            Excel(self)
+            # Excel(self)
         ]
 
         super().__init__(libraries)

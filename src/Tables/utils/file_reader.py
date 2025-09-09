@@ -43,8 +43,8 @@ class FileReader(LibraryAttributes):
             data_type = FileType.CSV
         elif path.endswith(".parquet"):
             data_type = FileType.Parquet
-        elif path.endswith(".xlsx"):
-            data_type = FileType.Excel
+        # elif path.endswith(".xlsx"):
+        #     data_type = FileType.Excel
         else:
             raise TypeError(f"Invalid file type of {Path(path).name}. Allowed files are {[file_type.value for file_type in FileType]}")
 

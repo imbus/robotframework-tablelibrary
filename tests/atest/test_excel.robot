@@ -1,8 +1,8 @@
-*** Settings ***
+#*** Settings ***
 Library    Tables    file_type=Excel
 
 
-*** Test Cases ***
+#*** Test Cases ***
 Read Excel File - One File - One Sheet
     Tables.Excel Open    excel_01    ${CURDIR}/testdata/example_02.xlsx
     ${list} =    Tables.Excel Get Open Files

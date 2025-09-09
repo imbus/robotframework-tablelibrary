@@ -5,6 +5,7 @@ Library     Collections
 
 *** Test Cases ***    
 Write Excel File
+    [Tags]    robot:skip
     VAR    @{headers} =    year    temp
     VAR    @{data_01} =    2025    30
     VAR    @{data_02} =    2024    29    
