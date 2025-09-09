@@ -80,7 +80,7 @@ class FileReader(LibraryAttributes):
                 raise TypeError(
                     "Column identifier cannot be 'str' type when library setting 'ignore_header' is 'True'!"
                 )
-            if column_value not in list(data.iloc[0]):
+            if column_value not in data.iloc[0].tolist() and column_value not in data.columns:
                 raise ValueError(
                     f"Couldn't find column '{column_value}' in the table. "
                     f"Current columns are: {list(data.iloc[0])}"

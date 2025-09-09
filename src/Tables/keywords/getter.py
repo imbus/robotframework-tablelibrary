@@ -215,8 +215,8 @@ class Getter(LibraryAttributes):
 
     @keyword(tags=["Getter"])
     def count_table(self,
-                    axis: file_reader.Axis,
                     data: list[list[Any]],
+                    axis: file_reader.Axis,
                     assertion_operator: AssertionOperator | None = None,
                     assertion_expected: Any = None,
                     message: str = "",

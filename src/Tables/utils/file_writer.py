@@ -45,7 +45,7 @@ class FileWriter(LibraryAttributes):
         csv_header = self.header and not isinstance(data, list)
 
         writers = {
-            FileType.CSV: lambda: data_df.to_csv(file_path, index=False, header=csv_header),
+            FileType.CSV: lambda: data_df.to_csv(file_path, index=False, header=csv_header, sep=self.delimiter.value),
             FileType.Excel: lambda: data_df.to_excel(file_path, index=False),
             FileType.Parquet: lambda: data_df.to_parquet(file_path)
         }
@@ -61,8 +61,8 @@ class FileWriter(LibraryAttributes):
                     data: Any,
                     row: None | int = None,
                     column: None | str | int = None,
-                    header: bool = True,
                     file_path: None | str  = None,
+                    header: bool = True,
                     ) -> str:
         """Keyword to manipulate data.
            data = if it is a list it can change complete row/column if the size
@@ -80,7 +80,11 @@ class FileWriter(LibraryAttributes):
             path = file_path if file_path is not None
                    else self.file_reader.opened_table)
 
-        self.header = header if self.file_type != FileType.Parquet else False   #disable header for Parquet
+        original_ignore_header = self.ignore_header
+
+        # disable header for Parquet and overwrite ignore_header for validation keywords
+        self.header = header if self.file_type != FileType.Parquet else False
+        self.ignore_header = not self.header
 
         if self.header:
             headers = table_df.iloc[0].tolist()
@@ -112,5 +116,7 @@ class FileWriter(LibraryAttributes):
             table_df,
             file_path
         )
+
+        self.ignore_header = original_ignore_header
 
         return self.file_sync.current_file

@@ -46,9 +46,9 @@ class Writer(LibraryAttributes):
             self,
             data: str,
             row: int,
-            column: int,
-            header: bool = True,
+            column: int | str,
             file_path: str | None = None,
+            header: bool = True,
         ) -> list[list[Any]]:
         """
         Keyword to (over-) write the value of a specific cell.
@@ -78,8 +78,8 @@ class Writer(LibraryAttributes):
             self,
             data: list[Any],
             column: int,
-            header: bool = True,
             file_path: str | None = None,
+            header: bool = True,
         ) -> list[list[Any]]:
         """
         Keyword to (over-) write the values of a specific column.
@@ -108,8 +108,8 @@ class Writer(LibraryAttributes):
             self,
             data: list,
             row: int,
-            header: bool = True,
             file_path: str | None = None,
+            header: bool = True,
         ) -> list[list[Any]]:
         """
         Keyword to (over-) write the values of a specific row.
