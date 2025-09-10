@@ -20,12 +20,12 @@ class LibraryAttributes:
         self.library._file_type = value
 
     @property
-    def delimiter(self):
-        return self.library._delimiter
+    def separator(self):
+        return self.library._separator
 
-    @delimiter.setter
-    def delimiter(self, value):
-        self.library._delimiter = value
+    @separator.setter
+    def separator(self, value):
+        self.library._separator = value
 
     @property
     def file_encoding(self):

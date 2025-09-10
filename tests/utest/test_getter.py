@@ -5,7 +5,7 @@ from Tables.utils.settings import FileEncoding, FileType
 class DummyLibrary:
     _file_encoding = FileEncoding.UTF8
     _file_type = FileType.CSV
-    delimiter = ","
+    separator = ","
     ignore_header = False
 
 @pytest.fixture

@@ -142,7 +142,7 @@ class FileReader(LibraryAttributes):
         Opening up the csv file using and returning pandas dataframe.
         """
         return pd.read_csv(path,
-                         sep=self.delimiter.value,
+                         sep=self.separator.value,
                          encoding=self.file_encoding.value,
                          header=None)
 
