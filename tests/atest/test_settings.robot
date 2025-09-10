@@ -5,7 +5,7 @@ Library   Tables    file_type=CSV    file_encoding=UTF8    delimiter=,    ignore
 *** Test Cases ***
 File Type
     Tables.Configure File Type    Parquet
-    Tables.Configure File Type    Excel
+    # Tables.Configure File Type    Excel
     Tables.Configure File Type    CSV
 
 Delimiter

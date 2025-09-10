@@ -116,24 +116,24 @@ Read Table Row - Parquet - With Header
 Get Row and Column Count - CSV - With Header
     Tables.Configure Ignore Header    False
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
-    Tables.Count Table    Rows        ${content}    ==    ${6}
-    Tables.Count Table    Columns     ${content}    ==    ${3}
+    Tables.Count Table    ${content}    Rows     ==    ${6}
+    Tables.Count Table    ${content}    Columns    ==    ${3}
 
 Get Row and Column Count - CSV - Without Header
     Tables.Configure Ignore Header    True
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
-    Tables.Count Table    Rows        ${content}    ==    ${5}
-    Tables.Count Table    Columns     ${content}    ==    ${3}
+    Tables.Count Table    ${content}    Rows     ==    ${5}
+    Tables.Count Table    ${content}    Columns    ==    ${3}
 
 Get Row and Column Count - Parquet - With Header
     Tables.Configure Ignore Header    False
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
-    Tables.Count Table    Rows        ${content}    ==    ${1001}
-    Tables.Count Table    Columns     ${content}    ==    ${2}
+    Tables.Count Table    ${content}    Rows     ==    ${1001}
+    Tables.Count Table    ${content}    Columns    ==    ${2}
 
 Get Row and Column Count - Parquet - Without Header
     Tables.Configure Ignore Header    True
     ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_03.parquet
-    Tables.Count Table    Rows        ${content}    ==    ${1000}
-    Tables.Count Table    Columns     ${content}    ==    ${2}
+    Tables.Count Table    ${content}    Rows     ==    ${1000}
+    Tables.Count Table    ${content}    Columns    ==    ${2}
 

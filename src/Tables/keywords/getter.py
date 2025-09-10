@@ -1,6 +1,7 @@
 from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_reader import FileReader
+from ..utils.file_system import FileSync
 from ..utils import file_reader
 from ..utils.settings import FileType
 from typing import Any, cast
@@ -12,7 +13,7 @@ class Getter(LibraryAttributes):
 
     def __init__(self, library):
         self.library = library
-        self.file_reader = FileReader(library)
+        self.file_reader = FileReader(library, FileSync)
 
 
     @keyword(tags=["Getter"])
@@ -21,6 +22,17 @@ class Getter(LibraryAttributes):
             path: str
     ) -> list[list[Any]]:
         """
+        Keyword reads a table from the given path & returns the content.
+
+        | =`Arguments`= | =`Description`= |
+        | ``path`` | Specify the path of the given tables file. |
+
+        == Return Value ==
+        Keyword returns the complete content of the given file.\n
+        Raises an error if the file does not exist!
+
+        == Example ==
+        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
         """
         table_df = self.file_reader.read_table_file(path)
         data = cast(list[list[Any]], table_df.values.tolist())
@@ -28,6 +40,9 @@ class Getter(LibraryAttributes):
         if self.file_type == FileType.Parquet and not self.ignore_header:
             data.insert(0, list(table_df.columns))
 
+        if self.ignore_header and self.file_type != FileType.Parquet:
+                table_df = table_df.iloc[1:]
+                data = data[1:]
         return data
 
 
@@ -200,14 +215,14 @@ class Getter(LibraryAttributes):
 
     @keyword(tags=["Getter"])
     def count_table(self,
-                    axis: file_reader.Axis,
                     data: list[list[Any]],
+                    axis: file_reader.Axis,
                     assertion_operator: AssertionOperator | None = None,
                     assertion_expected: Any = None,
                     message: str = "",
                         ) -> int:
         """
-        Keywod for counting rows or columns in the provided table.
+        Keyword for counting rows or columns in the provided table.
 
         | =`Arguments`= | =`Description`= |
         | ``axis`` | Select 'Columns' or 'Rows' depending which axis should be checked |
@@ -220,8 +235,8 @@ class Getter(LibraryAttributes):
         == Example ==
         | CSV:
         | ${content} =    Tables.Read Table    example_01.csv
-        | Tables.Count Table    Rows        ${content}    ==    ${6}
-        | Tables.Count Table    Columns     ${content}    ==    ${3}
+        | Tables.Count Table    ${content}  Rows    ==    ${6}
+        | Tables.Count Table    ${content}  Columns    ==    ${3}
         """
 
         table_df = self.file_reader.validate_table_to_dataframe(

@@ -5,7 +5,7 @@ class FileType(Enum):
     Available file types / extension for your input files.
     """
     CSV = "csv"
-    Excel = "excel"
+    # Excel = "excel"       not available right now
     Parquet = "parquet"
 
 class FileEncoding(Enum):

@@ -1,16 +1,16 @@
 from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
-from ..utils.settings import FileType
 from ..utils.file_system import FileSystem
+from ..utils.file_writer import FileWriter
+from ..utils.file_system import FileSync
 
 from typing import Any
-import pandas as pd
-from pathlib import Path
 
 class Writer(LibraryAttributes):
 
     def __init__(self, library):
         self.library = library
+        self.file_writer = FileWriter(library, FileSync)
 
     @property
     def _fs(self):
@@ -23,62 +23,115 @@ class Writer(LibraryAttributes):
             file_path: str
         ) -> str:
         """
-        Keyword to write the given data to a new file.
+        Keyword to write the given data to a new file or overwrite an existing file.
 
         | =`Arguments`= | =`Description`= |
         | ``data`` | Data object to store in a new file |
-        | ``file_path`` | The full path of your file system to store the file. |
+        | ``file_path`` | The full path of the table file to save the content in. |
+
+        == Data Object ==
+        The given data object with the argument ``data`` needs to be a list of lists to replicate the table structure
 
         == Example ==
         | Write Table    ${data}    ${CURDIR}/output/statistics.csv
         """
-        dir_name = Path(file_path).parent
-        self._fs.ensure_directory_exists(dir_name)
-
-        if not self.ignore_header:
-            headers = data[0]
-            rows = data[1:]
-            df = pd.DataFrame(rows, columns=headers)
-        else:
-            df = pd.DataFrame(data)
-
-        writers = {
-            FileType.CSV: lambda: df.to_csv(file_path, index=False),
-            FileType.Excel: lambda: df.to_excel(file_path, index=False),
-            FileType.Parquet: lambda: df.to_parquet(file_path, index=False)
-        }
-
-        writer = writers.get(self.file_type)
-        if writer:
-            writer()
-        else:
-            raise ValueError(f"Unsupported file type: {self.file_type}")
+        self.file_writer.write_table(
+            data,
+            file_path
+        )
         return file_path
 
     @keyword(tags=["Writer"])
-    def write_cell(
+    def write_table_cell(
             self,
-            alias: str,
+            data: str,
             row: int,
-            column: int
+            column: int | str,
+            file_path: str | None = None,
+            header: bool = True,
         ) -> list[list[Any]]:
         """
         Keyword to (over-) write the value of a specific cell.
+
+        | =`Arguments`= | =`Description`= |
+        | ``data`` | The new value for the given table cell. |
+        | ``row`` | Define the index of the row to identify the cell. |
+        | ``column`` | Define the index of the column to identify the cell. Is column is a string then header should be set on True.|
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. |
+        | ``file_path`` | The full path of the existing table file. |
+
+        == Example ==
+        |  Write Table Cell    New York    row=20    column=2    file_path=${CURDIR}/output/statistics.csv    header=False
+        |  Write Table Cell    Apple    row=1    column=Fruit    file_path=${CURDIR}/output/statistics.csv    header=True   #per default it is true
         """
+        self.file_writer.write_table_file_cells(
+            data = data,
+            row = row,
+            column = column,
+            header= header,
+            file_path = file_path
+        )
+
         return [[None]]
 
     @keyword(tags=["Writer"])
-    def write_column(
+    def write_table_column(
             self,
-            alias: str,
-            column: int
+            data: list[Any],
+            column: int,
+            file_path: str | None = None,
+            header: bool = True,
         ) -> list[list[Any]]:
+        """
+        Keyword to (over-) write the values of a specific column.
+
+        | =`Arguments`= | =`Description`= |
+        | ``data`` | The new values for the given table column - needs to be list object. |
+        | ``column`` | Define the index of the column to modify. |
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. |
+        | ``file_path`` | The full path of the existing table file. |
+
+        == Example ==
+        |  VAR   @{column_list}    month    august    march
+        |  Write Table Column    ${column_list}    2    ${CURDIR}/output/statistics.csv    True
+        """
+
+        self.file_writer.write_table_file_cells(
+            data = data,
+            column = column,
+            header= header,
+            file_path = file_path
+        )
+
         return [[None]]
 
     @keyword(tags=["Writer"])
-    def write_row(
+    def write_table_row(
             self,
-            alias: str,
+            data: list,
             row: int,
+            file_path: str | None = None,
+            header: bool = True,
         ) -> list[list[Any]]:
+        """
+        Keyword to (over-) write the values of a specific row.
+
+        | =`Arguments`= | =`Description`= |
+        | ``data`` | The new values for the given table row - needs to be list object. |
+        | ``row`` | Define the index of the row to modify. |
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored.
+        |              If Header = False and row index = 0 it will overwrite a possible header, if there is one!|
+        | ``file_path`` | The full path of the existing table file. |
+
+        == Example ==
+        |  Write Table Row    ${list_of_values}    3    ${CURDIR}/output/statistics.csv    True
+        """
+
+        self.file_writer.write_table_file_cells(
+            data = data,
+            row = row,
+            header= header,
+            file_path = file_path
+        )
+
         return [[None]]
