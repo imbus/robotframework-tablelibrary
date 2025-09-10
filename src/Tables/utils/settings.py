@@ -12,7 +12,9 @@ class FileSuffix(Enum):
     """
     Available file suffix for related file types.
     """
+    TXT = "txt"
     CSV = "csv"
+    TSV = "tsv"
     XLSX = "xlsx"
     XLS = "xls"
     Parquet = "parquet"

@@ -38,7 +38,7 @@ class FileReader(LibraryAttributes):
         """
         Converts the file types depending on the ending of the filename
         """
-        if FileSuffix.CSV.value in path.suffix:
+        if FileSuffix.CSV.value in path.suffix or FileSuffix.TXT.value in path.suffix:
             return FileType.CSV
         if FileSuffix.XLSX.value in path.suffix or FileSuffix.XLS.value in path.suffix:
             return FileType.Excel
