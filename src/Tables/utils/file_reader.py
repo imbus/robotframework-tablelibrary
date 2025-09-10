@@ -114,7 +114,14 @@ class FileReader(LibraryAttributes):
                                        row: Any | None = None,
                                        column: Any | None = None,
                                        ):
-        """"""
+        """
+        Reads the data(as list) and compares it with the provided table (as dataframe). It checks if rows or column size matches the one of the table.
+        Returns an error if both rows and columns are not None.
+        data: Provided list whose size (len) should be checked.
+        table: the table which should be compared against. Depending if 'column' or 'row' parameters are not None, this axis would be checked.
+        row: If not None the row size of the table will be checked.
+        column: If not None the column size of the table will be checked.
+        """
         if row is not None and column is not None:
             raise ValueError("Cannot select both row and column if selected data is a list for manipulation.")
 
@@ -132,6 +139,7 @@ class FileReader(LibraryAttributes):
                  path: str
         ) -> DataFrame:
         """
+        Opening up the csv file using and returning pandas dataframe.
         """
         return pd.read_csv(path,
                          sep=self.delimiter.value,
@@ -176,16 +184,14 @@ class FileReader(LibraryAttributes):
                         path: str
                         ) -> DataFrame:
         """
-        Reading table
+        Reading table file and returns a dataframe of it.
         """
         table_df: DataFrame = {}
         self.file_exists(path)
 
         self.file_sync.current_file = path
 
-
-        read_type = self.read_data_type(path)
-        self.file_type = read_type
+        self.file_type = self.read_data_type(path)
 
         if self.file_type == FileType.CSV:
             table_df = self.read_csv(path)

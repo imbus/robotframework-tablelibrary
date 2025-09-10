@@ -222,7 +222,7 @@ class Getter(LibraryAttributes):
                     message: str = "",
                         ) -> int:
         """
-        Keywod for counting rows or columns in the provided table.
+        Keyword for counting rows or columns in the provided table.
 
         | =`Arguments`= | =`Description`= |
         | ``axis`` | Select 'Columns' or 'Rows' depending which axis should be checked |
@@ -235,8 +235,8 @@ class Getter(LibraryAttributes):
         == Example ==
         | CSV:
         | ${content} =    Tables.Read Table    example_01.csv
-        | Tables.Count Table    Rows        ${content}    ==    ${6}
-        | Tables.Count Table    Columns     ${content}    ==    ${3}
+        | Tables.Count Table    ${content}  Rows    ==    ${6}
+        | Tables.Count Table    ${content}  Columns    ==    ${3}
         """
 
         table_df = self.file_reader.validate_table_to_dataframe(

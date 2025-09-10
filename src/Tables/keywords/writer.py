@@ -56,12 +56,13 @@ class Writer(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``data`` | The new value for the given table cell. |
         | ``row`` | Define the index of the row to identify the cell. |
-        | ``column`` | Define the index of the column to identify the cell. |
+        | ``column`` | Define the index of the column to identify the cell. Is column is a string then header should be set on True.|
         | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. |
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
-        |  Write Table Cell    custom_new_cell_value    20    2    ${CURDIR}/output/statistics.csv
+        |  Write Table Cell    New York    row=20    column=2    file_path=${CURDIR}/output/statistics.csv    header=False
+        |  Write Table Cell    Apple    row=1    column=Fruit    file_path=${CURDIR}/output/statistics.csv    header=True   #per default it is true
         """
         self.file_writer.write_table_file_cells(
             data = data,
@@ -91,7 +92,8 @@ class Writer(LibraryAttributes):
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
-        |  Write Table Column    ${list_of_values}    2    True    ${CURDIR}/output/statistics.csv
+        |  VAR   @{column_list}    month    august    march
+        |  Write Table Column    ${column_list}    2    ${CURDIR}/output/statistics.csv    True
         """
 
         self.file_writer.write_table_file_cells(
@@ -117,11 +119,12 @@ class Writer(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``data`` | The new values for the given table row - needs to be list object. |
         | ``row`` | Define the index of the row to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. |
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored.
+        |              If Header = False and row index = 0 it will overwrite a possible header, if there is one!|
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
-        |  Write Table Row    ${list_of_values}    3    True    ${CURDIR}/output/statistics.csv
+        |  Write Table Row    ${list_of_values}    3    ${CURDIR}/output/statistics.csv    True
         """
 
         self.file_writer.write_table_file_cells(

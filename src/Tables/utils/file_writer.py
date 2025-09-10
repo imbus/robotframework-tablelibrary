@@ -25,7 +25,8 @@ class FileWriter(LibraryAttributes):
 
     def write_table(self,
                     data: DataFrame | list[list[Any]],
-                    file_path: str | None = None):
+                    file_path: str | None = None
+                    ) -> str:
         """Keyword to create/overwrite table using dataframe tables."""
         if file_path is None:
             file_path = self.file_reader.opened_table
