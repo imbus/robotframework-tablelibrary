@@ -1,4 +1,4 @@
-from ..utils.settings import FileEncoding, FileType, Delimiter
+from ..utils.settings import FileEncoding, FileType, Delimiter, LineTerminator
 from ..general.library_attributes import LibraryAttributes
 
 from robot.api.deco import keyword
@@ -34,6 +34,20 @@ class Configuration(LibraryAttributes):
         | Configure Delimiter    \\t
         """
         self.separator = separator
+
+    @keyword(tags=["Configuration"])
+    def configure_line_terminator(self, line_terminator: LineTerminator):
+        """
+        Change the internal line terminator during your test execution dynamically.
+
+        | =`Arguments`= | =`Description`= |
+        | ``line_terminator`` | Define a new line_terminator |
+
+        == Example ==
+        | Configure Line Terminator    LF
+        | Configure Line Terminator    CRLF
+        """
+        self.line_terminator = line_terminator
 
     @keyword(tags=["Configuration"])
     def configure_file_encoding(self, file_encoding: FileEncoding):

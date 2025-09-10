@@ -1,4 +1,28 @@
+import csv
 from enum import Enum
+
+class Quoting(Enum):
+    """
+    Available quoting options for CSV mainly. Default is MINIMAL.
+    """
+    ALL = csv.QUOTE_ALL
+    MINIMAL = csv.QUOTE_MINIMAL
+    NONNUMERIC = csv.QUOTE_NONNUMERIC
+    NONE = csv.QUOTE_NONE
+
+QuotingCharacter = Enum(
+    "QuotingCharacter",
+    {
+        "\"": "\"",
+        "'": "'",
+    }
+)
+QuotingCharacter.__doc__ = """
+    Available quoting characters - default is ``\"``.
+    | = Delimiter = | = Description = |
+    | ``\"`` | Using the \" as separator. |
+    | ``'`` | Using the ' as separator. |
+"""
 
 class FileType(Enum):
     """
@@ -26,6 +50,13 @@ class FileEncoding(Enum):
     UTF8 = "utf-8"
     UTF16 = "utf-16"
     LATIN1 = "latin-1"
+
+class LineTerminator(Enum):
+    """
+    Available line terminators.
+    """
+    LF = "\n"
+    CRLR = "\r\n"
 
 Delimiter = Enum(
     "Delimiter",

@@ -140,7 +140,8 @@ class FileReader(LibraryAttributes):
         return pd.read_csv(path,
                          sep=self.separator.value,
                          encoding=self.file_encoding.value,
-                         header=None)
+                         header=None,
+                         lineterminator=self.line_terminator.value)
 
     def validate_table_to_dataframe(self,
                                     data: list[list[Any]],

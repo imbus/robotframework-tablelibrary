@@ -6,7 +6,7 @@ from .__about__ import __version__
 from robot.api.deco import library
 from robotlibcore import HybridCore
 
-from .utils.settings import FileType, Delimiter, FileEncoding
+from .utils.settings import FileType, Delimiter, FileEncoding, LineTerminator, Quoting, QuotingCharacter
 
 from .keywords import (
     Configuration,
@@ -38,7 +38,7 @@ class Tables(HybridCore):
     - latin-1
 
     == Excel Files ==
-    Please visit the following to handle excel files: [https://pypi.org/project/robotframework-excelsage|robotframework-sageexcel]
+    Please visit the following to handle excel files: [https://pypi.org/project/robotframework-excelsage|robotframework-excelsage]
 
     == Examples ==
     === CSV ===
@@ -67,7 +67,8 @@ class Tables(HybridCore):
             file_type: FileType = FileType.CSV,
             file_encoding: FileEncoding = FileEncoding.UTF8,
             separator: Delimiter = Delimiter[","],
-            ignore_header: bool = False
+            ignore_header: bool = False,
+            line_terminator: LineTerminator = LineTerminator.LF
         ):
         """
         Table Library can be controlled by the following arguments:
@@ -77,11 +78,15 @@ class Tables(HybridCore):
         | ``file_encoding`` | Defiine the file encoding. |
         | ``separator``     | Define a separator for parsing the files. |
         | ``ignore_header`` | Define if headers in files should be ignored. Default is ``False``  |
+        | ``line_terminator`` | Define the required line terminator for your table files. Default is ``False``  |
         """
         self._file_type = file_type
         self._separator = separator
         self._file_encoding = file_encoding
         self._ignore_header = ignore_header
+        self._line_terminator = line_terminator
+        self._quoting = Quoting.MINIMAL
+        self._quoting_character = QuotingCharacter["\""]
 
         libraries = [
             Configuration(self),

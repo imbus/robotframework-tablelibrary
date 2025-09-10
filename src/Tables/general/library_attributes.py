@@ -36,6 +36,14 @@ class LibraryAttributes:
         self.library._file_encoding = value
 
     @property
+    def line_terminator(self):
+        return self.library._line_terminator
+
+    @line_terminator.setter
+    def line_terminator(self, value):
+        self.library._line_terminator = value
+
+    @property
     def ignore_header(self):
         return self.library._ignore_header
 
