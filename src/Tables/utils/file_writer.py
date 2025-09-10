@@ -46,7 +46,7 @@ class FileWriter(LibraryAttributes):
         csv_header = self.header and not isinstance(data, list)
 
         writers = {
-            FileType.CSV: lambda: data_df.to_csv(file_path, index=False, header=csv_header, sep=self.delimiter.value),
+            FileType.CSV: lambda: data_df.to_csv(file_path, index=False, header=csv_header, sep=self.separator.value),
             # FileType.Excel: lambda: data_df.to_excel(file_path, index=False),
             FileType.Parquet: lambda: data_df.to_parquet(file_path)
         }

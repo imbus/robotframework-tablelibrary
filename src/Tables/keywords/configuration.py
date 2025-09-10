@@ -21,19 +21,19 @@ class Configuration(LibraryAttributes):
         self.file_type = file_type
 
     @keyword(tags=["Configuration"])
-    def configure_delimiter(self, delimiter: Delimiter):
+    def configure_separator(self, separator: Delimiter):
         """
-        Change the internal delimiter during your test execution dynamically.
+        Change the internal separator during your test execution dynamically.
 
         | =`Arguments`= | =`Description`= |
-        | ``delimiter`` | Define a new delimiter |
+        | ``separator`` | Define a new separator |
 
         == Example ==
         | Configure Delimiter    ;
         | Configure Delimiter    ,
         | Configure Delimiter    \\t
         """
-        self.delimiter = delimiter
+        self.separator = separator
 
     @keyword(tags=["Configuration"])
     def configure_file_encoding(self, file_encoding: FileEncoding):

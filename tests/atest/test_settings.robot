@@ -1,5 +1,5 @@
 *** Settings ***
-Library   Tables    file_type=CSV    file_encoding=UTF8    delimiter=,    ignore_header=True
+Library   Tables    file_type=CSV    file_encoding=UTF8    separator=,    ignore_header=True
 
 
 *** Test Cases ***
@@ -9,8 +9,8 @@ File Type
     Tables.Configure File Type    CSV
 
 Delimiter
-    Tables.Configure Delimiter    ,
-    Tables.Configure Delimiter    ;
+    Tables.Configure Separator    ,
+    Tables.Configure Separator    ;
 
 File Encoding
     Tables.Configure File Encoding    UTF8

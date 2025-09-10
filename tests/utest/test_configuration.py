@@ -14,9 +14,9 @@ def test_set_file_type(config):
     config.configure_file_type(FileType.CSV)
     assert config.file_type == FileType.CSV
 
-def test_set_delimiter(config):
-    config.configure_delimiter(Delimiter[","])
-    assert config.delimiter == Delimiter[","]
+def test_set_separator(config):
+    config.configure_separator(Delimiter[","])
+    assert config.separator == Delimiter[","]
 
 def test_set_file_encoding(config):
     config.configure_file_encoding(FileEncoding.UTF8)

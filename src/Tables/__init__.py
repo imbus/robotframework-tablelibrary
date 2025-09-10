@@ -66,7 +66,7 @@ class Tables(HybridCore):
             *_,
             file_type: FileType = FileType.CSV,
             file_encoding: FileEncoding = FileEncoding.UTF8,
-            delimiter: Delimiter = Delimiter[","],
+            separator: Delimiter = Delimiter[","],
             ignore_header: bool = False
         ):
         """
@@ -75,11 +75,11 @@ class Tables(HybridCore):
         | =`Argument`=      | =`Description`= |
         | ``file_type``     | Choose the file type to test initially. |
         | ``file_encoding`` | Defiine the file encoding. |
-        | ``delimiter``     | Define a delimiter for parsing the files. |
+        | ``separator``     | Define a separator for parsing the files. |
         | ``ignore_header`` | Define if headers in files should be ignored. Default is ``False``  |
         """
         self._file_type = file_type
-        self._delimiter = delimiter
+        self._separator = separator
         self._file_encoding = file_encoding
         self._ignore_header = ignore_header
 
