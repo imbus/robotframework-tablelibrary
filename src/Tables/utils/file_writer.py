@@ -25,13 +25,13 @@ class FileWriter(LibraryAttributes):
 
     def write_table(self,
                     data: DataFrame | list[list[Any]],
-                    file_path: str | None = None
-                    ) -> str:
+                    file_path: Path | None = None
+                    ) -> Path:
         """Keyword to create/overwrite table using dataframe tables."""
         if file_path is None:
             file_path = self.file_reader.opened_table
 
-        dir_name = Path(file_path).parent
+        dir_name = file_path.parent
         self._fs.ensure_directory_exists(dir_name)
         self.file_type = self.file_reader.read_data_type(file_path)
 
@@ -62,9 +62,9 @@ class FileWriter(LibraryAttributes):
                     data: Any,
                     row: None | int = None,
                     column: None | str | int = None,
-                    file_path: None | str  = None,
+                    file_path: None | Path  = None,
                     header: bool = True,
-                    ) -> str:
+                    ) -> Path:
         """Keyword to manipulate data.
            data = if it is a list it can change complete row/column if the size
            of data matches the lenght of row/column.
