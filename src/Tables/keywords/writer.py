@@ -3,6 +3,7 @@ from ..general.library_attributes import LibraryAttributes
 from ..utils.file_system import FileSystem
 from ..utils.file_writer import FileWriter
 from ..utils.file_system import FileSync
+from pathlib import Path
 
 from typing import Any
 
@@ -20,7 +21,7 @@ class Writer(LibraryAttributes):
     def write_table(
             self,
             data: list[list[Any]],
-            file_path: str
+            file_path: Path
         ) -> str:
         """
         Keyword to write the given data to a new file or overwrite an existing file.
@@ -39,7 +40,7 @@ class Writer(LibraryAttributes):
             data,
             file_path
         )
-        return file_path
+        return str(file_path)
 
     @keyword(tags=["Writer"])
     def write_table_cell(
@@ -47,7 +48,7 @@ class Writer(LibraryAttributes):
             data: str,
             row: int,
             column: int | str,
-            file_path: str | None = None,
+            file_path: Path | None = None,
             header: bool = True,
         ) -> list[list[Any]]:
         """
@@ -79,7 +80,7 @@ class Writer(LibraryAttributes):
             self,
             data: list[Any],
             column: int,
-            file_path: str | None = None,
+            file_path: Path | None = None,
             header: bool = True,
         ) -> list[list[Any]]:
         """
@@ -110,7 +111,7 @@ class Writer(LibraryAttributes):
             self,
             data: list,
             row: int,
-            file_path: str | None = None,
+            file_path: Path | None = None,
             header: bool = True,
         ) -> list[list[Any]]:
         """

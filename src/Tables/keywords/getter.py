@@ -7,6 +7,7 @@ from ..utils.settings import FileType
 from typing import Any, cast
 from assertionengine import verify_assertion, AssertionOperator
 from assertionengine.assertion_engine import NumericalOperators
+from pathlib import Path
 
 
 class Getter(LibraryAttributes):
@@ -19,7 +20,7 @@ class Getter(LibraryAttributes):
     @keyword(tags=["Getter"])
     def read_table(
             self,
-            path: str
+            path: Path
     ) -> list[list[Any]]:
         """
         Keyword reads a table from the given path & returns the content.

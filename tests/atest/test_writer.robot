@@ -19,7 +19,9 @@ Write CSV File
     VAR    @{data_01} =    2025    30
     VAR    @{data_02} =    2024    29    
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
-    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.csv
+    ${file_path} =    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.csv
+    BuiltIn.Log    ${file_path}
+    BuiltIn.Should Contain    ${file_path}    results${/}test_writer.csv
 
 Write CSV File - Without Header
     VAR    @{data_00} =    2026    31

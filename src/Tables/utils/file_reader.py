@@ -1,5 +1,5 @@
 from ..general.library_attributes import LibraryAttributes
-from ..utils.settings import FileType
+from ..utils.settings import FileType, FileSuffix
 from ..utils.file_system import FileSync
 
 import pandas as pd
@@ -18,7 +18,7 @@ class FileReader(LibraryAttributes):
         self.file_sync = file_sync
 
     @property
-    def opened_table(self)-> str:
+    def opened_table(self)-> Path:
         if not self.file_sync.current_file:
             raise ValueError(
                 "No file open - use `Read Table` to read a file first!"
@@ -26,29 +26,25 @@ class FileReader(LibraryAttributes):
         return self.file_sync.current_file
 
     def file_exists(self,
-                    path: str
+                    path: Path
         ) -> bool | FileNotFoundError:
-        if not Path(path).is_file():
+        if not path.is_file():
             raise FileNotFoundError(f"File not found: {path}")
         return True
 
     def read_data_type(self,
-                       path:str
+                       path: Path
         ) -> FileType:
         """
         Converts the file types depending on the ending of the filename
         """
-        data_type = None
-        if path.endswith(".csv"):
-            data_type = FileType.CSV
-        elif path.endswith(".parquet"):
-            data_type = FileType.Parquet
-        # elif path.endswith(".xlsx"):
-        #     data_type = FileType.Excel
-        else:
-            raise TypeError(f"Invalid file type of {Path(path).name}. Allowed files are {[file_type.value for file_type in FileType]}")
-
-        return data_type
+        if FileSuffix.CSV.value in path.suffix:
+            return FileType.CSV
+        if FileSuffix.XLSX.value in path.suffix or FileSuffix.XLS.value in path.suffix:
+            return FileType.Excel
+        if FileSuffix.Parquet.value in path.suffix:
+            return FileType.Parquet
+        raise TypeError(f"Invalid file type of {Path(path).name}. Allowed files are {[file_type.value for file_type in FileType]}")
 
     def cast_column_type(self,
                          column_value: int | str
@@ -136,7 +132,7 @@ class FileReader(LibraryAttributes):
 
 
     def read_csv(self,
-                 path: str
+                 path: Path
         ) -> DataFrame:
         """
         Opening up the csv file using and returning pandas dataframe.
@@ -168,20 +164,20 @@ class FileReader(LibraryAttributes):
 
 
     def read_excel(self,
-                   path: str,
+                   path: Path,
                    sheet_name: str | list[str | int] | None = None
         ) -> dict[str, DataFrame]:
         header = 0 if self.ignore_header else None
         dict_df = pd.read_excel(path, header=header, sheet_name=sheet_name)
         return {sheet_name: dict_df} if isinstance(sheet_name, str) else cast(dict[str, DataFrame], dict_df)
 
-    def read_parquet(self, path:str) -> DataFrame:
+    def read_parquet(self, path: Path) -> DataFrame:
         """
         """
         return pd.read_parquet(path)
 
     def read_table_file(self,
-                        path: str
+                        path: Path
                         ) -> DataFrame:
         """
         Reading table file and returns a dataframe of it.
