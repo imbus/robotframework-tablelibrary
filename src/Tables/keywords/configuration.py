@@ -1,4 +1,4 @@
-from ..utils.settings import FileEncoding, FileType, Delimiter, LineTerminator
+from ..utils.settings import FileEncoding, FileType, Delimiter, LineTerminator, Quoting, QuotingCharacter
 from ..general.library_attributes import LibraryAttributes
 
 from robot.api.deco import keyword
@@ -34,6 +34,35 @@ class Configuration(LibraryAttributes):
         | Configure Delimiter    \\t
         """
         self.separator = separator
+
+    @keyword(tags=["Configuration"])
+    def configure_quoting(self, quoting: Quoting):
+        """
+        Change the internal quoting mode during your test execution dynamically.
+
+        | =`Arguments`= | =`Description`= |
+        | ``quoting`` | Define a new quoting mode |
+
+        == Example ==
+        | Configure Quoting    MINIMAL
+        | Configure Quoting    NONNUMERIC
+        | Configure Quoting    NONE
+        """
+        self.quoting = quoting
+
+    @keyword(tags=["Configuration"])
+    def configure_quoting_character(self, quoting_character: QuotingCharacter):
+        """
+        Change the internal quoting character during your test execution dynamically.
+
+        | =`Arguments`= | =`Description`= |
+        | ``quoting`` | Define a new quoting mode |
+
+        == Example ==
+        | Configure Quoting Character    "
+        | Configure Quoting Character    '
+        """
+        self.quoting_character = quoting_character
 
     @keyword(tags=["Configuration"])
     def configure_line_terminator(self, line_terminator: LineTerminator):

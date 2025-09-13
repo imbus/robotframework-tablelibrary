@@ -68,7 +68,9 @@ class Tables(HybridCore):
             file_encoding: FileEncoding = FileEncoding.UTF8,
             separator: Delimiter = Delimiter[","],
             ignore_header: bool = False,
-            line_terminator: LineTerminator = LineTerminator.LF
+            line_terminator: LineTerminator = LineTerminator.LF,
+            quoting: Quoting = Quoting.MINIMAL,
+            quoting_character: QuotingCharacter = QuotingCharacter["\""]
         ):
         """
         Table Library can be controlled by the following arguments:
@@ -79,14 +81,16 @@ class Tables(HybridCore):
         | ``separator``     | Define a separator for parsing the files. |
         | ``ignore_header`` | Define if headers in files should be ignored. Default is ``False``  |
         | ``line_terminator`` | Define the required line terminator for your table files. Default is ``False``  |
+        | ``quoting`` | Define which values should be surrounded with quotes, please check the CSV quoting for more details. Default is ``MINIMAL``  |
+        | ``quoting_character`` | Define quoting character to use for writing table files. Default is ``\"``  |
         """
         self._file_type = file_type
         self._separator = separator
         self._file_encoding = file_encoding
         self._ignore_header = ignore_header
         self._line_terminator = line_terminator
-        self._quoting = Quoting.MINIMAL
-        self._quoting_character = QuotingCharacter["\""]
+        self._quoting = quoting
+        self._quoting_character = quoting_character
 
         libraries = [
             Configuration(self),
