@@ -48,7 +48,7 @@ class Getter(LibraryAttributes):
 
 
     @keyword(tags=["Getter"])
-    def read_table_cell(
+    def get_table_cell(
             self,
             data: list[list[Any]],
             row: int,
@@ -77,10 +77,10 @@ class Getter(LibraryAttributes):
         | CSV:
         | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
         |
-        | ${cell_value} =    Read Table Cell    ${data}    0    1    # without assertion
-        | Read Table Cell    ${data}    0    1    ==    27    # with assertion
+        | ${cell_value} =    Get Table Cell    ${data}    0    1    # without assertion
+        | Get Table Cell    ${data}    0    1    ==    27    # with assertion
         |
-        | Read Table Cell    ${data}    1    name    ==    sascha
+        | Get Table Cell    ${data}    1    name    ==    sascha
         | # using column name 'name' and 1st index row and checking if its value is 'sascha'
         |
         """
@@ -106,7 +106,7 @@ class Getter(LibraryAttributes):
         return cell
 
     @keyword(tags=["Getter"])
-    def read_table_column(
+    def get_table_column(
             self,
             data: list[list[Any]],
             column: str | int,
@@ -129,14 +129,14 @@ class Getter(LibraryAttributes):
         | CSV:
         | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
         |
-        | ${cell_value} =    Read Table Column    ${data}    0    # header index
+        | ${cell_value} =    Get Table Column    ${data}    0    # header index
         |
         | Tables.Configure Ignore Header    False
         | ${data} =    Tables.Read Table    example_01.csv
-        | Read Table Column    ${data}    name    contains    alex
-        | Read Table Column    ${data}    name    not contains    franz
+        | Get Table Column    ${data}    name    contains    alex
+        | Get Table Column    ${data}    name    not contains    franz
         |
-        | ${cell_value} =    Read Table Column    ${data}   Names    # header name
+        | ${cell_value} =    Get Table Column    ${data}   Names    # header name
         """
         valid_assertions = [
             AssertionOperator["contains"],
@@ -165,7 +165,7 @@ class Getter(LibraryAttributes):
         return column_list
 
     @keyword(tags=["Getter"])
-    def read_table_row(
+    def get_table_row(
             self,
             data: list[list[Any]],
             row: int,
@@ -188,7 +188,7 @@ class Getter(LibraryAttributes):
         | CSV
         | Tables.Configure Ignore Header    True
         | ${data} =    Tables.Read Table    example_01.csv
-        | Tables.Read Table Row 2    ${data}    0    contains    alex
+        | Tables.Get Table Row 2    ${data}    0    contains    alex
         """
         valid_assertions = [
             AssertionOperator["contains"],
