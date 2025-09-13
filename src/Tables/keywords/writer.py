@@ -43,7 +43,7 @@ class Writer(LibraryAttributes):
         return str(file_path)
 
     @keyword(tags=["Writer"])
-    def write_table_cell(
+    def set_table_cell(
             self,
             data: str,
             row: int,
@@ -62,8 +62,8 @@ class Writer(LibraryAttributes):
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
-        |  Write Table Cell    New York    row=20    column=2    file_path=${CURDIR}/output/statistics.csv    header=False
-        |  Write Table Cell    Apple    row=1    column=Fruit    file_path=${CURDIR}/output/statistics.csv    header=True   #per default it is true
+        |  Set Table Cell    New York    row=20    column=2    file_path=${CURDIR}/output/statistics.csv    header=False
+        |  Set Table Cell    Apple    row=1    column=Fruit    file_path=${CURDIR}/output/statistics.csv    header=True   #per default it is true
         """
         self.file_writer.write_table_file_cells(
             data = data,
@@ -76,7 +76,7 @@ class Writer(LibraryAttributes):
         return [[None]]
 
     @keyword(tags=["Writer"])
-    def write_table_column(
+    def set_table_column(
             self,
             data: list[Any],
             column: int,
@@ -94,7 +94,7 @@ class Writer(LibraryAttributes):
 
         == Example ==
         |  VAR   @{column_list}    month    august    march
-        |  Write Table Column    ${column_list}    2    ${CURDIR}/output/statistics.csv    True
+        |  Set Table Column    ${column_list}    2    ${CURDIR}/output/statistics.csv    True
         """
 
         self.file_writer.write_table_file_cells(
@@ -107,7 +107,7 @@ class Writer(LibraryAttributes):
         return [[None]]
 
     @keyword(tags=["Writer"])
-    def write_table_row(
+    def set_table_row(
             self,
             data: list,
             row: int,
@@ -125,7 +125,7 @@ class Writer(LibraryAttributes):
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
-        |  Write Table Row    ${list_of_values}    3    ${CURDIR}/output/statistics.csv    True
+        |  Set Table Row    ${list_of_values}    3    ${CURDIR}/output/statistics.csv    True
         """
 
         self.file_writer.write_table_file_cells(

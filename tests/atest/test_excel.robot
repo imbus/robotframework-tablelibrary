@@ -50,13 +50,13 @@ Read Excel File - One File - Two Sheets - Read One Sheet
 Read Excel Read
     Tables.Excel Open    excel_01    ${CURDIR}/testdata/example_06.xlsx
     ${data} =    Tables.Excel Sheet Read    Personen
-    ${sheet_content} =    Tables.Read Table Cell    ${data}   0    1
-    ${names} =    Tables.Read Table Column    ${data}    Name
+    ${sheet_content} =    Tables.Get Table Cell    ${data}   0    1
+    ${names} =    Tables.Get Table Column    ${data}    Name
     Should Contain    ${names}    Charlie
-    ${ages} =    Tables.Read Table Column    ${data}    Alter
+    ${ages} =    Tables.Get Table Column    ${data}    Alter
     Should Contain    ${ages}    ${35}
-    ${names} =    Tables.Read Table Column    ${data}    ${0}
+    ${names} =    Tables.Get Table Column    ${data}    ${0}
     Should Contain    ${names}    Charlie
-    ${ages} =    Tables.Read Table Column    ${data}    ${1}
+    ${ages} =    Tables.Get Table Column    ${data}    ${1}
     Should Contain    ${ages}    ${35}
     
