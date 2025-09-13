@@ -12,6 +12,11 @@ Read CSV File - With Header
     ${result} =    BuiltIn.Evaluate    "${content}[0][0]" == "index"
     BuiltIn.Should Be True    ${result}
 
+Read CSV File - Return Dict Object
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv    Dicts
+    Log    123
+
 Read CSV File - With Header - New Delimiter
     [Setup]    Tables.Configure Separator    ;
     [Teardown]    Tables.Configure Separator    ,

@@ -8,6 +8,7 @@ from typing import Any, cast
 from assertionengine import verify_assertion, AssertionOperator
 from assertionengine.assertion_engine import NumericalOperators
 from pathlib import Path
+from typing import Literal
 
 
 class Getter(LibraryAttributes):
@@ -20,8 +21,9 @@ class Getter(LibraryAttributes):
     @keyword(tags=["Getter"])
     def read_table(
             self,
-            path: Path
-    ) -> list[list[Any]]:
+            path: Path,
+            return_type: Literal["Lists", "Dicts"] = "Lists"
+    ) -> list[list[Any]] | list[dict[str, Any]]:
         """
         Keyword reads a table from the given path & returns the content.
 
@@ -44,8 +46,16 @@ class Getter(LibraryAttributes):
         if self.ignore_header and self.file_type != FileType.Parquet:
                 table_df = table_df.iloc[1:]
                 data = data[1:]
-        return data
 
+        if return_type == "Dicts":
+            df_for_dicts = table_df
+
+            if self.file_type != FileType.Parquet and not self.ignore_header and not table_df.empty:
+                header = [str(x) for x in df_for_dicts.iloc[0].tolist()]
+                df_for_dicts = df_for_dicts.iloc[1:].copy()
+                df_for_dicts.columns = header
+            return cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records"))
+        return data
 
     @keyword(tags=["Getter"])
     def get_table_cell(
