@@ -38,7 +38,7 @@ class FileReader(LibraryAttributes):
         """
         Converts the file types depending on the ending of the filename
         """
-        if FileSuffix.CSV.value in path.suffix:
+        if FileSuffix.CSV.value in path.suffix or FileSuffix.TXT.value in path.suffix:
             return FileType.CSV
         if FileSuffix.XLSX.value in path.suffix or FileSuffix.XLS.value in path.suffix:
             return FileType.Excel
@@ -140,7 +140,8 @@ class FileReader(LibraryAttributes):
         return pd.read_csv(path,
                          sep=self.separator.value,
                          encoding=self.file_encoding.value,
-                         header=None)
+                         header=None,
+                         lineterminator=self.line_terminator.value)
 
     def validate_table_to_dataframe(self,
                                     data: list[list[Any]],

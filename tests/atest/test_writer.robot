@@ -13,6 +13,32 @@ Write Excel File
     Tables.Configure File Type    Excel
     Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.xlsx
     
+## Txt tests #########################################################
+Write CSV to TXT File
+    VAR    @{headers} =    year    temp
+    VAR    @{data_01} =    2025    30
+    VAR    @{data_02} =    2024    29    
+    VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
+    ${file_path} =    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.txt
+    BuiltIn.Log    ${file_path}
+    BuiltIn.Should Contain    ${file_path}    results${/}test_writer.txt
+
+Write CSV to TXT File - Quoting
+    [Teardown]    Configure Quoting    MINIMAL
+    Configure Quoting Character    '
+    Configure Quoting    ALL
+    VAR    @{headers} =    year    temp
+    VAR    @{data_01} =    2025    30
+    VAR    @{data_02} =    2024    29    
+    VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
+    ${file_path} =    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.txt
+    BuiltIn.Log    ${file_path}
+    BuiltIn.Should Contain    ${file_path}    results${/}test_writer.txt
+    ${content} =    Tables.Read Table    ${file_path}
+    Should Contain    ${content}[1]    '2025'
+    Should Contain    ${content}[1]    '30'
+
+    
 ## Csv tests #########################################################
 Write CSV File
     VAR    @{headers} =    year    temp
