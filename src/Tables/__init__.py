@@ -12,6 +12,7 @@ from .keywords import (
     Configuration,
     Getter,
     Writer,
+    Modifier
     # Excel
 )
 
@@ -96,6 +97,7 @@ class Tables(HybridCore):
             Configuration(self),
             Getter(self),
             Writer(self),
+            Modifier(self)
             # Excel(self)
         ]
 
