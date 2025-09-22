@@ -1,17 +1,17 @@
 from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
+from ..utils.settings import FileType, TableFormat
 from ..utils.file_system import FileSystem
-from ..utils.file_writer import FileWriter
-from ..utils.file_system import FileSync
+from ..utils.file_access import FileAccess
+
 from pathlib import Path
 
-from typing import Any
 
 class Writer(LibraryAttributes):
 
-    def __init__(self, library):
+    def __init__(self, library, file_access:FileAccess):
         self.library = library
-        self.file_writer = FileWriter(library, FileSync)
+        self.file_writer = file_access.file_writer
 
     @property
     def _fs(self):
@@ -20,7 +20,7 @@ class Writer(LibraryAttributes):
     @keyword(tags=['Writer'])
     def write_table(
             self,
-            data: list[list[Any]],
+            data: list[list],
             file_path: Path
         ) -> str:
         """
@@ -40,6 +40,7 @@ class Writer(LibraryAttributes):
             data,
             file_path
         )
+
         return str(file_path)
 
     @keyword(tags=["Writer"])
@@ -48,9 +49,8 @@ class Writer(LibraryAttributes):
             data: str,
             row: int,
             column: int | str,
-            file_path: Path | None = None,
             header: bool = True,
-        ) -> list[list[Any]]:
+        ) -> list[list]:
         """
         Keyword to (over-) write the value of a specific cell.
 
@@ -65,24 +65,29 @@ class Writer(LibraryAttributes):
         |  Set Table Cell    New York    row=20    column=2    file_path=${CURDIR}/output/statistics.csv    header=False
         |  Set Table Cell    Apple    row=1    column=Fruit    file_path=${CURDIR}/output/statistics.csv    header=True   #per default it is true
         """
-        self.file_writer.write_table_file_cells(
+        original_ignore_header = self.ignore_header
+
+        # disable header for Parquet and overwrite ignore_header for validation keywords
+        self.file_writer.header = header if self.file_type != FileType.Parquet else False
+        self.ignore_header = not self.file_writer.header
+
+        table_df:list[list] = self.file_writer.set_dataframe_cells(
             data = data,
             row = row,
             column = column,
-            header= header,
-            file_path = file_path
+            return_type=TableFormat["List of lists"]
         )
 
-        return [[None]]
+        self.ignore_header = original_ignore_header
+        return table_df
 
     @keyword(tags=["Writer"])
     def set_table_column(
             self,
-            data: list[Any],
+            data: list,
             column: int,
-            file_path: Path | None = None,
             header: bool = True,
-        ) -> list[list[Any]]:
+        ) -> list[list]:
         """
         Keyword to (over-) write the values of a specific column.
 
@@ -97,11 +102,10 @@ class Writer(LibraryAttributes):
         |  Set Table Column    ${column_list}    2    ${CURDIR}/output/statistics.csv    True
         """
 
-        self.file_writer.write_table_file_cells(
-            data = data,
+        self.file_writer.set_dataframe_cells(
+            data=data,
             column = column,
             header= header,
-            file_path = file_path
         )
 
         return [[None]]
@@ -111,9 +115,8 @@ class Writer(LibraryAttributes):
             self,
             data: list,
             row: int,
-            file_path: Path | None = None,
             header: bool = True,
-        ) -> list[list[Any]]:
+        ) -> list[list]:
         """
         Keyword to (over-) write the values of a specific row.
 
@@ -128,11 +131,10 @@ class Writer(LibraryAttributes):
         |  Set Table Row    ${list_of_values}    3    ${CURDIR}/output/statistics.csv    True
         """
 
-        self.file_writer.write_table_file_cells(
-            data = data,
+        self.file_writer.set_dataframe_cells(
+            data=data,
             row = row,
             header= header,
-            file_path = file_path
         )
 
         return [[None]]

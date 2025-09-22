@@ -24,6 +24,23 @@ QuotingCharacter.__doc__ = """
     | ``'`` | Using the ' as separator. |
 """
 
+TableFormat = Enum(
+    "TableFormat",
+    {
+        "List of lists": 0,
+        "List of dicts": 1,
+        "Dataframe": 2,
+    }
+)
+
+TableFormat.__doc__ = """
+    Available table formats. Mostly used as return type during reading/getting the table.
+    | = Delimiter = | = Description = |
+    | ``List of lists`` | Using the table format as list[list] |
+    | ``List of dicts`` | Using the table format as list[dict] |
+    | ``Dataframe``     | Using the table format as pandas.DataFrame |
+"""
+
 class FileType(Enum):
     """
     Available file types / extension for your input files.
@@ -31,6 +48,7 @@ class FileType(Enum):
     CSV = "csv"
     Excel = "xlsx"
     Parquet = "parquet"
+    List_of_lists = "0"
 
 class FileSuffix(Enum):
     """

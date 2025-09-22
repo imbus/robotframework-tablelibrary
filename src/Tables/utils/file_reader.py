@@ -1,6 +1,4 @@
-from ..general.library_attributes import LibraryAttributes
-from ..utils.settings import FileType, FileSuffix
-from ..utils.file_system import FileSync
+from robot.api import logger
 
 import pandas as pd
 from pandas import DataFrame
@@ -8,9 +6,15 @@ from pathlib import Path
 from typing import cast, Any
 from enum import Enum
 
+from ..general.library_attributes import LibraryAttributes
+from ..utils.settings import FileType, FileSuffix, TableFormat
+from ..utils.file_system import FileSync, TableObject
+
+
 class Axis(Enum):
-            Columns = "columns"
-            Rows = "rows"
+    Columns = "columns"
+    Rows = "rows"
+
 
 class FileReader(LibraryAttributes):
     def __init__(self, library, file_sync: FileSync):
@@ -18,12 +22,47 @@ class FileReader(LibraryAttributes):
         self.file_sync = file_sync
 
     @property
-    def opened_table(self)-> Path:
-        if not self.file_sync.current_file:
+    def opened_table_path(self)-> Path:
+        if self.file_sync.current_file is None:
             raise ValueError(
-                "No file open - use `Read Table` to read a file first!"
+                "No file path found - use `Open Table` to read a file first!"
+            )
+        return self.file_sync.table_storage[self.file_sync.current_file].path
+
+    @property
+    def current_alias(self) -> str:
+        if self.file_sync.current_file is None:
+            raise ValueError(
+                "No file open - use `Open Table` to read a file first!"
             )
         return self.file_sync.current_file
+
+    def convert_dataframe(
+        self,
+        data: DataFrame,
+        return_type: TableFormat = TableFormat["List of lists"]
+    )-> list[list] | list[dict] | DataFrame:
+        """"""
+        if return_type == TableFormat["List of lists"]:
+            list_data = cast(list[list], data.values.tolist())
+
+            if self.file_type == FileType.Parquet and not self.ignore_header:
+                list_data.insert(0, list(data.columns))
+
+            if self.ignore_header and self.file_type != FileType.Parquet:
+                return list_data[1:]
+            return list_data
+        if return_type == TableFormat["List of dicts"]:
+            df_for_dicts = data
+
+            if self.file_type != FileType.Parquet and not self.ignore_header and not data.empty:
+                header = [str(x) for x in df_for_dicts.iloc[0].tolist()]
+                df_for_dicts = df_for_dicts.iloc[1:].copy()
+                df_for_dicts.columns = header
+            return cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records"))
+        if return_type == TableFormat["Dataframe"]:
+            return data
+        raise ValueError(f"Invalid TableFormat type. Please select valid values: {[key.name for key in TableFormat]}")
 
     def file_exists(self,
                     path: Path
@@ -57,6 +96,14 @@ class FileReader(LibraryAttributes):
             return int(column_value)
         except (ValueError, TypeError):
             return str(column_value)
+
+    def cast_path_type(self,
+                       path: str
+    ) -> str | Path:
+        valid_path = Path(path)
+        return Path(path) if valid_path.exists() else str(path)
+
+
 
 
     def validate_column(self,
@@ -120,6 +167,8 @@ class FileReader(LibraryAttributes):
         """
         if row is not None and column is not None:
             raise ValueError("Cannot select both row and column if selected data is a list for manipulation.")
+        if row is None and column is None:
+            raise ValueError("Cannot ignore both row and column if selected data is a list for manipulation.")
 
         selected_axis = 1 if row is not None else 0
         if len(data) != table.shape[selected_axis]:
@@ -141,26 +190,30 @@ class FileReader(LibraryAttributes):
                          sep=self.separator.value,
                          encoding=self.file_encoding.value,
                          header=None,
-                         lineterminator=self.line_terminator.value)
+                         #lineterminator="\r\n"  #TODO:the culprit for weird readings and writings of table
+                         )
 
     def validate_table_to_dataframe(self,
-                                    data: list[list[Any]],
+                                    data: list[list] | DataFrame,
                                     row: None | int = None,
                                     column: None | str | int = None,
                                     ) -> DataFrame:
         """Formats an already read table to dataframe. Also checks
         if provided row or column are valid (see validate_row/ validate_column)."""
-        df = DataFrame(data)
+        if isinstance(data, list):
+            data = DataFrame(data)
 
         if row:
-            self.validate_row(df, row)
+            self.validate_row(data, row)
 
         if column:
-            casted_column = self.cast_column_type(column)
-            self.validate_column(df, casted_column)
-            if isinstance(casted_column, str):
-                df = DataFrame(data[1:], columns=data[0])
-        return df
+            column = self.cast_column_type(column)
+            self.validate_column(data, column)
+
+        if self.file_type != FileType.Parquet and (isinstance(column, str) or self.ignore_header):
+                data.columns = data.iloc[0].to_list()
+                data = data[1:].reset_index(drop=True)
+        return data
 
 
 
@@ -178,25 +231,87 @@ class FileReader(LibraryAttributes):
         return pd.read_parquet(path)
 
     def read_table_file(self,
-                        path: Path
+                        path: Path | None = None
                         ) -> DataFrame:
         """
         Reading table file and returns a dataframe of it.
         """
         table_df: DataFrame = {}
-        self.file_exists(path)
+        if path is None and self.current_alias:
+            path = self.opened_table_path
 
-        self.file_sync.current_file = path
+        if path is not None:
+            self.file_exists(path)
+            self.file_type = self.read_data_type(path)
 
-        self.file_type = self.read_data_type(path)
+            if self.file_type == FileType.CSV:
+                table_df = self.read_csv(path)
 
-        if self.file_type == FileType.CSV:
-            table_df = self.read_csv(path)
+            elif self.file_type == FileType.Parquet:
+                table_df = self.read_parquet(path)
 
-        elif self.file_type == FileType.Parquet:
-            table_df = self.read_parquet(path)
-
-        else:
-            raise ValueError(f"Not supported data type - file path: {path}")
+            else:
+                raise ValueError(f"Not supported data type - file path: {path}")
 
         return table_df
+
+    def open_table_dataframe(
+            self,
+            alias: str,
+            path: Path
+    ) -> str:
+        """"""
+        self.file_exists(path)
+
+        _df = self.read_table_file(
+            path=path
+        )
+
+        self.file_sync.current_file = alias
+        self.file_sync.table_storage[self.file_sync.current_file] = TableObject(path, _df)
+
+        return self.file_sync.current_file
+
+    def close_table_dataframe(
+            self,
+            alias: str | None = None
+        ) -> bool:
+        """"""
+        if not self.file_sync.table_storage:
+            logger.info("Nothing to close - no file is opened!")
+            return False
+        if not alias:
+            self.file_sync.table_storage = {}
+            self.file_sync.current_file = None
+            logger.info("Closed all opened files!")
+            return True
+        if alias in self.file_sync.table_storage:
+            del self.file_sync.table_storage[alias]
+            if len(self.file_sync.table_storage) == 0:
+                self.file_sync.current_file = None
+            logger.info(f"Selected file '{alias}' is closed!")
+            return True
+        raise KeyError(
+            f"Given file alias '{alias}' does not exist - check all opened files and their alias first!"
+        )
+
+    def table_dataframe_switch(
+            self,
+            alias: str
+        ):
+        """
+        Keyword to switch between opened excel files - only if more than one file is opened.
+
+        | =`Arguments`= | =`Description`= |
+        | ``alias`` | The defined ``alias`` of the file to switch to. |
+
+        == Example ==
+        | Excel File Switch    file_a
+        | Excel File Switch    file_b
+        """
+        if len(self.file_sync.table_storage) <= 1:
+            raise KeyError(
+                "No or only one file is opened at the moment - please open at least two files to use this keyword!"
+            )
+        self.file_sync.current_file = alias
+        return self.file_sync.current_file

@@ -7,6 +7,7 @@ from robot.api.deco import library
 from robotlibcore import HybridCore
 
 from .utils.settings import FileType, Delimiter, FileEncoding, LineTerminator, Quoting, QuotingCharacter
+from .utils.file_access import FileAccess
 
 from .keywords import (
     Configuration,
@@ -93,11 +94,13 @@ class Tables(HybridCore):
         self._quoting = quoting
         self._quoting_character = quoting_character
 
+        self.file_access = FileAccess(self)
+
         libraries = [
             Configuration(self),
-            Getter(self),
-            Writer(self),
-            Modifier(self)
+            Getter(self, self.file_access),
+            Writer(self, self.file_access),
+            Modifier(self, self.file_access),
             # Excel(self)
         ]
 

@@ -1,29 +1,37 @@
 from robot.api.deco import keyword
+
 from ..general.library_attributes import LibraryAttributes
-from ..utils.file_reader import FileReader
-from ..utils.file_system import FileSync
-from ..utils import file_reader
-from ..utils.settings import FileType
+from ..utils.file_reader import Axis
+from ..utils.file_system import FileSystem
+from ..utils.settings import FileType, TableFormat
+from ..utils.file_access import FileAccess
+
 from typing import Any, cast
-from assertionengine import verify_assertion, AssertionOperator
-from assertionengine.assertion_engine import NumericalOperators
 from pathlib import Path
 from typing import Literal
+import pandas as pd
+
+from assertionengine import verify_assertion, AssertionOperator
+from assertionengine.assertion_engine import NumericalOperators
+
 
 
 class Getter(LibraryAttributes):
 
-    def __init__(self, library):
+    def __init__(self, library, file_access:FileAccess):
         self.library = library
-        self.file_reader = FileReader(library, FileSync)
+        self.file_reader = file_access.file_reader
 
+    @property
+    def _fs(self):
+        return FileSystem()
 
     @keyword(tags=["Getter"])
     def read_table(
             self,
             path: Path,
             return_type: Literal["Lists", "Dicts"] = "Lists"
-    ) -> list[list[Any]] | list[dict[str, Any]]:
+    ) -> list[list] | list[dict[str, Any]]:
         """
         Keyword reads a table from the given path & returns the content.
 
@@ -38,7 +46,7 @@ class Getter(LibraryAttributes):
         | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
         """
         table_df = self.file_reader.read_table_file(path)
-        data = cast(list[list[Any]], table_df.values.tolist())
+        data = cast(list[list], table_df.values.tolist())
 
         if self.file_type == FileType.Parquet and not self.ignore_header:
             data.insert(0, list(table_df.columns))
@@ -58,9 +66,52 @@ class Getter(LibraryAttributes):
         return data
 
     @keyword(tags=["Getter"])
+    def open_table(
+            self,
+            alias: str,
+            path: Path
+    ) -> str:
+        """"""
+        self.file_reader.open_table_dataframe(
+            alias= alias,
+            path= path
+        )
+        return alias
+
+    @keyword(tags=["Getter"])
+    def close_table(
+            self,
+            alias: str | None = None
+        ) -> bool:
+        """"""
+        expected: bool = self.file_reader.close_table_dataframe(alias=alias)
+        return expected
+
+    @keyword(tags=["Getter"])
+    def switch_table(
+            self,
+            alias: str,
+    ):
+        """"""
+        return self.file_reader.table_dataframe_switch(
+            alias=alias
+        )
+
+    @keyword(tags=["Getter"])
+    def get_table(
+            self,
+            return_type:TableFormat = TableFormat["List of lists"]
+    ) -> list[list] | list[dict] | pd.DataFrame:
+        """"""
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
+        table_df = self.file_reader.validate_table_to_dataframe(
+            data= current_df)
+
+        return self.file_reader.convert_dataframe(table_df, return_type)
+
+    @keyword(tags=["Getter"])
     def get_table_cell(
             self,
-            data: list[list[Any]],
             row: int,
             column: int | str,
             assertion_operator: AssertionOperator | None = None,
@@ -95,10 +146,12 @@ class Getter(LibraryAttributes):
         |
         """
         cell = None
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(
-            data= data,
+            data= current_df,
             row= row,
             column= column)
+
 
         column = self.file_reader.cast_column_type(column)
 
@@ -118,7 +171,6 @@ class Getter(LibraryAttributes):
     @keyword(tags=["Getter"])
     def get_table_column(
             self,
-            data: list[list[Any]],
             column: str | int,
             assertion_operator: AssertionOperator | None = None,
             assertion_expected: Any = None,
@@ -154,8 +206,9 @@ class Getter(LibraryAttributes):
             AssertionOperator["validate"],
             ]
         column_list = []
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(
-            data= data,
+            data= current_df,
             column= column)
         column = self.file_reader.cast_column_type(column)
 
@@ -177,7 +230,6 @@ class Getter(LibraryAttributes):
     @keyword(tags=["Getter"])
     def get_table_row(
             self,
-            data: list[list[Any]],
             row: int,
             assertion_operator: AssertionOperator | None = None,
             assertion_expected: Any = None,
@@ -206,8 +258,9 @@ class Getter(LibraryAttributes):
             AssertionOperator["validate"],
             ]
         row_list = []
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(
-            data= data,
+            data= current_df,
             row= row)
 
         row_list = cast(list[Any], table_df.iloc[row].to_list())
@@ -226,8 +279,8 @@ class Getter(LibraryAttributes):
 
     @keyword(tags=["Getter"])
     def count_table(self,
-                    data: list[list[Any]],
-                    axis: file_reader.Axis,
+                    path: Path | str,
+                    axis: Axis,
                     assertion_operator: AssertionOperator | None = None,
                     assertion_expected: Any = None,
                     message: str = "",
@@ -249,10 +302,15 @@ class Getter(LibraryAttributes):
         | Tables.Count Table    ${content}  Rows    ==    ${6}
         | Tables.Count Table    ${content}  Columns    ==    ${3}
         """
+        casted_path = self.file_reader.cast_path_type(path)
+        if isinstance(casted_path, Path):
+            df = self.file_reader.read_table_file(casted_path)
+        else:
+            df = self.file_reader.file_sync.table_storage[casted_path].data
 
         table_df = self.file_reader.validate_table_to_dataframe(
-            data= data)
-        shape_index = 0 if axis == file_reader.Axis.Rows else 1
+            data= df)
+        shape_index = 0 if axis == Axis.Rows else 1
 
         axis_count = cast(int, table_df.shape[shape_index])
 
