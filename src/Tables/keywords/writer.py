@@ -1,6 +1,6 @@
 from robot.api.deco import keyword
 from ..general.library_attributes import LibraryAttributes
-from ..utils.settings import FileType, TableFormat
+from ..utils.settings import TableFormat
 from ..utils.file_system import FileSystem
 from ..utils.file_access import FileAccess
 
@@ -65,20 +65,14 @@ class Writer(LibraryAttributes):
         |  Set Table Cell    New York    row=20    column=2    file_path=${CURDIR}/output/statistics.csv    header=False
         |  Set Table Cell    Apple    row=1    column=Fruit    file_path=${CURDIR}/output/statistics.csv    header=True   #per default it is true
         """
-        original_ignore_header = self.ignore_header
-
-        # disable header for Parquet and overwrite ignore_header for validation keywords
-        self.file_writer.header = header if self.file_type != FileType.Parquet else False
-        self.ignore_header = not self.file_writer.header
 
         table_df:list[list] = self.file_writer.set_dataframe_cells(
             data = data,
             row = row,
             column = column,
+            header=header,
             return_type=TableFormat["List of lists"]
         )
-
-        self.ignore_header = original_ignore_header
         return table_df
 
     @keyword(tags=["Writer"])
@@ -101,14 +95,13 @@ class Writer(LibraryAttributes):
         |  VAR   @{column_list}    month    august    march
         |  Set Table Column    ${column_list}    2    ${CURDIR}/output/statistics.csv    True
         """
-
-        self.file_writer.set_dataframe_cells(
+        table:list[list] = self.file_writer.set_dataframe_cells(
             data=data,
             column = column,
             header= header,
+            return_type=TableFormat["List of lists"]
         )
-
-        return [[None]]
+        return table
 
     @keyword(tags=["Writer"])
     def set_table_row(
@@ -130,11 +123,10 @@ class Writer(LibraryAttributes):
         == Example ==
         |  Set Table Row    ${list_of_values}    3    ${CURDIR}/output/statistics.csv    True
         """
-
-        self.file_writer.set_dataframe_cells(
+        table:list[list] = self.file_writer.set_dataframe_cells(
             data=data,
             row = row,
             header= header,
+            return_type=TableFormat["List of lists"]
         )
-
-        return [[None]]
+        return table

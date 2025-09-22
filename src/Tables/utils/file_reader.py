@@ -152,10 +152,10 @@ class FileReader(LibraryAttributes):
         return True
 
     def validate_data_list_with_table(self,
-                                       data: list,
-                                       table: DataFrame,
-                                       row: Any | None = None,
-                                       column: Any | None = None,
+                                      data: list,
+                                      table: DataFrame,
+                                      row: Any | None = None,
+                                      column: Any | None = None
                                        ):
         """
         Reads the data(as list) and compares it with the provided table (as dataframe). It checks if rows or column size matches the one of the table.
@@ -234,7 +234,7 @@ class FileReader(LibraryAttributes):
                         path: Path | None = None
                         ) -> DataFrame:
         """
-        Reading table file and returns a dataframe of it.
+        Reading table file and returns a dataframe (without header settings) of it.
         """
         table_df: DataFrame = {}
         if path is None and self.current_alias:
