@@ -21,7 +21,7 @@ class Writer(LibraryAttributes):
     def write_table(
             self,
             data: list[list],
-            file_path: Path
+            file_path: Path | str | None = None
         ) -> str:
         """
         Keyword to write the given data to a new file or overwrite an existing file.

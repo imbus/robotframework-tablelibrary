@@ -98,13 +98,15 @@ class FileReader(LibraryAttributes):
             return str(column_value)
 
     def cast_path_type(self,
-                       path: str
+                       path: Path | str
     ) -> str | Path:
+        if isinstance(path, Path):
+            return path
+
         valid_path = Path(path)
-        return Path(path) if valid_path.exists() else str(path)
-
-
-
+        if valid_path.exists():
+            return valid_path
+        return path
 
     def validate_column(self,
                         data: DataFrame,
@@ -219,11 +221,11 @@ class FileReader(LibraryAttributes):
 
     def read_excel(self,
                    path: Path,
-                   sheet_name: str | list[str | int] | None = None
-        ) -> dict[str, DataFrame]:
-        header = 0 if self.ignore_header else None
-        dict_df = pd.read_excel(path, header=header, sheet_name=sheet_name)
-        return {sheet_name: dict_df} if isinstance(sheet_name, str) else cast(dict[str, DataFrame], dict_df)
+                   **kwargs
+        ) -> DataFrame:
+        return pd.read_excel(path,
+                             header=None,
+                             sheet_name=kwargs.get("sheet_name", 0))
 
     def read_parquet(self, path: Path) -> DataFrame:
         """
@@ -231,25 +233,25 @@ class FileReader(LibraryAttributes):
         return pd.read_parquet(path)
 
     def read_table_file(self,
-                        path: Path | None = None
+                        path: Path
                         ) -> DataFrame:
         """
         Reading table file and returns a dataframe (without header settings) of it.
         """
         table_df: DataFrame = {}
-        if path is None and self.current_alias:
-            path = self.opened_table_path
 
         if path is not None:
             self.file_exists(path)
+            readers = {
+                FileType.CSV: lambda: self.read_csv(path),
+                FileType.Excel: lambda: self.read_excel(path),
+                FileType.Parquet: lambda: self.read_parquet(path),
+            }
             self.file_type = self.read_data_type(path)
 
-            if self.file_type == FileType.CSV:
-                table_df = self.read_csv(path)
-
-            elif self.file_type == FileType.Parquet:
-                table_df = self.read_parquet(path)
-
+            reader = readers.get(self.file_type)
+            if reader:
+                table_df = reader()
             else:
                 raise ValueError(f"Not supported data type - file path: {path}")
 
@@ -298,7 +300,7 @@ class FileReader(LibraryAttributes):
     def table_dataframe_switch(
             self,
             alias: str
-        ):
+        ) -> str:
         """
         Keyword to switch between opened excel files - only if more than one file is opened.
 

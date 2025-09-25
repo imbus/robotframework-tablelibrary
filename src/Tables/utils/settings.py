@@ -14,7 +14,7 @@ QuotingCharacter = Enum(
     "QuotingCharacter",
     {
         "\"": "\"",
-        "'": "'",
+        "\'": "\'",
     }
 )
 QuotingCharacter.__doc__ = """
@@ -48,7 +48,6 @@ class FileType(Enum):
     CSV = "csv"
     Excel = "xlsx"
     Parquet = "parquet"
-    List_of_lists = "0"
 
 class FileSuffix(Enum):
     """

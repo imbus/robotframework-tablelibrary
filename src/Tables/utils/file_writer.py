@@ -33,8 +33,24 @@ class FileWriter(LibraryAttributes):
         return FileSystem()
 
     @property
+    def _table_storage(self):
+        return self.file_sync.table_storage
+
+    @property
     def current_table(self):
-        return self.file_sync.table_storage[self.file_sync.current_file]
+        return self._table_storage[self.file_sync.current_file]
+
+    def find_file_path(self,
+                       path: str | Path | None = None) -> Path:
+        if path is None:
+            return Path(self.current_table.path)
+        casted_path = self.file_reader.cast_path_type(path)
+        if isinstance(casted_path, str):
+            if casted_path in self._table_storage:
+                return Path(self._table_storage[casted_path].path)
+            raise ValueError(f"Couldn't find saved table. Current open tables are:"
+                             f"{[self._table_storage.keys()]}")
+        return Path(casted_path)
 
     def add_header_in_dataframe(self,
                                 table: DataFrame)-> DataFrame:
@@ -194,14 +210,17 @@ class FileWriter(LibraryAttributes):
 
     def write_table(self,
                     data: DataFrame | list[list],
-                    file_path: Path | None = None
+                    file_path: Path | str | None = None
                     ) -> Path:
         """Keyword to create/overwrite table using dataframe tables."""
-        if file_path is None:
-            file_path = self.file_reader.opened_table_path
+        file_path = self.find_file_path(file_path)
 
-        dir_name = file_path.parent
-        self._fs.ensure_directory_exists(dir_name)
+        if isinstance(file_path, Path):
+            dir_name = file_path.parent
+            self._fs.ensure_directory_exists(dir_name)
+        else:
+            raise TypeError("Invalid file_path type.")
+
         self.file_type = self.file_reader.read_data_type(file_path)
 
         if isinstance(data, list) and self.file_type == FileType.Parquet:
@@ -211,18 +230,21 @@ class FileWriter(LibraryAttributes):
         else:
             data_df = data
 
-        #lists or 'headless' dataframes automatically add index in to_csv. When prevent that by puting first row as header
-        csv_header = self.header and not isinstance(data, list)
+        #lists or 'headless' dataframes automatically add index in to_csv. We prevent that by puting first row as header
+        fixed_header = self.header and not isinstance(data, list)
 
         writers = {
             FileType.CSV: lambda: data_df.to_csv(file_path,
                                                  index=False,
-                                                 header=csv_header,
+                                                 header=fixed_header,
                                                  sep=self.separator.value,
                                                  quoting=self.quoting.value,
                                                  quotechar=self.quoting_character.value
                                                 ),
-            # FileType.Excel: lambda: data_df.to_excel(file_path, index=False),
+            FileType.Excel: lambda: data_df.to_excel(file_path,
+                                                     index=False,
+                                                     header=fixed_header
+                                                     ),
             FileType.Parquet: lambda: data_df.to_parquet(file_path)
         }
 
@@ -235,9 +257,9 @@ class FileWriter(LibraryAttributes):
 
     def write_table_file_cells(self,
                     data: Any,
+                    file_path: Path,
                     row: None | int = None,
                     column: None | str | int = None,
-                    file_path: Path | None  = None,
                     header: bool = True,
                     ) -> Path:
         """Keyword to manipulate data.
@@ -359,34 +381,44 @@ class FileWriter(LibraryAttributes):
             self.file_reader.validate_row(table_df, row)
 
         # Different actions
-        if action == ModifyAction.Insert_Column:
-            table_df = self.insert_column_to_dataframe(
-                column,
-                data,
-                table_df
-            )
-        if action == ModifyAction.Insert_Row:
-            table_df = self. insert_row_to_dataframe(
-                row,
-                data,
-                table_df
-            )
-        if action == ModifyAction.Append_Column:
-            table_df = self.append_column_to_dataframe(
-                data,
-                table_df
-            )
-
-        if action == ModifyAction.Append_Row:
-            table_df = self.append_row_to_dataframe(
-                data,
-                table_df
-            )
-        if action == ModifyAction.Remove_Column:
-            table_df = self.remove_column_dataframe(column, table_df)
-
-        if action == ModifyAction.Remove_Row:
-            table_df = self.remove_row_dataframe(row, table_df)
+        actions = {
+            ModifyAction.Insert_Column:
+                lambda: self.insert_column_to_dataframe(
+                    column,
+                    data,
+                    table_df
+                ),
+            ModifyAction.Insert_Row:
+                lambda: self.insert_row_to_dataframe(
+                    row,
+                    data,
+                    table_df
+                ),
+            ModifyAction.Append_Column:
+                lambda: self.append_column_to_dataframe(
+                    data,
+                    table_df
+                ),
+            ModifyAction.Append_Row:
+                lambda: self.append_row_to_dataframe(
+                    data,
+                    table_df
+                ),
+            ModifyAction.Remove_Column:
+                lambda: self.remove_column_dataframe(
+                    column,
+                    table_df
+                ),
+            ModifyAction.Remove_Row:
+                lambda: self.remove_row_dataframe(
+                    row,
+                    table_df)
+         }
+        modify_action = actions.get(action)
+        if modify_action:
+            table_df = modify_action()
+        else:
+            raise ValueError(f"Invalid action. Available actions are: {list(ModifyAction)}")
 
         self.update_cached_dataframe(table_df)
 
@@ -394,5 +426,4 @@ class FileWriter(LibraryAttributes):
         self.header = original_header
 
         return table_df
-
 

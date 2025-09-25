@@ -5,15 +5,15 @@ Library     Collections
 
 *** Test Cases ***    
 Write Excel File
-    [Tags]    robot:skip
     VAR    @{headers} =    year    temp
     VAR    @{data_01} =    2025    30
     VAR    @{data_02} =    2024    29    
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
-    Tables.Configure File Type    Excel
     Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.xlsx
     
-## Txt tests #########################################################
+########################################################################################
+# TXT
+########################################################################################
 Write CSV to TXT File
     VAR    @{headers} =    year    temp
     VAR    @{data_01} =    2025    30
@@ -21,10 +21,9 @@ Write CSV to TXT File
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
     ${file_path} =    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.txt
     BuiltIn.Log    ${file_path}
-    BuiltIn.Should Contain    ${file_path}    results${/}test_writer.txt
+    BuiltIn.Should Contain    ${file_path}    results/test_writer.txt
 
 Write CSV to TXT File - Quoting
-    [Tags]    robot:skip
     [Teardown]    Configure Quoting    MINIMAL
     Configure Quoting Character    '
     Configure Quoting    ALL
@@ -34,13 +33,15 @@ Write CSV to TXT File - Quoting
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
     ${file_path} =    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.txt
     BuiltIn.Log    ${file_path}
-    BuiltIn.Should Contain    ${file_path}    results${/}test_writer.txt
+    BuiltIn.Should Contain    ${file_path}    results/test_writer.txt
     ${content} =    Tables.Read Table    ${file_path}
     Should Contain    ${content}[1]    '2025'
     Should Contain    ${content}[1]    '30'
 
     
-## Csv tests #########################################################
+########################################################################################
+# CSV
+########################################################################################
 Write CSV File
     VAR    @{headers} =    year    temp
     VAR    @{data_01} =    2025    30
@@ -48,7 +49,7 @@ Write CSV File
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
     ${file_path} =    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.csv
     BuiltIn.Log    ${file_path}
-    BuiltIn.Should Contain    ${file_path}    results${/}test_writer.csv
+    BuiltIn.Should Contain    ${file_path}    results/test_writer.csv
 
 Write CSV File - Without Header
     VAR    @{data_00} =    2026    31
@@ -58,7 +59,7 @@ Write CSV File - Without Header
     Tables.Write Table    ${object}    ${CURDIR}/results/test_writer_2.csv
 
 Set CSV - Cell - Without Read Table
-    [Teardown]    Reset CSV Table
+    [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     Tables.Open Table    table 1    ${csv_path}
     Tables.Get Table
@@ -66,10 +67,10 @@ Set CSV - Cell - Without Read Table
     Tables.Set Table Cell    10    1    temp    header=True
     Tables.Set Table Cell    2029    1    0    header=False
     Tables.Set Table Cell    first column    0    1    header=False
-    Tables.Get Table
+    @{content}    Tables.Get Table
 
 Set CSV - Row
-    [Teardown]    Reset CSV Table
+    [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     Tables.Open Table    table 1    ${csv_path}
     Tables.Get Table
@@ -82,7 +83,7 @@ Set CSV - Row
     Tables.Get Table
 
 Set CSV - Column
-    [Teardown]    Reset CSV Table
+    [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
@@ -93,7 +94,7 @@ Set CSV - Column
     Tables.Get Table
 
 Modify CSV Row - With Header
-    Reset CSV Table
+    [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     VAR    @{row_list} =     2001    04
     VAR    @{row_list_2} =    2026    10
@@ -105,7 +106,7 @@ Modify CSV Row - With Header
     Tables.Remove Row    0    header=True
 
 Modify CSV Column
-    Reset CSV Table
+    [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     VAR    @{column_list} =    month      june      july
     VAR    @{column_list_2} =    day      1      2
@@ -116,8 +117,40 @@ Modify CSV Column
     Tables.Remove Column    0     header=False
     Tables.Remove Column    day     header=True
     Tables.Get Table
+
+Modify first Table - Write in second table
+    [Setup]    Reset Both Csv Tables
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
+    VAR    ${csv_path_2} =   ${CURDIR}/results/test_writer_2.csv
+
+    VAR    @{column_list} =    month      june      july
+    VAR    @{column_list_2} =    day      1      2
+    VAR    @{column_list_3} =    2010     2008
+
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Open Table    table 2    ${csv_path_2}
+    Tables.Switch Table   table 1
+    Tables.Insert Column    ${column_list}        1    header=False
+    Tables.Append Column    ${column_list_2}      header=True
+    Tables.Remove Column    0     header=False
+    Tables.Remove Column    day     header=True
+    ${new_content}    Tables.Get Table
+    Tables.Write Table    ${new_content}    table 2
+
+Modify and Write Table - Without Write Path
+    [Setup]    Reset CSV Table
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
+    VAR    @{column_list} =    month      june      july
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Append Column    ${column_list}
+    ${content}    Get Table
+    Tables.Write Table    data=${content}
+
+
     
-## Parquet tests #########################################################
+########################################################################################
+# Parquet
+########################################################################################
 Write Parquet File
     VAR    @{headers} =    year    temp
     VAR    @{data_01} =    2025    30
@@ -140,7 +173,7 @@ Write Parquet - Cell - Without Read Table
     Tables.Set Table Cell    100    0    1    ${parquet_path}
 
 Set Parquet - Row
-    Reset Parquet Table
+    [Setup]   Reset Parquet Table
     VAR    ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     VAR   @{row_list}    2004    04
     VAR   @{row_list_1}    2030    30
@@ -152,6 +185,7 @@ Set Parquet - Row
     Tables.Set Table Row    ${row_list_2}    0    header=False
 
 Set Parquet - Column
+    [Setup]   Reset Parquet Table
     VAR   ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
@@ -163,7 +197,7 @@ Set Parquet - Column
 
 
 Modify Parquet Row - With Header
-    Reset Parquet Table
+    [Setup]   Reset Parquet Table
     VAR   ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     VAR    @{row_list} =     2001    04
     VAR    @{row_list_2} =    2026    10
@@ -176,7 +210,7 @@ Modify Parquet Row - With Header
     Tables.Remove Row    0    header=True
 
 Modify Parquet Column
-    Reset Parquet Table
+    [Setup]   Reset Parquet Table
     VAR   ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     VAR    @{column_list} =    month      june      july
     VAR    @{column_list_2} =    day      1      2
@@ -188,20 +222,106 @@ Modify Parquet Column
     Tables.Remove Column    day     header=True
     Tables.Get Table
 
+########################################################################################
+# Excel
+########################################################################################
+Set Excel - Cell - Without Read Table
+    [Setup]    Reset Excel Table
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Get Table
+    Tables.Set Table Cell    25    0    1    header=True
+    Tables.Set Table Cell    10    1    temp    header=True
+    Tables.Set Table Cell    2029    1    0    header=False
+    Tables.Set Table Cell    first column    0    1    header=False
+    Tables.Get Table
+
+Set Excel - Row
+    [Setup]    Reset Excel Table
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Get Table
+    VAR   @{row_list}    2004    04
+    VAR   @{row_list_1}    2030    30
+    VAR   @{row_list_2}    column 1    column 2
+    Tables.Set Table Row    ${row_list}    0    header=True
+    Tables.Set Table Row    ${row_list_1}    1    header=False
+    Tables.Set Table Row    ${row_list_2}    0    header=False
+    Tables.Get Table
+
+Set Excel - Column
+    [Setup]    Reset Excel Table
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    VAR   @{column_list}    2006    2007
+    VAR   @{column_list_1}    month    august    march
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Get Table
+    Tables.Set Table Column    ${column_list}    0    header=True
+    Tables.Set Table Column    ${column_list_1}    1    header=False
+    Tables.Get Table
+
+Modify Excel Row - With Header
+    [Setup]    Reset Excel Table
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    VAR    @{row_list} =     2001    04
+    VAR    @{row_list_2} =    2026    10
+    VAR    @{column_list} =   column 1    column 2
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Insert Row    ${row_list}    0    header=True
+    Tables.Insert Row    ${column_list}    0    header=False
+    Tables.Append Row    ${row_list_2}    header=True
+    Tables.Remove Row    0    header=True
+
+Modify Excel Column
+    [Setup]    Reset Excel Table
+    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    VAR    @{column_list} =    month      june      july
+    VAR    @{column_list_2} =    day      1      2
+    VAR    @{column_list_3} =    2010     2008
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Insert Column    ${column_list}        1    header=False
+    Tables.Append Column    ${column_list_2}      header=True
+    Tables.Remove Column    0     header=False
+    Tables.Remove Column    day     header=True
+    Tables.Get Table
+
 
 *** Keywords ***
 Reset CSV Table
+    VAR    ${file_path} =    ${CURDIR}/results/test_writer.csv
     VAR    @{headers} =    year    temp
     VAR    @{data_01} =    2025    30
     VAR    @{data_02} =    2024    29    
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
-    ${file_path} =    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.csv
-    RETURN    ${CURDIR}/results/test_writer.csv
+    ${file_path} =    Tables.Write Table    ${object}    ${file_path}
+    RETURN    ${file_path}
+Reset CSV Table 2
+    VAR    ${file_path} =    ${CURDIR}/results/test_writer_2.csv
+    VAR    @{data_00} =    2026    31
+    VAR    @{data_01} =    2025    30
+    VAR    @{data_02} =    2024    29    
+    VAR    @{object} =    ${data_00}    ${data_01}    ${data_02}
+    ${file_path} =    Tables.Write Table    ${object}    ${file_path}
+    RETURN    ${file_path}
+
+Reset Both Csv Tables
+    Reset CSV Table
+    Reset CSV Table 2
     
 Reset Parquet Table
+    VAR    ${file_path} =    ${CURDIR}/results/test_writer.parquet
     VAR    @{headers} =    year    temp
     VAR    @{data_01} =    2025    30
     VAR    @{data_02} =    2024    29    
     VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
-    Tables.Write Table    ${object}    ${CURDIR}/results/test_writer.parquet
-    RETURN    
+    Tables.Write Table    ${object}    ${file_path}
+    RETURN    ${file_path}
+
+Reset Excel Table
+    VAR    ${file_path} =    ${CURDIR}/results/test_writer.xlsx
+    VAR    @{headers} =    year    temp
+    VAR    @{data_01} =    2025    30
+    VAR    @{data_02} =    2024    29    
+    VAR    @{object} =    ${headers}    ${data_01}    ${data_02}
+    Tables.Write Table    ${object}    ${file_path}
+    RETURN    ${file_path}
