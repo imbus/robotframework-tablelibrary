@@ -61,62 +61,109 @@ Write CSV File - Without Header
 Set CSV - Cell - Without Read Table
     [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
+
     Tables.Open Table    table 1    ${csv_path}
-    Tables.Get Table
     Tables.Set Table Cell    25    0    1    header=True
-    Tables.Set Table Cell    10    1    temp    header=True
-    Tables.Set Table Cell    2029    1    0    header=False
-    Tables.Set Table Cell    first column    0    1    header=False
+    Tables.Set Table Cell    10    1    temp   header=True
+    Tables.Set Table Cell    not temp    0    1    header=False
+
     @{content}    Tables.Get Table
+    Tables.Set Table Cell    first column    0    1    header=False
+    ${result} =    BuiltIn.Evaluate    "${content}[0][1]" == "not temp"
+    BuiltIn.Should Be True    ${result}
+    ${result} =    BuiltIn.Evaluate    ${content}[1][1] == 25
+    BuiltIn.Should Be True    ${result}
+    ${result} =    BuiltIn.Evaluate    ${content}[2][1] == 10
+    BuiltIn.Should Be True    ${result}
 
 Set CSV - Row
     [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
-    Tables.Open Table    table 1    ${csv_path}
-    Tables.Get Table
     VAR   @{row_list}    2004    04
     VAR   @{row_list_1}    2030    30
     VAR   @{row_list_2}    column 1    column 2
-    Tables.Set Table Row    ${row_list}    0    header=True
+
+    Tables.Open Table    table 1    ${csv_path}
+    Tables.Set Table Row    ${row_list}    1    header=True
     Tables.Set Table Row    ${row_list_1}    1    header=False
     Tables.Set Table Row    ${row_list_2}    0    header=False
-    Tables.Get Table
+
+    @{content}    Tables.Get Table
+    Collections.Lists Should Be Equal    ${content}[0]     ${row_list_2}
+    Collections.Lists Should Be Equal    ${content}[1]     ${row_list_1}
+    Collections.Lists Should Be Equal    ${content}[2]     ${row_list}
 
 Set CSV - Column
     [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
+
     Tables.Open Table    table 1    ${csv_path}
     Tables.Get Table
-    Tables.Set Table Column    ${column_list}    0    header=True
+    Tables.Set Table Column    ${column_list}    year    header=True
     Tables.Set Table Column    ${column_list_1}    1    header=False
-    Tables.Get Table
 
-Modify CSV Row - With Header
+    @{content}    Tables.Get Table    List of dicts
+    @{first_column_list} =    Evaluate    [row["year"] for row in ${content}]
+    @{second_column_list} =    Evaluate    [row["month"] for row in ${content}]
+    Collections.Lists Should Be Equal    ${first_column_list}     ${column_list}
+    Collections.Lists Should Be Equal    ${second_column_list}     ${column_list_1}[1:]
+
+Modify CSV Table - Row
     [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     VAR    @{row_list} =     2001    04
     VAR    @{row_list_2} =    2026    10
     VAR    @{column_list} =   column 1    column 2
+
+    VAR    @{original_column} =     year    temp
+    VAR    @{original_row} =    2025    30
+    VAR    @{original_row_2} =   2024    29
+
     Tables.Open Table    table 1    ${csv_path}
     Tables.Insert Row    ${row_list}    0    header=True
     Tables.Insert Row    ${column_list}    0    header=False
-    Tables.Append Row    ${row_list_2}    header=True
+    Tables.Append Row    ${row_list_2}
     Tables.Remove Row    0    header=True
 
-Modify CSV Column
+    @{content}    Tables.Get Table
+    Collections.List Should Not Contain Value    ${content}[0]    ${original_column}[0]
+    Collections.List Should Not Contain Value    ${content}[0]    ${original_column}[1]
+    Collections.Lists Should Be Equal    ${content}[0]     ${column_list}
+    Collections.Lists Should Be Equal    ${content}[1]     ${row_list}
+    Collections.Lists Should Be Equal    ${content}[2]     ${original_row}
+    Collections.Lists Should Be Equal    ${content}[3]     ${original_row_2}
+    Collections.Lists Should Be Equal    ${content}[4]     ${row_list_2}
+
+    Tables.Count Table    table 1    Columns    ==    ${2}
+    Tables.Count Table    table 1    Rows    ==    ${5}
+
+
+Modify CSV Table - Column
     [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     VAR    @{column_list} =    month      june      july
     VAR    @{column_list_2} =    day      1      2
-    VAR    @{column_list_3} =    2010     2008
+
+    VAR    @{expected_column} =    month    day
+    VAR    @{expected_row} =    june    1
+    VAR    @{expected_row_2} =    july    2
+
     Tables.Open Table    table 1    ${csv_path}
-    Tables.Insert Column    ${column_list}        1    header=False
-    Tables.Append Column    ${column_list_2}      header=True
-    Tables.Remove Column    0     header=False
-    Tables.Remove Column    day     header=True
-    Tables.Get Table
+    Tables.Insert Column    ${column_list}        1
+    Tables.Append Column    ${column_list_2}
+    Tables.Remove Column    0
+    Tables.Remove Column    temp
+
+    @{content}    Tables.Get Table
+    Collections.Lists Should Be Equal    ${content}[0]     ${expected_column}
+    Collections.Lists Should Be Equal    ${content}[1]     ${expected_row}
+    Collections.Lists Should Be Equal    ${content}[2]     ${expected_row_2}
+    Tables.Count Table    table 1    Columns    ==    ${2}
+    Tables.Count Table    table 1    Rows    ==    ${3}
+    
+    
 
 Modify first Table - Write in second table
     [Setup]    Reset Both Csv Tables
@@ -129,13 +176,19 @@ Modify first Table - Write in second table
 
     Tables.Open Table    table 1    ${csv_path}
     Tables.Open Table    table 2    ${csv_path_2}
+
     Tables.Switch Table   table 1
-    Tables.Insert Column    ${column_list}        1    header=False
-    Tables.Append Column    ${column_list_2}      header=True
-    Tables.Remove Column    0     header=False
-    Tables.Remove Column    day     header=True
+    Tables.Insert Column    ${column_list}        1
+    Tables.Append Column    ${column_list_2}
+    Tables.Remove Column    0
+
     ${new_content}    Tables.Get Table
     Tables.Write Table    ${new_content}    table 2
+
+    Tables.Configure Ignore Header    False
+    ${content} =    Tables.Read Table    ${csv_path_2}
+    ${result} =    BuiltIn.Evaluate    "${content}[0][0]" == "month"
+    BuiltIn.Should Be True    ${result}
 
 Modify and Write Table - Without Write Path
     [Setup]    Reset CSV Table
@@ -144,7 +197,11 @@ Modify and Write Table - Without Write Path
     Tables.Open Table    table 1    ${csv_path}
     Tables.Append Column    ${column_list}
     ${content}    Get Table
-    Tables.Write Table    data=${content}
+    Tables.Write Table    ${content}
+
+    ${content} =     Tables.Read Table    ${csv_path}
+    ${result} =    BuiltIn.Evaluate    "${content}[0][2]" == "month"
+    BuiltIn.Should Be True    ${result}
 
 
     
@@ -162,10 +219,18 @@ Set Parquet - Cell
     Reset Parquet Table
     VAR    ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     Tables.Open Table    table 1    ${parquet_path}
-    Tables.Get Table
-    Tables.Set Table Cell    25          0    1     header=True
-    Tables.Set Table Cell    2029        1    0     header=False
-    Tables.Set Table Cell    column 1    0    0    header=False  
+    Tables.Set Table Cell    25    0    1    header=True
+    Tables.Set Table Cell    10    1    temp   header=True
+    Tables.Set Table Cell    not temp    0    1    header=False
+
+    @{content}    Tables.Get Table
+    Tables.Set Table Cell    first column    0    1    header=False
+    ${result} =    BuiltIn.Evaluate    "${content}[0][1]" == "not temp"
+    BuiltIn.Should Be True    ${result}
+    ${result} =    BuiltIn.Evaluate    ${content}[1][1] == 25
+    BuiltIn.Should Be True    ${result}
+    ${result} =    BuiltIn.Evaluate    ${content}[2][1] == 10
+    BuiltIn.Should Be True    ${result}
 
 Write Parquet - Cell - Without Read Table
     Reset Parquet Table
@@ -178,112 +243,193 @@ Set Parquet - Row
     VAR   @{row_list}    2004    04
     VAR   @{row_list_1}    2030    30
     VAR   @{row_list_2}    column 1    column 2
+
     Tables.Open Table    table 1    ${parquet_path}
-    Tables.Get Table
-    Tables.Set Table Row    ${row_list}      0    header=True
-    Tables.Set Table Row    ${row_list_1}    1    header=True
+    Tables.Set Table Row    ${row_list}    1    header=True
+    Tables.Set Table Row    ${row_list_1}    1    header=False
     Tables.Set Table Row    ${row_list_2}    0    header=False
+
+    @{content}    Tables.Get Table
+    Collections.Lists Should Be Equal    ${content}[0]     ${row_list_2}
+    Collections.Lists Should Be Equal    ${content}[1]     ${row_list_1}
+    Collections.Lists Should Be Equal    ${content}[2]     ${row_list}
 
 Set Parquet - Column
     [Setup]   Reset Parquet Table
     VAR   ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
+
     Tables.Open Table    table 1    ${parquet_path}
     Tables.Get Table
-    Tables.Set Table Column    ${column_list}    0    header=True
+    Tables.Set Table Column    ${column_list}    year    header=True
     Tables.Set Table Column    ${column_list_1}    1    header=False
-    Tables.Get Table
+
+    @{content}    Tables.Get Table    List of dicts
+    @{first_column_list} =    Evaluate    [row["year"] for row in ${content}]
+    @{second_column_list} =    Evaluate    [row["month"] for row in ${content}]
+    Collections.Lists Should Be Equal    ${first_column_list}     ${column_list}
+    Collections.Lists Should Be Equal    ${second_column_list}     ${column_list_1}[1:]
 
 
-Modify Parquet Row - With Header
+Modify Parquet Row
     [Setup]   Reset Parquet Table
     VAR   ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     VAR    @{row_list} =     2001    04
     VAR    @{row_list_2} =    2026    10
     VAR    @{column_list} =   column 1    column 2
+
+    VAR    @{original_column} =     year    temp
+    VAR    @{original_row} =    2025    30
+    VAR    @{original_row_2} =   2024    29
+
     Tables.Open Table    table 1    ${parquet_path}
-    Tables.Get Table
     Tables.Insert Row    ${row_list}    0    header=True
     Tables.Insert Row    ${column_list}    0    header=False
-    Tables.Append Row    ${row_list_2}    header=True
+    Tables.Append Row    ${row_list_2}
     Tables.Remove Row    0    header=True
+
+    @{content}    Tables.Get Table
+    Collections.List Should Not Contain Value    ${content}[0]    ${original_column}[0]
+    Collections.List Should Not Contain Value    ${content}[0]    ${original_column}[1]
+    Collections.Lists Should Be Equal    ${content}[0]     ${column_list}
+    Collections.Lists Should Be Equal    ${content}[1]     ${row_list}
+    Collections.Lists Should Be Equal    ${content}[2]     ${original_row}
+    Collections.Lists Should Be Equal    ${content}[3]     ${original_row_2}
+    Collections.Lists Should Be Equal    ${content}[4]     ${row_list_2}
+
+    Tables.Count Table    table 1    Columns    ==    ${2}
+    Tables.Count Table    table 1    Rows    ==    ${5}
 
 Modify Parquet Column
     [Setup]   Reset Parquet Table
     VAR   ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
     VAR    @{column_list} =    month      june      july
     VAR    @{column_list_2} =    day      1      2
-    VAR    @{column_list_3} =    2010     2008
+
+    VAR    @{expected_column} =    month    day
+    VAR    @{expected_row} =    june    1
+    VAR    @{expected_row_2} =    july    2
+
     Tables.Open Table    table 1    ${parquet_path}
-    Tables.Insert Column    ${column_list}        1    header=False
-    Tables.Append Column    ${column_list_2}      header=True
-    Tables.Remove Column    0     header=False
-    Tables.Remove Column    day     header=True
-    Tables.Get Table
+    Tables.Insert Column    ${column_list}        1
+    Tables.Append Column    ${column_list_2}
+    Tables.Remove Column    0
+    Tables.Remove Column    temp
+
+    @{content}    Tables.Get Table
+    Collections.Lists Should Be Equal    ${content}[0]     ${expected_column}
+    Collections.Lists Should Be Equal    ${content}[1]     ${expected_row}
+    Collections.Lists Should Be Equal    ${content}[2]     ${expected_row_2}
+    Tables.Count Table    table 1    Columns    ==    ${2}
+    Tables.Count Table    table 1    Rows    ==    ${3}
 
 ########################################################################################
 # Excel
 ########################################################################################
 Set Excel - Cell - Without Read Table
     [Setup]    Reset Excel Table
-    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
-    Tables.Open Table    table 1    ${csv_path}
-    Tables.Get Table
+    VAR    ${xlsx_path} =   ${CURDIR}/results/test_writer.xlsx
+
+    Tables.Open Table    table 1    ${xlsx_path}
     Tables.Set Table Cell    25    0    1    header=True
-    Tables.Set Table Cell    10    1    temp    header=True
-    Tables.Set Table Cell    2029    1    0    header=False
+    Tables.Set Table Cell    10    1    temp   header=True
+    Tables.Set Table Cell    not temp    0    1    header=False
+
+    @{content}    Tables.Get Table
     Tables.Set Table Cell    first column    0    1    header=False
-    Tables.Get Table
+    ${result} =    BuiltIn.Evaluate    "${content}[0][1]" == "not temp"
+    BuiltIn.Should Be True    ${result}
+    ${result} =    BuiltIn.Evaluate    ${content}[1][1] == 25
+    BuiltIn.Should Be True    ${result}
+    ${result} =    BuiltIn.Evaluate    ${content}[2][1] == 10
+    BuiltIn.Should Be True    ${result}
 
 Set Excel - Row
     [Setup]    Reset Excel Table
-    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
-    Tables.Open Table    table 1    ${csv_path}
-    Tables.Get Table
+    VAR    ${xlsx_path} =   ${CURDIR}/results/test_writer.xlsx
     VAR   @{row_list}    2004    04
     VAR   @{row_list_1}    2030    30
     VAR   @{row_list_2}    column 1    column 2
-    Tables.Set Table Row    ${row_list}    0    header=True
+
+    Tables.Open Table    table 1    ${xlsx_path}
+    Tables.Set Table Row    ${row_list}    1    header=True
     Tables.Set Table Row    ${row_list_1}    1    header=False
     Tables.Set Table Row    ${row_list_2}    0    header=False
-    Tables.Get Table
+
+    @{content}    Tables.Get Table
+    Collections.Lists Should Be Equal    ${content}[0]     ${row_list_2}
+    Collections.Lists Should Be Equal    ${content}[1]     ${row_list_1}
+    Collections.Lists Should Be Equal    ${content}[2]     ${row_list}
 
 Set Excel - Column
     [Setup]    Reset Excel Table
-    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    VAR    ${xlsx_path} =   ${CURDIR}/results/test_writer.xlsx
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
-    Tables.Open Table    table 1    ${csv_path}
-    Tables.Get Table
-    Tables.Set Table Column    ${column_list}    0    header=True
-    Tables.Set Table Column    ${column_list_1}    1    header=False
-    Tables.Get Table
 
-Modify Excel Row - With Header
+    Tables.Open Table    table 1    ${xlsx_path}
+    Tables.Get Table
+    Tables.Set Table Column    ${column_list}    year    header=True
+    Tables.Set Table Column    ${column_list_1}    1    header=False
+
+    @{content}    Tables.Get Table    List of dicts
+    @{first_column_list} =    Evaluate    [row["year"] for row in ${content}]
+    @{second_column_list} =    Evaluate    [row["month"] for row in ${content}]
+    Collections.Lists Should Be Equal    ${first_column_list}     ${column_list}
+    Collections.Lists Should Be Equal    ${second_column_list}     ${column_list_1}[1:]
+
+Modify Excel Row
     [Setup]    Reset Excel Table
-    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    VAR    ${xlsx_path} =   ${CURDIR}/results/test_writer.xlsx
     VAR    @{row_list} =     2001    04
     VAR    @{row_list_2} =    2026    10
     VAR    @{column_list} =   column 1    column 2
-    Tables.Open Table    table 1    ${csv_path}
+
+    VAR    @{original_column} =     year    temp
+    VAR    @{original_row} =    2025    30
+    VAR    @{original_row_2} =   2024    29
+
+    Tables.Open Table    table 1    ${xlsx_path}
     Tables.Insert Row    ${row_list}    0    header=True
     Tables.Insert Row    ${column_list}    0    header=False
-    Tables.Append Row    ${row_list_2}    header=True
+    Tables.Append Row    ${row_list_2}
     Tables.Remove Row    0    header=True
+
+    @{content}    Tables.Get Table
+    Collections.List Should Not Contain Value    ${content}[0]    ${original_column}[0]
+    Collections.List Should Not Contain Value    ${content}[0]    ${original_column}[1]
+    Collections.Lists Should Be Equal    ${content}[0]     ${column_list}
+    Collections.Lists Should Be Equal    ${content}[1]     ${row_list}
+    Collections.Lists Should Be Equal    ${content}[2]     ${original_row}
+    Collections.Lists Should Be Equal    ${content}[3]     ${original_row_2}
+    Collections.Lists Should Be Equal    ${content}[4]     ${row_list_2}
+
+    Tables.Count Table    table 1    Columns    ==    ${2}
+    Tables.Count Table    table 1    Rows    ==    ${5}
 
 Modify Excel Column
     [Setup]    Reset Excel Table
-    VAR    ${csv_path} =   ${CURDIR}/results/test_writer.xlsx
+    VAR    ${xlsx_path} =   ${CURDIR}/results/test_writer.xlsx
     VAR    @{column_list} =    month      june      july
     VAR    @{column_list_2} =    day      1      2
-    VAR    @{column_list_3} =    2010     2008
-    Tables.Open Table    table 1    ${csv_path}
-    Tables.Insert Column    ${column_list}        1    header=False
-    Tables.Append Column    ${column_list_2}      header=True
-    Tables.Remove Column    0     header=False
-    Tables.Remove Column    day     header=True
-    Tables.Get Table
+
+    VAR    @{expected_column} =    month    day
+    VAR    @{expected_row} =    june    1
+    VAR    @{expected_row_2} =    july    2
+
+    Tables.Open Table    table 1    ${xlsx_path}
+    Tables.Insert Column    ${column_list}        1
+    Tables.Append Column    ${column_list_2}
+    Tables.Remove Column    0
+    Tables.Remove Column    temp
+
+    @{content}    Tables.Get Table
+    Collections.Lists Should Be Equal    ${content}[0]     ${expected_column}
+    Collections.Lists Should Be Equal    ${content}[1]     ${expected_row}
+    Collections.Lists Should Be Equal    ${content}[2]     ${expected_row_2}
+    Tables.Count Table    table 1    Columns    ==    ${2}
+    Tables.Count Table    table 1    Rows    ==    ${3}
 
 
 *** Keywords ***

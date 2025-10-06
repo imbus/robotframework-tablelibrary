@@ -12,9 +12,11 @@ Read CSV File - With Header
     ${result} =    BuiltIn.Evaluate    "${content}[0][0]" == "index"
     BuiltIn.Should Be True    ${result}
 
-Read CSV File - Return Dict Object
+Read CSV File - Return Table Object
     Tables.Configure Ignore Header    False
-    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv    Dicts
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv    List of dicts
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv    List of lists
+    ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv    Dataframe
     Log    123
 
 Read CSV File - With Header - New Delimiter
@@ -92,6 +94,11 @@ Get Row and Column Count - CSV - Without Header
     Tables.Open Table     table 1    ${file_path}
     Tables.Count Table    table 1    Rows     ==    ${5}
     Tables.Count Table    table 1    Columns    ==    ${3}
+Read Row Count - CSV - With Header
+    Tables.Configure Ignore Header    False
+    VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
+    ${row_count}  Tables.Count Table    ${file_path}    Rows
+    BuiltIn.Should Be Equal    ${row_count}    ${6}
 
 ########################################################################################
 # TXT
@@ -159,9 +166,18 @@ Get Table Row - Parquet - With Header
     Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_03.parquet
     Tables.Get Table Row    0    contains    ${0.81}
 
-Get Row and Column Count - Parquet - Without Header
-    Tables.Configure Ignore Header    True
+Get Row and Column Count - Parquet
     Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_03.parquet
-    Tables.Count Table    table 1    Rows     ==    ${1000}
+    Tables.Count Table    table 1    Rows     ==    ${1001}
     Tables.Count Table    table 1    Columns    ==    ${2}
+
+Read Row and Column Count - Parquet
+    Tables.Configure Ignore Header    False
+    VAR     ${parquet_path}    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Count Table    ${parquet_path}    Rows     ==    ${1001}
+    Tables.Count Table    ${parquet_path}    Columns    ==    ${2}
+    Tables.Configure Ignore Header    True
+    Tables.Count Table    ${parquet_path}    Rows     ==    ${1000}
+    Tables.Count Table    ${parquet_path}    Columns    ==    ${2}
+
 

@@ -28,13 +28,20 @@ class Writer(LibraryAttributes):
 
         | =`Arguments`= | =`Description`= |
         | ``data`` | Data object to store in a new file |
-        | ``file_path`` | The full path of the table file to save the content in. |
+        | ``file_path`` | The full path of the table file to save the content in. If alias from 'Open Table' is used,
+        |                 it will write the data in the aliases file path. If no file path is selected, then it will use current alias.|
 
         == Data Object ==
         The given data object with the argument ``data`` needs to be a list of lists to replicate the table structure
 
+        == Return Value ==
+        Returns the path of written table as a string.
+
         == Example ==
-        | Write Table    ${data}    ${CURDIR}/output/statistics.csv
+        | Write Table    ${data}    statistics.csv     # write into file location
+        |
+        | Tables.Open Table    table 1    new_statistics.csv
+        | Tables.Write Table    ${data}    table 1      # write into new_statistics.csv
         """
         self.file_writer.write_table(
             data,
@@ -52,18 +59,20 @@ class Writer(LibraryAttributes):
             header: bool = True,
         ) -> list[list]:
         """
-        Keyword to (over-) write the value of a specific cell.
+        Keyword to (over-) write the value of a specific cell of the current table (see Open Table).
 
         | =`Arguments`= | =`Description`= |
         | ``data`` | The new value for the given table cell. |
-        | ``row`` | Define the index of the row to identify the cell. |
+        | ``row`` | Define the index of the row to identify the cell. If header= True it will skip the first row (as header)
+        |           and 0th index is the row after the header.|
         | ``column`` | Define the index of the column to identify the cell. Is column is a string then header should be set on True.|
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. |
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. Default: True|
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
-        |  Set Table Cell    New York    row=20    column=2    file_path=${CURDIR}/output/statistics.csv    header=False
-        |  Set Table Cell    Apple    row=1    column=Fruit    file_path=${CURDIR}/output/statistics.csv    header=True   #per default it is true
+        |  Tables.Open Table    table 1    ${csv_path}
+        |  Set Table Cell    New York    row=20    column=2    header=False
+        |  Set Table Cell    Apple    row=1    column=Fruit    header=True
         """
 
         table_df:list[list] = self.file_writer.set_dataframe_cells(
@@ -79,7 +88,7 @@ class Writer(LibraryAttributes):
     def set_table_column(
             self,
             data: list,
-            column: int,
+            column: int | str,
             header: bool = True,
         ) -> list[list]:
         """

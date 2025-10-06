@@ -8,7 +8,6 @@ from ..utils.file_access import FileAccess
 
 from typing import Any, cast
 from pathlib import Path
-from typing import Literal
 import pandas as pd
 
 from assertionengine import verify_assertion, AssertionOperator
@@ -30,22 +29,28 @@ class Getter(LibraryAttributes):
     def read_table(
             self,
             path: Path,
-            return_type: Literal["Lists", "Dicts"] = "Lists"
-    ) -> list[list] | list[dict[str, Any]]:
+            return_type: TableFormat = TableFormat["List of lists"]
+    ) -> list[list] | list[dict[str, Any]] | pd.DataFrame:
         """
         Keyword reads a table from the given path & returns the content.
 
         | =`Arguments`= | =`Description`= |
         | ``path`` | Specify the path of the given tables file. |
+        | ``return_type`` | You can declare what type of table format it should be returned.
+                            Either list of lists, list of dictionaries or a pandas datarframe. Default: List of lists. |
 
         == Return Value ==
         Keyword returns the complete content of the given file.\n
         Raises an error if the file does not exist!
 
         == Example ==
-        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
+        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv    List of lists
+        | ${result} =    BuiltIn.Evaluate    "${content}[0][0]" == "index"
+        | BuiltIn.Should Be True    ${result} # checking if the first column is 'index'
         """
         table_df = self.file_reader.read_table_file(path)
+        if return_type == TableFormat["Dataframe"]:
+            return table_df
         data = cast(list[list], table_df.values.tolist())
 
         if self.file_type == FileType.Parquet and not self.ignore_header:
@@ -55,7 +60,7 @@ class Getter(LibraryAttributes):
                 table_df = table_df.iloc[1:]
                 data = data[1:]
 
-        if return_type == "Dicts":
+        if return_type == TableFormat["List of dicts"]:
             df_for_dicts = table_df
 
             if self.file_type != FileType.Parquet and not self.ignore_header and not table_df.empty:
@@ -71,7 +76,22 @@ class Getter(LibraryAttributes):
             alias: str,
             path: Path
     ) -> str:
-        """"""
+        """
+        Keyword which is similar to read_table but saves the table in form of an alias.
+        The saved table can be further modified but it will not change the file which was the table was opened from.
+
+        | =`Arguments`= | =`Description`= |
+        | ``path`` | Specify the path of the given tables file. |
+        | ``alias`` | Define an alias name to identified opened table file. |
+
+        == Return Value ==
+        Returns the alias string.
+
+        == Example ==
+        | # Opening and saving multiple tables in cache
+        | Tables.Open Table    table 1   table.csv
+        | Tables.Open Table    table 2   table_1.csv    # currently table 2 is active
+        """
         self.file_reader.open_table_dataframe(
             alias= alias,
             path= path
@@ -83,7 +103,21 @@ class Getter(LibraryAttributes):
             self,
             alias: str | None = None
         ) -> bool:
-        """"""
+        """
+        Keyword which closes specific or all of the tables.
+
+        | =`Arguments`= | =`Description`= |
+        | ``alias`` | Use the name of saved alias. If None was selected, then all copened tables will be closed. |
+
+        == Return Value ==
+        Returns True if the table is successfully closed. False if no open tables are available.
+
+        == Example ==
+        | Tables.Open Table    table 1   table.csv
+        | Tables.Open Table    table 2   table_1.csv
+        |
+        | Tables.Close Table    table 1     # close table 1
+        """
         expected: bool = self.file_reader.close_table_dataframe(alias=alias)
         return expected
 
@@ -91,18 +125,47 @@ class Getter(LibraryAttributes):
     def switch_table(
             self,
             alias: str,
-    ):
-        """"""
-        return self.file_reader.table_dataframe_switch(
+     ) -> str:
+        """
+        Keyword which switches into current working table.
+
+        | =`Arguments`= | =`Description`= |
+        | ``alias`` | Use the name of saved alias. |
+
+        == Return Value ==
+        Return the string of the alias it switched to.
+
+        == Example ==
+        | Tables.Open Table    table 1   table.csv
+        | Tables.Open Table    table 2   table_1.csv    # current active table
+        |
+        | Tables.Switch Table   table 1     # switched to 'table 1' as current active table
+        """
+        self.file_reader.table_dataframe_switch(
             alias=alias
         )
+        return alias
 
     @keyword(tags=["Getter"])
     def get_table(
             self,
             return_type:TableFormat = TableFormat["List of lists"]
     ) -> list[list] | list[dict] | pd.DataFrame:
-        """"""
+        """
+        Keyword which returns a table in form of either list of lists, list of dicts, pandas dataframe.
+
+        | =`Arguments`= | =`Description`= |
+        | ``return_type`` | Choose what type of table format it should return. Default: list of lists|
+
+        == Return Value ==
+        Return table in form as either list of lists, list of dicts or dataframe.
+
+        == Example ==
+        | Tables.Open Table    table 1   table.csv
+        | @{lists} =        Tables.Get Table
+        | @{dicts} =        Tables.Get Table    List of dicts
+        | @{dataframe} =    Tables.Get Table    Dataframe
+        """
         current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(
             data= current_df)
@@ -119,31 +182,25 @@ class Getter(LibraryAttributes):
             message: str = "",
         ) -> Any:
         """
-        Keyword reads the table cell with the given row & column index.
+        Keyword reads the currently opened table cell (see opened_table) with the given row & column index.
 
         | =`Arguments`= | =`Description`= |
-        | ``data`` | The table data - must be reat via ``Read`` keywords first |
         | ``row`` | Row to read the cell from |
-        | ``column`` | Column to read the cell from |
+        | ``column`` | Column to read the cell from. Can be index number or a name of a column as a string.
+        |              If string, ignore_header must be False. |
         | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
         |                          Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
-        == Return Value / Errors ==
-        Keyword returns the value of the given cell.\n
+        == Return Value ==
+        Keyword returns the value of the given cell.
         In case of a failed assertion, the keyword will just fail without returning anything.
 
         == Example ==
-        | CSV:
-        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
-        |
-        | ${cell_value} =    Get Table Cell    ${data}    0    1    # without assertion
-        | Get Table Cell    ${data}    0    1    ==    27    # with assertion
-        |
-        | Get Table Cell    ${data}    1    name    ==    sascha
-        | # using column name 'name' and 1st index row and checking if its value is 'sascha'
-        |
+        | Tables.Configure Ignore Header    False
+        | Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+        | Get Table Cell    1    name    ==    sascha
         """
         cell = None
         current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
@@ -177,28 +234,23 @@ class Getter(LibraryAttributes):
             message: str = "",
         ) -> list[Any]:
         """
-        Keyword to read the given table column.
+        Keyword to read the given table column from current opened table (see open_table).
+        If ignore_header = True and searched column is a string then it will raise an error.
 
         | =`Arguments`= | =`Description`= |
-        | ``data`` | The table data - must be reat via ``Read`` keywords first |
         | ``column`` | Column header name (str) or index (int) to return values from |
         | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
         |                          Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
+        == Return Value ==
+        Returns column values as a list.
+
         == Example ==
-        | CSV:
-        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv
-        |
-        | ${cell_value} =    Get Table Column    ${data}    0    # header index
-        |
         | Tables.Configure Ignore Header    False
-        | ${data} =    Tables.Read Table    example_01.csv
-        | Get Table Column    ${data}    name    contains    alex
-        | Get Table Column    ${data}    name    not contains    franz
-        |
-        | ${cell_value} =    Get Table Column    ${data}   Names    # header name
+        | Tables.Open Table    table 1    example_01.csv
+        | Get Table Column    name    contains    alex
         """
         valid_assertions = [
             AssertionOperator["contains"],
@@ -236,21 +288,21 @@ class Getter(LibraryAttributes):
             message: str = "",
         ) -> list[Any]:
         """
-        Keyword to read a specific row from the table data - row is specified by its index.
-
+        Keyword to read the given table column from current opened table (see open_table).
         | =`Arguments`= | =`Description`= |
-        | ``data`` | The table data - must be reat via ``Read`` keywords first |
         | ``row`` | Row index (int) to read values from |
         | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
         |                          Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
+        == Return Value ==
+        Returns row values as a list.
+
         == Example ==
-        | CSV
-        | Tables.Configure Ignore Header    True
-        | ${data} =    Tables.Read Table    example_01.csv
-        | Tables.Get Table Row 2    ${data}    0    contains    alex
+        | Tables.Configure Ignore Header    False
+        | Tables.Open Table    table 1   example_01.csv
+        | Tables.Get Table Row    0    contains    age
         """
         valid_assertions = [
             AssertionOperator["contains"],
@@ -289,24 +341,40 @@ class Getter(LibraryAttributes):
         Keyword for counting rows or columns in the provided table.
 
         | =`Arguments`= | =`Description`= |
+        | ``path`` | Either a filepath or a saved variable of 'Open Table' keyword. |
         | ``axis`` | Select 'Columns' or 'Rows' depending which axis should be checked |
-        | ``data`` | The table data - must be reat via ``Read`` keywords first |
         | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
         |                          Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
+        == Return Value ==
+        Keyword returns a number count of either rows or columns.
+
         == Example ==
         | CSV:
-        | ${content} =    Tables.Read Table    example_01.csv
-        | Tables.Count Table    ${content}  Rows    ==    ${6}
-        | Tables.Count Table    ${content}  Columns    ==    ${3}
+        | VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
+        | Tables.Open Table     table 1    ${file_path}
+        | Tables.Count Table    table 1    Rows     ==    ${6}
+        | Tables.Count Table    table 1    Columns    ==    ${3}
+        |
+        | VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
+        | ${row_count}  Tables.Count Table    ${file_path}    Rows
+        | BuiltIn.Should Be Equal    ${row_count}    ${6}
         """
         casted_path = self.file_reader.cast_path_type(path)
         if isinstance(casted_path, Path):
             df = self.file_reader.read_table_file(casted_path)
         else:
             df = self.file_reader.file_sync.table_storage[casted_path].data
+
+        if self.file_type == FileType.Parquet and not self.ignore_header:
+            table_header = df.columns.to_list()
+            table_data = df.values.tolist()
+            header_data_table = [table_header]
+            header_data_table.extend(table_data)
+            df = pd.DataFrame(header_data_table, columns=None)
+
 
         table_df = self.file_reader.validate_table_to_dataframe(
             data= df)

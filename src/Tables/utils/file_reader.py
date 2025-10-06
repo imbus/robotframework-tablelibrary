@@ -71,6 +71,35 @@ class FileReader(LibraryAttributes):
             raise FileNotFoundError(f"File not found: {path}")
         return True
 
+    def check_default_dataframe_header(self, table: DataFrame) -> bool:
+        """Checks if Dataframe has default index ([0,1,2,3..]) and if it does returns True. If it detects unique columns returns False."""
+        table_column_count = table.shape[1]
+        default_index = [str(i) for i in range(table_column_count)]
+        table_header = [str(i) for i in table.columns.to_list()]
+
+        # Compare the two lists
+        return table_header == default_index
+
+
+    def reset_header_dataframe(self, table: DataFrame) -> DataFrame:
+        """Checks if Dataframe has default index ([0,1,2,3..]) and if it does the Dataframe remains the same. If it detects unique columns
+        it puts them into the body of dataframe and makes the header as basic index.
+        Parquet is special case since the default header is not index based but with unique columns. Thus it will not have index as headers."""
+        table_header = table.columns.to_list()
+        table_data = table.values.tolist()
+
+        if self.file_type == FileType.Parquet:
+            if not self.check_default_dataframe_header(table):
+                return table
+            header = table.iloc[0].tolist()
+            data = table[1:].values
+            return DataFrame(data, columns=header)
+        if self.check_default_dataframe_header(table):
+            return table
+        header_data_table = [table_header]
+        header_data_table.extend(table_data)
+        return DataFrame(header_data_table, columns=None)
+
     def read_data_type(self,
                        path: Path
         ) -> FileType:
@@ -200,7 +229,7 @@ class FileReader(LibraryAttributes):
                                     row: None | int = None,
                                     column: None | str | int = None,
                                     ) -> DataFrame:
-        """Formats an already read table to dataframe. Also checks
+        """Formats a table (list of lists or dataframe) to dataframe. Also checks
         if provided row or column are valid (see validate_row/ validate_column)."""
         if isinstance(data, list):
             data = DataFrame(data)
@@ -262,7 +291,9 @@ class FileReader(LibraryAttributes):
             alias: str,
             path: Path
     ) -> str:
-        """"""
+        """
+        Reads a file and puts it in table_storage as cached table with path.
+        """
         self.file_exists(path)
 
         _df = self.read_table_file(

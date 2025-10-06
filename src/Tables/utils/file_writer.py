@@ -70,39 +70,10 @@ class FileWriter(LibraryAttributes):
             table = DataFrame(rows.values, columns=headers)
         return table
 
-    def check_default_dataframe_header(self, table: DataFrame) -> bool:
-        """Checks if Dataframe has default index ([0,1,2,3..]) and if it does returns True. If it detects unique columns returns False."""
-        table_column_count = table.shape[1]
-        default_index = [str(i) for i in range(table_column_count)]
-        table_header = [str(i) for i in table.columns.to_list()]
-
-        # Compare the two lists
-        return table_header == default_index
-
-
-    def reset_header_dataframe(self, table: DataFrame) -> DataFrame:
-        """Checks if Dataframe has default index ([0,1,2,3..]) and if it does the Dataframe remains the same. If it detects unique columns
-        it puts them into the body of dataframe and makes the header as basic index.
-        Parquet is special case since the default header is not index based but with unique columns."""
-        table_header = table.columns.to_list()
-        table_data = table.values.tolist()
-
-        if self.file_type == FileType.Parquet:
-            if not self.check_default_dataframe_header(table):
-                return table
-            header = table.iloc[0].tolist()
-            data = table[1:].values
-            return DataFrame(data, columns=header)
-        if self.check_default_dataframe_header(table):
-            return table
-        header_data_table = [table_header]
-        header_data_table.extend(table_data)
-        return DataFrame(header_data_table, columns=None)
-
     def update_cached_dataframe(self,
                                 table: DataFrame) -> DataFrame:
         if self.file_sync.current_file is not None:
-            table = self.reset_header_dataframe(table)
+            table = self.file_reader.reset_header_dataframe(table)
             self.current_table.data = table
         return self.current_table.data
 
@@ -117,7 +88,7 @@ class FileWriter(LibraryAttributes):
         if isinstance(column_index, str):
             raise TypeError("Cannot modify table using column name as index. Use int instead")
         if self.file_type != FileType.Parquet:
-            table = self.reset_header_dataframe(table) # we reset the headers since column index doesn't matter
+            table = self.file_reader.reset_header_dataframe(table) # we reset the headers since column index doesn't matter
         self.file_reader.validate_data_list_with_table(
                 data=column_data,
                 table=table,
@@ -159,7 +130,7 @@ class FileWriter(LibraryAttributes):
             raise ValueError(f"Cannot append column if column data({column_data}) is empty.")
 
         if self.file_type != FileType.Parquet:
-            table = self.reset_header_dataframe(table) # we reset the headers since column index doesn't matter
+            table = self.file_reader.reset_header_dataframe(table) # we reset the headers since column index doesn't matter
         self.file_reader.validate_data_list_with_table(
                 data=column_data,
                 table=table,
@@ -173,7 +144,7 @@ class FileWriter(LibraryAttributes):
 
     def append_row_to_dataframe(self,
                                 row_data : list | None,
-                                table:DataFrame) -> DataFrame:
+                                table: DataFrame) -> DataFrame:
         if row_data is None:
             raise ValueError(f"Cannot append row if row data({row_data}) is empty.")
 
@@ -182,9 +153,8 @@ class FileWriter(LibraryAttributes):
                 table=table,
                 row=1
             )
-        data_df = DataFrame([row_data], columns=table.columns.to_list() if self.header else None)
-        return pd.concat(objs=[table, data_df],
-                          ignore_index=True)
+        table.loc[len(table)] = row_data
+        return table
 
     def remove_column_dataframe(self,
                                 column_index: str | int | None,
@@ -255,56 +225,6 @@ class FileWriter(LibraryAttributes):
             raise ValueError(f"Unsupported file type: {self.file_type}")
         return file_path
 
-    def write_table_file_cells(self,
-                    data: Any,
-                    file_path: Path,
-                    row: None | int = None,
-                    column: None | str | int = None,
-                    header: bool = True,
-                    ) -> Path:
-        """Keyword to manipulate data.
-           data = if it is a list it can change complete row/column if the size
-           of data matches the lenght of row/column.
-           row = using for index of the row where in the table the cell should be manipulated.
-                 If it is None then it will be all rows.
-           column = Using for index/column name of the columns where in the table the cell should be manipulated.
-                    If it is None then it will be all columns.
-           header = if it is True then the header during manipulation will be included. Meaning index 0 will be manipulated.
-                    If it is False then the 1st index will be treated as 0 index.
-           file_path = Path where the table is located which should be manipulated. If it is None then it searches for 'read_table'."""
-
-        table_df = self.file_reader.read_table_file(path = file_path)
-
-        original_ignore_header = self.ignore_header
-
-        # overwrite ignore_header for validation keywords
-        self.header = header
-        self.ignore_header = not self.header
-
-        table_df = self.add_header_in_dataframe(table_df)
-
-        axis_row = row if row is not None else slice(None)
-        axis_column = self.file_reader.cast_column_type(column) if column is not None else slice(None)
-
-        if column:
-            self.file_reader.validate_column(table_df, axis_column)
-        if row:
-            self.file_reader.validate_row(table_df, axis_row)
-
-        if isinstance(axis_column, str):
-            table_df.loc[axis_row, axis_column] = data
-        else:
-            table_df.iloc[axis_row, axis_column] = data
-
-        self.write_table(
-            table_df,
-            file_path
-        )
-
-        self.ignore_header = original_ignore_header
-
-        return file_path if file_path is not None else self.current_table.path
-
     def set_dataframe_cells(self,
                             data: Any,
                             row: None | int = None,
@@ -312,7 +232,7 @@ class FileWriter(LibraryAttributes):
                             header: bool = True,
                             return_type: TableFormat = TableFormat["Dataframe"]
         ) -> list[list] | list[dict] | DataFrame:
-        """"""
+        """Changes a cell in a Dataframe."""
         table_df = self.current_table.data
         original_ignore_header = self.ignore_header
         original_header = self.header
@@ -361,6 +281,7 @@ class FileWriter(LibraryAttributes):
                      header: bool = True,
                      )-> DataFrame:
         """
+        Depending on the action this Keyword changes table data by removing,inserting or appending row or column.
         """
         table_df = self.current_table.data
         original_ignore_header = self.ignore_header
@@ -426,4 +347,3 @@ class FileWriter(LibraryAttributes):
         self.header = original_header
 
         return table_df
-
