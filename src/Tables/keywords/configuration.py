@@ -2,6 +2,7 @@ from ..utils.settings import FileEncoding, FileType, Delimiter, LineTerminator, 
 from ..general.library_attributes import LibraryAttributes
 
 from robot.api.deco import keyword
+from typing import Any
 
 class Configuration(LibraryAttributes):
 
@@ -79,7 +80,7 @@ class Configuration(LibraryAttributes):
         self.line_terminator = line_terminator
 
     @keyword(tags=["Configuration"])
-    def configure_file_encoding(self, file_encoding: FileEncoding):
+    def configure_file_encoding(self, file_encoding: FileEncoding | Any):
         """
         Change the internal file encoding during your test execution dynamically.
 

@@ -13,7 +13,7 @@ class Quoting(Enum):
 QuotingCharacter = Enum(
     "QuotingCharacter",
     {
-        "\"": "\"",
+        '"': '"',
         "'": "'",
     }
 )
@@ -22,6 +22,23 @@ QuotingCharacter.__doc__ = """
     | = Delimiter = | = Description = |
     | ``\"`` | Using the \" as separator. |
     | ``'`` | Using the ' as separator. |
+"""
+
+TableFormat = Enum(
+    "TableFormat",
+    {
+        "List of lists": 0,
+        "List of dicts": 1,
+        "Dataframe": 2,
+    }
+)
+
+TableFormat.__doc__ = """
+    Available table formats. Mostly used as return type during reading/getting the table.
+    | = Delimiter = | = Description = |
+    | ``List of lists`` | Using the table format as list[list] |
+    | ``List of dicts`` | Using the table format as list[dict] |
+    | ``Dataframe``     | Using the table format as pandas.DataFrame |
 """
 
 class FileType(Enum):

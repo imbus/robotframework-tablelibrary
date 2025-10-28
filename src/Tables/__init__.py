@@ -5,8 +5,10 @@ from .__about__ import __version__
 
 from robot.api.deco import library
 from robotlibcore import HybridCore
+from typing import Any
 
 from .utils.settings import FileType, Delimiter, FileEncoding, LineTerminator, Quoting, QuotingCharacter
+from .utils.file_access import FileAccess
 
 from .keywords import (
     Configuration,
@@ -30,8 +32,9 @@ class Tables(HybridCore):
 
     == Supported File Types ==
     - CSV
-    - Excel (not supported at the moment)
+    - Excel
     - Parquet
+    - TXT -> will be interpreted as CSV file
 
     == Supported File Encoding ==
     - utf-8
@@ -39,7 +42,10 @@ class Tables(HybridCore):
     - latin-1
 
     == Excel Files ==
-    Please visit the following to handle excel files: [https://pypi.org/project/robotframework-excelsage|robotframework-excelsage]
+    We have included a basic handling of ``Excel`` files,
+    but for more complex excel features, please take a look at the following library:
+    [https://pypi.org/project/robotframework-excelsage|robotframework-excelsage].
+    \nThis library got especially written to work with Excel files, sheets, etc...
 
     == Examples ==
     === CSV ===
@@ -64,14 +70,14 @@ class Tables(HybridCore):
 
     def __init__(
             self,
-            *_,
+            *,
             file_type: FileType = FileType.CSV,
-            file_encoding: FileEncoding = FileEncoding.UTF8,
+            file_encoding: FileEncoding | Any = FileEncoding.UTF8,
             separator: Delimiter = Delimiter[","],
             ignore_header: bool = False,
             line_terminator: LineTerminator = LineTerminator.LF,
             quoting: Quoting = Quoting.MINIMAL,
-            quoting_character: QuotingCharacter = QuotingCharacter["\""]
+            quoting_character: QuotingCharacter = QuotingCharacter['"']
         ):
         """
         Table Library can be controlled by the following arguments:
@@ -93,11 +99,13 @@ class Tables(HybridCore):
         self._quoting = quoting
         self._quoting_character = quoting_character
 
+        self.file_access = FileAccess(self)
+
         libraries = [
             Configuration(self),
-            Getter(self),
-            Writer(self),
-            Modifier(self)
+            Getter(self, self.file_access),
+            Writer(self, self.file_access),
+            Modifier(self, self.file_access),
             # Excel(self)
         ]
 

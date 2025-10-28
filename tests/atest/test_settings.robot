@@ -16,3 +16,8 @@ File Encoding
     Tables.Configure File Encoding    UTF8
     Tables.Configure File Encoding    LATIN1
     Tables.Configure File Encoding    UTF16
+
+Quoting Characters
+    [Teardown]    Tables.Configure Quoting Character    "
+    Tables.Configure Quoting Character    "
+    Tables.Configure Quoting Character    '

@@ -57,6 +57,10 @@ repos:
         files: \.(robot|resource)$
         language: python
         require_serial: true
+        #  AddChanginging max lenght for atest names from 20 -> 40
+        args:
+          - --configure
+          - LEN04.max_len=40 
 
   - repo: local
     hooks:
