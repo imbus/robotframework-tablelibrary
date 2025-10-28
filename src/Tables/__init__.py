@@ -5,6 +5,7 @@ from .__about__ import __version__
 
 from robot.api.deco import library
 from robotlibcore import HybridCore
+from typing import Any
 
 from .utils.settings import FileType, Delimiter, FileEncoding, LineTerminator, Quoting, QuotingCharacter
 from .utils.file_access import FileAccess
@@ -71,7 +72,7 @@ class Tables(HybridCore):
             self,
             *,
             file_type: FileType = FileType.CSV,
-            file_encoding: FileEncoding = FileEncoding.UTF8,
+            file_encoding: FileEncoding | Any = FileEncoding.UTF8,
             separator: Delimiter = Delimiter[","],
             ignore_header: bool = False,
             line_terminator: LineTerminator = LineTerminator.LF,

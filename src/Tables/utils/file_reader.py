@@ -217,9 +217,13 @@ class FileReader(LibraryAttributes):
         """
         Opening up the csv file using and returning pandas dataframe.
         """
+        try:
+            _file_encoding = self.file_encoding.value
+        except Exception:
+            _file_encoding = self.file_encoding
         return pd.read_csv(path,
                          sep=self.separator.value,
-                         encoding=self.file_encoding.value,
+                         encoding=_file_encoding,
                          header=None,
                          #lineterminator="\r\n"  #TODO:the culprit for weird readings and writings of table
                          )
