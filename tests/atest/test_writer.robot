@@ -1,6 +1,7 @@
 *** Settings ***
 Library     Tables    file_type=CSV
 Library     Collections
+Library     OperatingSystem
 Library     String
 
 
@@ -472,6 +473,95 @@ Modify Excel Column
     Collections.Lists Should Be Equal    ${content}[2]     ${expected_row_2}
     Tables.Count Table    ${uuid}    Columns    ==    ${2}
     Tables.Count Table    ${uuid}    Rows    ==    ${3}
+
+Quoting Characters - Double Quotes - Always
+    [Setup]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    "
+    ...    AND
+    ...    Tables.Configure Quoting    ALL
+    [Teardown]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    "
+    ...    AND
+    ...    Tables.Configure Quoting    MINIMAL
+
+    VAR    @{headers} =    name    age
+    ${uuid} =    Create Table    ${headers}
+
+    VAR    @{data}    marvin    26
+    Tables.Append Row    ${data}
+
+    Tables.Write Table    ${uuid}    ${CURDIR}/results/test_writer_new_table.csv
+
+    ${raw_content} =    OperatingSystem.Get File    ${CURDIR}/results/test_writer_new_table.csv
+    BuiltIn.Should Contain    ${raw_content}    "marvin"
+    BuiltIn.Should Contain    ${raw_content}    "26"
+
+Quoting Characters - Single Quotes - Always
+    [Setup]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    '
+    ...    AND
+    ...    Tables.Configure Quoting    ALL
+    [Teardown]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    "
+    ...    AND
+    ...    Tables.Configure Quoting    MINIMAL
+
+    VAR    @{headers} =    name    age
+    ${uuid} =    Create Table    ${headers}
+
+    VAR    @{data}    marvin    26
+    Tables.Append Row    ${data}
+
+    Tables.Write Table    ${uuid}    ${CURDIR}/results/test_writer_new_table.csv
+
+    ${raw_content} =    OperatingSystem.Get File    ${CURDIR}/results/test_writer_new_table.csv
+    BuiltIn.Should Contain    ${raw_content}    'marvin'
+    BuiltIn.Should Contain    ${raw_content}    '26'
+
+Quoting Characters - Double Quotes - Non Numeric
+    [Setup]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    "
+    ...    AND
+    ...    Tables.Configure Quoting    NONNUMERIC
+    [Teardown]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    "
+    ...    AND
+    ...    Tables.Configure Quoting    MINIMAL
+
+    VAR    @{headers} =    name    age
+    ${uuid} =    Create Table    ${headers}
+
+    VAR    @{data}    marvin    ${26}
+    Tables.Append Row    ${data}
+
+    Tables.Write Table    ${uuid}    ${CURDIR}/results/test_writer_new_table.csv
+
+    ${raw_content} =    OperatingSystem.Get File    ${CURDIR}/results/test_writer_new_table.csv
+    BuiltIn.Should Contain    ${raw_content}    "marvin"
+    BuiltIn.Should Contain    ${raw_content}    26
+    BuiltIn.Should Not Contain    ${raw_content}    "26"
+
+Quoting Characters - Double Quotes - Minimal
+    [Setup]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    "
+    ...    AND
+    ...    Tables.Configure Quoting    MINIMAL
+    [Teardown]    BuiltIn.Run Keywords
+    ...    Tables.Configure Quoting Character    "
+    ...    AND
+    ...    Tables.Configure Quoting    MINIMAL
+
+    VAR    @{headers} =    name    age
+    ${uuid} =    Create Table    ${headers}
+
+    VAR    @{data}    marvin,sergej    ${26}
+    Tables.Append Row    ${data}
+
+    Tables.Write Table    ${uuid}    ${CURDIR}/results/test_writer_new_table.csv
+
+    ${raw_content} =    OperatingSystem.Get File    ${CURDIR}/results/test_writer_new_table.csv
+    BuiltIn.Should Contain    ${raw_content}    "marvin,sergej"
+    BuiltIn.Should Contain    ${raw_content}    26
 
 
 *** Keywords ***

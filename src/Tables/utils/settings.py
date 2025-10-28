@@ -13,8 +13,8 @@ class Quoting(Enum):
 QuotingCharacter = Enum(
     "QuotingCharacter",
     {
-        "\"": "\"",
-        "\'": "\'",
+        '"': '"',
+        "'": "'",
     }
 )
 QuotingCharacter.__doc__ = """

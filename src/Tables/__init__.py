@@ -31,8 +31,9 @@ class Tables(HybridCore):
 
     == Supported File Types ==
     - CSV
-    - Excel (not supported at the moment)
+    - Excel
     - Parquet
+    - TXT -> will be interpreted as CSV file
 
     == Supported File Encoding ==
     - utf-8
@@ -40,7 +41,10 @@ class Tables(HybridCore):
     - latin-1
 
     == Excel Files ==
-    Please visit the following to handle excel files: [https://pypi.org/project/robotframework-excelsage|robotframework-excelsage]
+    We have included a basic handling of ``Excel`` files,
+    but for more complex excel features, please take a look at the following library:
+    [https://pypi.org/project/robotframework-excelsage|robotframework-excelsage].
+    \nThis library got especially written to work with Excel files, sheets, etc...
 
     == Examples ==
     === CSV ===
@@ -72,7 +76,7 @@ class Tables(HybridCore):
             ignore_header: bool = False,
             line_terminator: LineTerminator = LineTerminator.LF,
             quoting: Quoting = Quoting.MINIMAL,
-            quoting_character: QuotingCharacter = QuotingCharacter["\""]
+            quoting_character: QuotingCharacter = QuotingCharacter['"']
         ):
         """
         Table Library can be controlled by the following arguments:
