@@ -69,7 +69,7 @@ class Tables(HybridCore):
 
     def __init__(
             self,
-            *_,
+            *,
             file_type: FileType = FileType.CSV,
             file_encoding: FileEncoding = FileEncoding.UTF8,
             separator: Delimiter = Delimiter[","],
