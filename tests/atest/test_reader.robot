@@ -37,63 +37,64 @@ Open CSV Files - With Header
     [Tags]    skip_file
     VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
     VAR    ${file_path_2}    ${CURDIR}${/}testdata${/}example_04.csv  
-    Tables.Open Table    table 1   ${file_path}
-    Tables.Open Table    table 2   ${file_path_2}
+    ${uuid} =    Tables.Open Table   ${file_path}
+    ${uuid2} =    Tables.Open Table   ${file_path_2}
+    Should Not Be Equal As Strings    ${uuid}    ${uuid2}
     Tables.Get Table
-    Tables.Switch Table    table 1
+    Tables.Switch Table    ${uuid}
     Tables.Get Table
 
 
 Get Table Cell - CSV - Without Header
     Tables.Configure Ignore Header    True
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Get Table Cell    1    0    ==    1
 
 Get Table Cell - CSV - With Header
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Get Table Cell    1    1    ==    alex
 
 Get Table Cell - CSV - With Header - Column Name
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Get Table Cell    1    name    ==    sascha
 
 Get Table Column - CSV - Without Header
     Tables.Configure Ignore Header    True
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Get Table Column    1    contains    alex
     Get Table Column    1    not contains    franz
 
 Get Table Column - CSV - With Header
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Get Table Column    name    contains    alex
     Get Table Column    name    not contains    franz
 
 Get Table Row - CSV - Without Header
     Tables.Configure Ignore Header    True
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Tables.Get Table Row    0    contains    alex
 
 Get Table Row - CSV - With Header
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Tables.Get Table Row    0    contains    age
 
 Get Row and Column Count - CSV - With Header
     Tables.Configure Ignore Header    False
     VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
-    Tables.Open Table     table 1    ${file_path}
-    Tables.Count Table    table 1    Rows     ==    ${6}
-    Tables.Count Table    table 1    Columns    ==    ${3}
+    ${uuid} =    Tables.Open Table    ${file_path}
+    Tables.Count Table    ${uuid}    Rows     ==    ${6}
+    Tables.Count Table    ${uuid}    Columns    ==    ${3}
 
 Get Row and Column Count - CSV - Without Header
     Tables.Configure Ignore Header    True
     VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
-    Tables.Open Table     table 1    ${file_path}
-    Tables.Count Table    table 1    Rows     ==    ${5}
-    Tables.Count Table    table 1    Columns    ==    ${3}
+    ${uuid} =    Tables.Open Table    ${file_path}
+    Tables.Count Table    ${uuid}    Rows     ==    ${5}
+    Tables.Count Table    ${uuid}    Columns    ==    ${3}
 Read Row Count - CSV - With Header
     Tables.Configure Ignore Header    False
     VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
@@ -146,30 +147,30 @@ Read Parquet File - Without Header
 
 Get Table Cell - Parquet
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_03.parquet
     Get Table Cell    1    1    ==    ${4.76}
 
 Get Table Cell - Parquet - Column Name
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_03.parquet
     Get Table Cell    1    _strom    ==    ${4.76}
 
 Get Table Column - Parquet
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_03.parquet
     Get Table Column    _strom    contains    ${4.0}
 
 
 #TODO: In order for parquet to get header names a new keyword might be needed (ie. Get Table Header)
 Get Table Row - Parquet - With Header
     Tables.Configure Ignore Header    False
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_03.parquet
     Tables.Get Table Row    0    contains    ${0.81}
 
 Get Row and Column Count - Parquet
-    Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_03.parquet
-    Tables.Count Table    table 1    Rows     ==    ${1001}
-    Tables.Count Table    table 1    Columns    ==    ${2}
+    ${uuid} =    Tables.Open Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    Tables.Count Table    ${uuid}    Rows     ==    ${1001}
+    Tables.Count Table    ${uuid}    Columns    ==    ${2}
 
 Read Row and Column Count - Parquet
     Tables.Configure Ignore Header    False

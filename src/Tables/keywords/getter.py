@@ -9,6 +9,7 @@ from ..utils.file_access import FileAccess
 from typing import Any, cast
 from pathlib import Path
 import pandas as pd
+from uuid import uuid4
 
 from assertionengine import verify_assertion, AssertionOperator
 from assertionengine.assertion_engine import NumericalOperators
@@ -73,8 +74,8 @@ class Getter(LibraryAttributes):
     @keyword(tags=["Getter"])
     def open_table(
             self,
-            alias: str,
-            path: Path
+            path: Path,
+            alias: str | None = None,
     ) -> str:
         """
         Keyword which is similar to read_table but saves the table in form of an alias.
@@ -92,10 +93,53 @@ class Getter(LibraryAttributes):
         | Tables.Open Table    table 1   table.csv
         | Tables.Open Table    table 2   table_1.csv    # currently table 2 is active
         """
+        if not alias:
+            alias = str(uuid4())
+
         self.file_reader.open_table_dataframe(
             alias= alias,
             path= path
         )
+        return alias
+
+    @keyword(tags=["Getter"])
+    def create_table(
+            self,
+            headers: list,
+            alias: str | None = None,
+        ):
+        """
+        Keyword which creates a new internal empty table object which can be directly used to add data.
+        Afterwards the data can be written into a new file.
+
+        Creating a new empty table requires headers. This leads to a better understanding of the data for each column
+        and wont be a problem for further workflows with the table data.
+
+        == Arguments ==
+        | =Argument= | =Description= |
+        | ``headers`` | Define headers for the new table file. |
+        | ``alias`` | Optional - if not given, uuid is generated as unique alias. |
+
+        == Important ==
+
+        Adding ``initial`` data to the empty table, MUST be done via ``Append Row`` or ``Append Column`` keyword - see example.
+
+        == Example ==
+        This example creates a new empty table, appends row & columns and writes it to a new csv file.
+        |  VAR    @{headers} =    name    age
+        |  VAR    @{person_1} =    name    age
+        |  ${uuid} =    Create Table    headers=${headers}
+        |  Append Row    ${person_1}
+        |
+        |  VAR    @{new_column} =    city    MG
+        |  Append Column    ${new_column}
+        |
+        |  Write Table    ${uuid}    ${filepath}
+        """
+        if not alias:
+            alias = str(uuid4())
+
+        self.file_reader.create_empty_table_dataframe(alias, headers)
         return alias
 
     @keyword(tags=["Getter"])
@@ -343,8 +387,8 @@ class Getter(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``path`` | Either a filepath or a saved variable of 'Open Table' keyword. |
         | ``axis`` | Select 'Columns' or 'Rows' depending which axis should be checked |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
-        |                          Only numerical operators are allowed |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. |
+        |                        |  Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 

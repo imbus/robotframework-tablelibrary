@@ -1,6 +1,7 @@
 *** Settings ***
 Library     Tables    file_type=CSV
 Library     Collections
+Library     String
 
 
 *** Test Cases ***    
@@ -62,7 +63,7 @@ Set CSV - Cell - Without Read Table
     [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
 
-    Tables.Open Table    table 1    ${csv_path}
+    Tables.Open Table    ${csv_path}
     Tables.Set Table Cell    25    0    1    header=True
     Tables.Set Table Cell    10    1    temp   header=True
     Tables.Set Table Cell    not temp    0    1    header=False
@@ -83,7 +84,7 @@ Set CSV - Row
     VAR   @{row_list_1}    2030    30
     VAR   @{row_list_2}    column 1    column 2
 
-    Tables.Open Table    table 1    ${csv_path}
+    Tables.Open Table    ${csv_path}
     Tables.Set Table Row    ${row_list}    1    header=True
     Tables.Set Table Row    ${row_list_1}    1    header=False
     Tables.Set Table Row    ${row_list_2}    0    header=False
@@ -99,7 +100,7 @@ Set CSV - Column
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
 
-    Tables.Open Table    table 1    ${csv_path}
+    Tables.Open Table    ${csv_path}
     Tables.Get Table
     Tables.Set Table Column    ${column_list}    year    header=True
     Tables.Set Table Column    ${column_list_1}    1    header=False
@@ -121,7 +122,7 @@ Modify CSV Table - Row
     VAR    @{original_row} =    2025    30
     VAR    @{original_row_2} =   2024    29
 
-    Tables.Open Table    table 1    ${csv_path}
+    ${uuid} =    Tables.Open Table    ${csv_path}
     Tables.Insert Row    ${row_list}    0    header=True
     Tables.Insert Row    ${column_list}    0    header=False
     Tables.Append Row    ${row_list_2}
@@ -136,8 +137,8 @@ Modify CSV Table - Row
     Collections.Lists Should Be Equal    ${content}[3]     ${original_row_2}
     Collections.Lists Should Be Equal    ${content}[4]     ${row_list_2}
 
-    Tables.Count Table    table 1    Columns    ==    ${2}
-    Tables.Count Table    table 1    Rows    ==    ${5}
+    Tables.Count Table    ${uuid}    Columns    ==    ${2}
+    Tables.Count Table    ${uuid}    Rows    ==    ${5}
 
 
 Modify CSV Table - Column
@@ -150,7 +151,7 @@ Modify CSV Table - Column
     VAR    @{expected_row} =    june    1
     VAR    @{expected_row_2} =    july    2
 
-    Tables.Open Table    table 1    ${csv_path}
+    ${uuid} =    Tables.Open Table    ${csv_path}
     Tables.Insert Column    ${column_list}        1
     Tables.Append Column    ${column_list_2}
     Tables.Remove Column    0
@@ -160,8 +161,8 @@ Modify CSV Table - Column
     Collections.Lists Should Be Equal    ${content}[0]     ${expected_column}
     Collections.Lists Should Be Equal    ${content}[1]     ${expected_row}
     Collections.Lists Should Be Equal    ${content}[2]     ${expected_row_2}
-    Tables.Count Table    table 1    Columns    ==    ${2}
-    Tables.Count Table    table 1    Rows    ==    ${3}
+    Tables.Count Table    ${uuid}    Columns    ==    ${2}
+    Tables.Count Table    ${uuid}    Rows    ==    ${3}
     
     
 
@@ -174,16 +175,16 @@ Modify first Table - Write in second table
     VAR    @{column_list_2} =    day      1      2
     VAR    @{column_list_3} =    2010     2008
 
-    Tables.Open Table    table 1    ${csv_path}
-    Tables.Open Table    table 2    ${csv_path_2}
+    ${uuid} =    Tables.Open Table    ${csv_path}
+    ${uuid2} =    Tables.Open Table    ${csv_path_2}
 
-    Tables.Switch Table   table 1
+    Tables.Switch Table   ${uuid}
     Tables.Insert Column    ${column_list}        1
     Tables.Append Column    ${column_list_2}
     Tables.Remove Column    0
 
     ${new_content}    Tables.Get Table
-    Tables.Write Table    ${new_content}    table 2
+    Tables.Write Table    ${new_content}    ${uuid2}
 
     Tables.Configure Ignore Header    False
     ${content} =    Tables.Read Table    ${csv_path_2}
@@ -194,7 +195,7 @@ Modify and Write Table - Without Write Path
     [Setup]    Reset CSV Table
     VAR    ${csv_path} =   ${CURDIR}/results/test_writer.csv
     VAR    @{column_list} =    month      june      july
-    Tables.Open Table    table 1    ${csv_path}
+    Tables.Open Table    ${csv_path}
     Tables.Append Column    ${column_list}
     ${content}    Get Table
     Tables.Write Table    ${content}
@@ -203,6 +204,47 @@ Modify and Write Table - Without Write Path
     ${result} =    BuiltIn.Evaluate    "${content}[0][2]" == "month"
     BuiltIn.Should Be True    ${result}
 
+Create New Empy Table - Append & Insert Data
+    
+    VAR    @{headers} =    name    age
+    VAR    @{person1} =    Michael    34
+    VAR    @{person2} =    John    19
+    
+    ${uuid} =    Tables.Create Table    headers=${headers}
+    
+    Tables.Append Row    ${person1}
+    Tables.Append Row    ${person2}
+    Count Table    ${uuid}    Rows    equal    ${3}
+    
+    VAR    @{column1} =    city    MG    ERL
+    Tables.Append Column    ${column1}
+    Count Table    ${uuid}    Columns    equal    ${3}
+
+    Get Table Cell    1    1    equals    34
+    Tables.Set Table Cell    25    0    1
+    Get Table Cell    1    1    equals    25
+
+    VAR    @{insert_row} =    Lu    26    Hamburg
+    Insert Row    ${insert_row}    0
+    Get Table Cell    1    0    equals    Lu
+    Count Table    ${uuid}    Rows    equal    ${4}
+
+Create New Empty Table - Random Data - Write to CSV
+    
+    VAR    @{headers} =    name    age
+    ${uuid} =    Create Table    ${headers}
+
+    FOR    ${_}    IN RANGE    ${100}
+        ${a} =    Generate Random String
+        ${b} =    Generate Random String
+        VAR    @{data}    ${a}    ${b}
+        Tables.Append Row    ${data}
+    END
+
+    Count Table    ${uuid}    Rows    equals    ${101}
+    Write Table    ${uuid}    ${CURDIR}/results/test_writer_new_table.csv
+
+    Count Table    ${CURDIR}/results/test_writer_new_table.csv    Rows    equals    ${101}
 
     
 ########################################################################################
@@ -218,7 +260,7 @@ Write Parquet File
 Set Parquet - Cell
     Reset Parquet Table
     VAR    ${parquet_path} =   ${CURDIR}/results/test_writer.parquet
-    Tables.Open Table    table 1    ${parquet_path}
+    Tables.Open Table    ${parquet_path}
     Tables.Set Table Cell    25    0    1    header=True
     Tables.Set Table Cell    10    1    temp   header=True
     Tables.Set Table Cell    not temp    0    1    header=False
@@ -244,7 +286,7 @@ Set Parquet - Row
     VAR   @{row_list_1}    2030    30
     VAR   @{row_list_2}    column 1    column 2
 
-    Tables.Open Table    table 1    ${parquet_path}
+    Tables.Open Table    ${parquet_path}
     Tables.Set Table Row    ${row_list}    1    header=True
     Tables.Set Table Row    ${row_list_1}    1    header=False
     Tables.Set Table Row    ${row_list_2}    0    header=False
@@ -260,7 +302,7 @@ Set Parquet - Column
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
 
-    Tables.Open Table    table 1    ${parquet_path}
+    Tables.Open Table    ${parquet_path}
     Tables.Get Table
     Tables.Set Table Column    ${column_list}    year    header=True
     Tables.Set Table Column    ${column_list_1}    1    header=False
@@ -283,7 +325,7 @@ Modify Parquet Row
     VAR    @{original_row} =    2025    30
     VAR    @{original_row_2} =   2024    29
 
-    Tables.Open Table    table 1    ${parquet_path}
+    ${uuid} =    Tables.Open Table    ${parquet_path}
     Tables.Insert Row    ${row_list}    0    header=True
     Tables.Insert Row    ${column_list}    0    header=False
     Tables.Append Row    ${row_list_2}
@@ -298,8 +340,8 @@ Modify Parquet Row
     Collections.Lists Should Be Equal    ${content}[3]     ${original_row_2}
     Collections.Lists Should Be Equal    ${content}[4]     ${row_list_2}
 
-    Tables.Count Table    table 1    Columns    ==    ${2}
-    Tables.Count Table    table 1    Rows    ==    ${5}
+    Tables.Count Table    ${uuid}    Columns    ==    ${2}
+    Tables.Count Table    ${uuid}    Rows    ==    ${5}
 
 Modify Parquet Column
     [Setup]   Reset Parquet Table
@@ -311,7 +353,7 @@ Modify Parquet Column
     VAR    @{expected_row} =    june    1
     VAR    @{expected_row_2} =    july    2
 
-    Tables.Open Table    table 1    ${parquet_path}
+    ${uuid} =    Tables.Open Table    ${parquet_path}
     Tables.Insert Column    ${column_list}        1
     Tables.Append Column    ${column_list_2}
     Tables.Remove Column    0
@@ -321,8 +363,8 @@ Modify Parquet Column
     Collections.Lists Should Be Equal    ${content}[0]     ${expected_column}
     Collections.Lists Should Be Equal    ${content}[1]     ${expected_row}
     Collections.Lists Should Be Equal    ${content}[2]     ${expected_row_2}
-    Tables.Count Table    table 1    Columns    ==    ${2}
-    Tables.Count Table    table 1    Rows    ==    ${3}
+    Tables.Count Table    ${uuid}    Columns    ==    ${2}
+    Tables.Count Table    ${uuid}    Rows    ==    ${3}
 
 ########################################################################################
 # Excel
@@ -331,7 +373,7 @@ Set Excel - Cell - Without Read Table
     [Setup]    Reset Excel Table
     VAR    ${xlsx_path} =   ${CURDIR}/results/test_writer.xlsx
 
-    Tables.Open Table    table 1    ${xlsx_path}
+    Tables.Open Table    ${xlsx_path}
     Tables.Set Table Cell    25    0    1    header=True
     Tables.Set Table Cell    10    1    temp   header=True
     Tables.Set Table Cell    not temp    0    1    header=False
@@ -352,7 +394,7 @@ Set Excel - Row
     VAR   @{row_list_1}    2030    30
     VAR   @{row_list_2}    column 1    column 2
 
-    Tables.Open Table    table 1    ${xlsx_path}
+    Tables.Open Table    ${xlsx_path}
     Tables.Set Table Row    ${row_list}    1    header=True
     Tables.Set Table Row    ${row_list_1}    1    header=False
     Tables.Set Table Row    ${row_list_2}    0    header=False
@@ -368,7 +410,7 @@ Set Excel - Column
     VAR   @{column_list}    2006    2007
     VAR   @{column_list_1}    month    august    march
 
-    Tables.Open Table    table 1    ${xlsx_path}
+    Tables.Open Table    ${xlsx_path}
     Tables.Get Table
     Tables.Set Table Column    ${column_list}    year    header=True
     Tables.Set Table Column    ${column_list_1}    1    header=False
@@ -390,7 +432,7 @@ Modify Excel Row
     VAR    @{original_row} =    2025    30
     VAR    @{original_row_2} =   2024    29
 
-    Tables.Open Table    table 1    ${xlsx_path}
+    ${uuid} =    Tables.Open Table    ${xlsx_path}
     Tables.Insert Row    ${row_list}    0    header=True
     Tables.Insert Row    ${column_list}    0    header=False
     Tables.Append Row    ${row_list_2}
@@ -405,8 +447,8 @@ Modify Excel Row
     Collections.Lists Should Be Equal    ${content}[3]     ${original_row_2}
     Collections.Lists Should Be Equal    ${content}[4]     ${row_list_2}
 
-    Tables.Count Table    table 1    Columns    ==    ${2}
-    Tables.Count Table    table 1    Rows    ==    ${5}
+    Tables.Count Table    ${uuid}    Columns    ==    ${2}
+    Tables.Count Table    ${uuid}    Rows    ==    ${5}
 
 Modify Excel Column
     [Setup]    Reset Excel Table
@@ -418,7 +460,7 @@ Modify Excel Column
     VAR    @{expected_row} =    june    1
     VAR    @{expected_row_2} =    july    2
 
-    Tables.Open Table    table 1    ${xlsx_path}
+    ${uuid} =    Tables.Open Table    ${xlsx_path}
     Tables.Insert Column    ${column_list}        1
     Tables.Append Column    ${column_list_2}
     Tables.Remove Column    0
@@ -428,8 +470,8 @@ Modify Excel Column
     Collections.Lists Should Be Equal    ${content}[0]     ${expected_column}
     Collections.Lists Should Be Equal    ${content}[1]     ${expected_row}
     Collections.Lists Should Be Equal    ${content}[2]     ${expected_row_2}
-    Tables.Count Table    table 1    Columns    ==    ${2}
-    Tables.Count Table    table 1    Rows    ==    ${3}
+    Tables.Count Table    ${uuid}    Columns    ==    ${2}
+    Tables.Count Table    ${uuid}    Rows    ==    ${3}
 
 
 *** Keywords ***

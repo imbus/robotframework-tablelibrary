@@ -45,11 +45,10 @@ class FileWriter(LibraryAttributes):
         if path is None:
             return Path(self.current_table.path)
         casted_path = self.file_reader.cast_path_type(path)
-        if isinstance(casted_path, str):
-            if casted_path in self._table_storage:
-                return Path(self._table_storage[casted_path].path)
-            raise ValueError(f"Couldn't find saved table. Current open tables are:"
-                             f"{[self._table_storage.keys()]}")
+        if isinstance(casted_path, str) and casted_path in self._table_storage:
+            return Path(self._table_storage[casted_path].path)
+            # raise ValueError(f"Couldn't find saved table. Current open tables are:"
+            #                  f"{[self._table_storage.keys()]}")
         return Path(casted_path)
 
     def add_header_in_dataframe(self,
@@ -64,7 +63,7 @@ class FileWriter(LibraryAttributes):
             header_data_table.extend(table_data)
             table = DataFrame(header_data_table, columns=None)
 
-        if self.header:
+        if self.header and not table.empty:
             headers = table.iloc[0].tolist()
             rows = table.iloc[1:]
             table = DataFrame(rows.values, columns=headers)
@@ -148,11 +147,11 @@ class FileWriter(LibraryAttributes):
         if row_data is None:
             raise ValueError(f"Cannot append row if row data({row_data}) is empty.")
 
-        self.file_reader.validate_data_list_with_table(
-                data=row_data,
-                table=table,
-                row=1
-            )
+        # self.file_reader.validate_data_list_with_table(
+        #         data=row_data,
+        #         table=table,
+        #         row=1
+        #     )
         table.loc[len(table)] = row_data
         return table
 
@@ -298,7 +297,7 @@ class FileWriter(LibraryAttributes):
         if column is not None and self.file_reader.validate_column(table_df, column):
             column = self.file_reader.cast_column_type(column)
 
-        if row is not None:
+        if row is not None and action is not ModifyAction.Append_Row and action is not ModifyAction.Append_Column:
             self.file_reader.validate_row(table_df, row)
 
         # Different actions

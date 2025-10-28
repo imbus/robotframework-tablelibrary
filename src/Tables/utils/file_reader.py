@@ -305,6 +305,18 @@ class FileReader(LibraryAttributes):
 
         return self.file_sync.current_file
 
+    def create_empty_table_dataframe(
+            self,
+            alias: str,
+            headers: list
+        ):
+        df = pd.DataFrame(columns=headers)
+
+        self.file_sync.current_file = alias
+        self.file_sync.table_storage[self.file_sync.current_file] = TableObject(Path("unknown"), df)
+
+        return self.file_sync.current_file
+
     def close_table_dataframe(
             self,
             alias: str | None = None

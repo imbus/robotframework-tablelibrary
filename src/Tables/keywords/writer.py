@@ -12,6 +12,7 @@ class Writer(LibraryAttributes):
     def __init__(self, library, file_access:FileAccess):
         self.library = library
         self.file_writer = file_access.file_writer
+        self.file_reader = file_access.file_reader
 
     @property
     def _fs(self):
@@ -20,7 +21,7 @@ class Writer(LibraryAttributes):
     @keyword(tags=['Writer'])
     def write_table(
             self,
-            data: list[list],
+            data: list[list] | str,
             file_path: Path | str | None = None
         ) -> str:
         """
@@ -43,6 +44,12 @@ class Writer(LibraryAttributes):
         | Tables.Open Table    table 1    new_statistics.csv
         | Tables.Write Table    ${data}    table 1      # write into new_statistics.csv
         """
+        if isinstance(data, str):
+            current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
+            table_df = self.file_reader.validate_table_to_dataframe(
+                data= current_df)
+            data = self.file_reader.convert_dataframe(table_df)
+
         self.file_writer.write_table(
             data,
             file_path
