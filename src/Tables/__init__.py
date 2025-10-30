@@ -24,7 +24,7 @@ from .keywords import (
 )
 class Tables(HybridCore):
     """
-    Table Library is a generic automation library for working with files like csv, parquet, etc.
+    ``TableLibrary`` is a generic automation library for working with files like csv, parquet, etc.
 
     == Table of content ==
 
@@ -40,6 +40,7 @@ class Tables(HybridCore):
     - utf-8
     - utf-16
     - latin-1
+    - further more... (define your own file encoding with the given library argument)
 
     == Excel Files ==
     We have included a basic handling of ``Excel`` files,
@@ -80,7 +81,7 @@ class Tables(HybridCore):
             quoting_character: QuotingCharacter = QuotingCharacter['"']
         ):
         """
-        Table Library can be controlled by the following arguments:
+        ``TableLibrary`` can be controlled by the following arguments:
 
         | =`Argument`=      | =`Description`= |
         | ``file_type``     | Choose the file type to test initially. |
