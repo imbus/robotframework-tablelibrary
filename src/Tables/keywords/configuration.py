@@ -1,11 +1,17 @@
-from ..utils.settings import FileEncoding, FileType, Delimiter, LineTerminator, Quoting, QuotingCharacter
-from ..general.library_attributes import LibraryAttributes
-
 from robot.api.deco import keyword
-from typing import Any
+
+from ..general.library_attributes import LibraryAttributes
+from ..utils.settings import (
+    Delimiter,
+    FileEncoding,
+    FileType,
+    LineTerminator,
+    Quoting,
+    QuotingCharacter,
+)
+
 
 class Configuration(LibraryAttributes):
-
     @keyword(tags=["Configuration"])
     def configure_file_type(self, file_type: FileType):
         """
@@ -80,7 +86,7 @@ class Configuration(LibraryAttributes):
         self.line_terminator = line_terminator
 
     @keyword(tags=["Configuration"])
-    def configure_file_encoding(self, file_encoding: FileEncoding | Any):
+    def configure_file_encoding(self, file_encoding: FileEncoding | str):
         """
         Change the internal file encoding during your test execution dynamically.
 
@@ -88,11 +94,15 @@ class Configuration(LibraryAttributes):
         | ``file_encoding`` | Define a new file encoding |
 
         == Example ==
-        | Configure File Encoding    UTF8
-        | Configure File Encoding    UTF16
-        | Configure File Encoding    LATIN1
+        | Configure File Encoding    UTF_8
+        | Configure File Encoding    UTF_16
+        | Configure File Encoding    LATIN_1
+
+        see [Python Encoding Names|https://docs.python.org/3/library/codecs.html#standard-encodings]
         """
-        self.file_encoding = file_encoding
+        self.file_encoding = (
+            file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
+        )
 
     @keyword(tags=["Configuration"])
     def configure_ignore_header(self, ignore_header: bool):

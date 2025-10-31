@@ -1,16 +1,16 @@
-from robot.api.deco import keyword
-from robot.api import logger
-
 from typing import Any, cast
+
 from pandas import DataFrame
+from robot.api import logger
+from robot.api.deco import keyword
 
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_reader import FileReader
-from ..utils.settings import FileType
 from ..utils.file_system import FileSync
+from ..utils.settings import FileType
+
 
 class Excel(LibraryAttributes):
-
     def __init__(self, library):
         self.library = library
 
@@ -28,9 +28,7 @@ class Excel(LibraryAttributes):
     @property
     def data(self) -> DataFrame:
         if not self.df:
-            raise ValueError(
-                "No file open - use `Excel Open` to read a file first!"
-            )
+            raise ValueError("No file open - use `Excel Open` to read a file first!")
         return self.df
 
     def _file_type_validation(self):
@@ -45,11 +43,8 @@ class Excel(LibraryAttributes):
 
     @keyword(tags=["Excel", "Getter"])
     def excel_open(
-            self,
-            alias: str,
-            path: str,
-            sheet_name: str | list[str | int] | None = None
-        ) -> str:
+        self, alias: str, path: str, sheet_name: str | list[str | int] | None = None
+    ) -> str:
         """
         Keyword to open the given excel file.
 
@@ -75,10 +70,7 @@ class Excel(LibraryAttributes):
         return alias
 
     @keyword(tags=["Excel", "Getter"])
-    def excel_close(
-            self,
-            alias: str | None = None
-        ) -> bool:
+    def excel_close(self, alias: str | None = None) -> bool:
         """
         Keyword to close all or just the given excel file.
 
@@ -127,10 +119,7 @@ class Excel(LibraryAttributes):
         return files
 
     @keyword(tags=["Excel", "Getter"])
-    def excel_file_switch(
-            self,
-            alias: str
-        ):
+    def excel_file_switch(self, alias: str):
         """
         Keyword to switch between opened excel files - only if more than one file is opened.
 
@@ -148,10 +137,7 @@ class Excel(LibraryAttributes):
         self.current_file = alias
 
     @keyword(tags=["Excel", "Getter"])
-    def excel_sheet_read(
-            self,
-            sheet_name: str
-        ) -> list[list[Any]]:
+    def excel_sheet_read(self, sheet_name: str) -> list[list[Any]]:
         """
         Keyword to read the data / content of the given ``sheet``.
 
@@ -169,9 +155,7 @@ class Excel(LibraryAttributes):
         return cast(list[list[Any]], df.values.tolist())
 
     @keyword(tags=["Excel", "Getter"])
-    def excel_get_available_sheets(
-            self
-        ) -> list:
+    def excel_get_available_sheets(self) -> list:
         """
         Keyword returns the available sheets within the currently opened excel file.
 

@@ -1,5 +1,5 @@
 *** Settings ***
-Library   Tables    file_type=CSV    file_encoding=UTF8    separator=,    ignore_header=True
+Library   Tables    file_type=CSV    file_encoding=UTF_8    separator=,    ignore_header=True
 
 
 *** Test Cases ***
@@ -13,9 +13,9 @@ Delimiter
     Tables.Configure Separator    ;
 
 File Encoding
-    Tables.Configure File Encoding    UTF8
-    Tables.Configure File Encoding    LATIN1
-    Tables.Configure File Encoding    UTF16
+    Tables.Configure File Encoding    UTF_8
+    Tables.Configure File Encoding    LATIN_1
+    Tables.Configure File Encoding    UTF_16
 
 Quoting Characters
     [Teardown]    Tables.Configure Quoting Character    "

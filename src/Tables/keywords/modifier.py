@@ -1,23 +1,18 @@
-from robot.api.deco import keyword
-from ..general.library_attributes import LibraryAttributes
-from ..utils.file_writer import ModifyAction
-from ..utils.file_access import FileAccess
-
 from pandas import DataFrame
+from robot.api.deco import keyword
+
+from ..general.library_attributes import LibraryAttributes
+from ..utils.file_access import FileAccess
+from ..utils.file_writer import ModifyAction
+
 
 class Modifier(LibraryAttributes):
-
-    def __init__(self, library, file_access:FileAccess):
+    def __init__(self, library, file_access: FileAccess):
         self.library = library
         self.file_writer = file_access.file_writer
 
-    @keyword(tags=['Writer'])
-    def insert_row(
-            self,
-            row_data: list,
-            row_index: int,
-            header: bool = True
-        ) -> DataFrame:
+    @keyword(tags=["Writer"])
+    def insert_row(self, row_data: list, row_index: int, header: bool = True) -> DataFrame:
         """
         Keyword to insert a new row into the currently opened table (see 'Open Table') at the given index.
 
@@ -41,18 +36,11 @@ class Modifier(LibraryAttributes):
         """
 
         return self.file_writer.modify_table(
-            action=ModifyAction.Insert_Row,
-            data=row_data,
-            row=row_index,
-            header=header
+            action=ModifyAction.Insert_Row, data=row_data, row=row_index, header=header
         )
 
-    @keyword(tags=['Writer'])
-    def insert_column(
-            self,
-            column_data: list,
-            column_index: int
-        )-> DataFrame:
+    @keyword(tags=["Writer"])
+    def insert_column(self, column_data: list, column_index: int) -> DataFrame:
         """
         Keyword to insert a new column into the currently opened table (see 'Open Table') at the given index.
 
@@ -72,16 +60,13 @@ class Modifier(LibraryAttributes):
         """
 
         return self.file_writer.modify_table(
-                action=ModifyAction.Insert_Column,
-                data=column_data,
-                column=column_index,
-            )
+            action=ModifyAction.Insert_Column,
+            data=column_data,
+            column=column_index,
+        )
 
-    @keyword(tags=['Writer'])
-    def append_row(
-            self,
-            row_data: list
-        ) -> DataFrame:
+    @keyword(tags=["Writer"])
+    def append_row(self, row_data: list) -> DataFrame:
         """
         Keyword to append a new row into the currently opened table (see 'Open Table') at the end of the table.
 
@@ -99,17 +84,13 @@ class Modifier(LibraryAttributes):
         | Tables.Append Row    ${row_list}
         """
 
-        return self.file_writer.modify_table(
-                action=ModifyAction.Append_Row,
-                data=row_data,
-                row=1
-            )
+        return self.file_writer.modify_table(action=ModifyAction.Append_Row, data=row_data, row=1)
 
-    @keyword(tags=['Writer'])
+    @keyword(tags=["Writer"])
     def append_column(
-            self,
-            column_data: list,
-        ) -> DataFrame:
+        self,
+        column_data: list,
+    ) -> DataFrame:
         """
         Keyword to append a new column into the currently opened table (see 'Open Table') at the end of the table.
 
@@ -129,17 +110,13 @@ class Modifier(LibraryAttributes):
         """
 
         return self.file_writer.modify_table(
-                action=ModifyAction.Append_Column,
-                data=column_data,
-                column=1,
-            )
+            action=ModifyAction.Append_Column,
+            data=column_data,
+            column=1,
+        )
 
-    @keyword(tags=['Writer'])
-    def remove_row(
-            self,
-            row_index: int,
-            header: bool = True
-        ) -> DataFrame:
+    @keyword(tags=["Writer"])
+    def remove_row(self, row_index: int, header: bool = True) -> DataFrame:
         """
         Keyword to remove the given row from the currently opened table (see 'Open Table').
 
@@ -161,16 +138,14 @@ class Modifier(LibraryAttributes):
         """
 
         return self.file_writer.modify_table(
-            action=ModifyAction.Remove_Row,
-            row=row_index,
-            header=header
-            )
+            action=ModifyAction.Remove_Row, row=row_index, header=header
+        )
 
-    @keyword(tags=['Writer'])
+    @keyword(tags=["Writer"])
     def remove_column(
-            self,
-            column_index: int | str,
-        ) -> DataFrame:
+        self,
+        column_index: int | str,
+    ) -> DataFrame:
         """
         Keyword to remove the given column from the currently opened table (see 'Open Table').
 
@@ -190,6 +165,6 @@ class Modifier(LibraryAttributes):
         """
 
         return self.file_writer.modify_table(
-                action=ModifyAction.Remove_Column,
-                column=column_index,
-                )
+            action=ModifyAction.Remove_Column,
+            column=column_index,
+        )

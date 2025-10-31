@@ -1,14 +1,14 @@
-from robot.api import logger
+from enum import Enum
+from pathlib import Path
+from typing import Any, cast
 
 import pandas as pd
 from pandas import DataFrame
-from pathlib import Path
-from typing import cast, Any
-from enum import Enum
+from robot.api import logger
 
 from ..general.library_attributes import LibraryAttributes
-from ..utils.settings import FileType, FileSuffix, TableFormat
 from ..utils.file_system import FileSync, TableObject
+from ..utils.settings import FileSuffix, FileType, TableFormat
 
 
 class Axis(Enum):
@@ -22,26 +22,20 @@ class FileReader(LibraryAttributes):
         self.file_sync = file_sync
 
     @property
-    def opened_table_path(self)-> Path:
+    def opened_table_path(self) -> Path:
         if self.file_sync.current_file is None:
-            raise ValueError(
-                "No file path found - use `Open Table` to read a file first!"
-            )
+            raise ValueError("No file path found - use `Open Table` to read a file first!")
         return self.file_sync.table_storage[self.file_sync.current_file].path
 
     @property
     def current_alias(self) -> str:
         if self.file_sync.current_file is None:
-            raise ValueError(
-                "No file open - use `Open Table` to read a file first!"
-            )
+            raise ValueError("No file open - use `Open Table` to read a file first!")
         return self.file_sync.current_file
 
     def convert_dataframe(
-        self,
-        data: DataFrame,
-        return_type: TableFormat = TableFormat["List of lists"]
-    )-> list[list] | list[dict] | DataFrame:
+        self, data: DataFrame, return_type: TableFormat = TableFormat["List of lists"]
+    ) -> list[list] | list[dict] | DataFrame:
         """"""
         if return_type == TableFormat["List of lists"]:
             list_data = cast(list[list], data.values.tolist())
@@ -62,11 +56,11 @@ class FileReader(LibraryAttributes):
             return cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records"))
         if return_type == TableFormat["Dataframe"]:
             return data
-        raise ValueError(f"Invalid TableFormat type. Please select valid values: {[key.name for key in TableFormat]}")
+        raise ValueError(
+            f"Invalid TableFormat type. Please select valid values: {[key.name for key in TableFormat]}"
+        )
 
-    def file_exists(self,
-                    path: Path
-        ) -> bool | FileNotFoundError:
+    def file_exists(self, path: Path) -> bool | FileNotFoundError:
         if not path.is_file():
             raise FileNotFoundError(f"File not found: {path}")
         return True
@@ -79,7 +73,6 @@ class FileReader(LibraryAttributes):
 
         # Compare the two lists
         return table_header == default_index
-
 
     def reset_header_dataframe(self, table: DataFrame) -> DataFrame:
         """Checks if Dataframe has default index ([0,1,2,3..]) and if it does the Dataframe remains the same. If it detects unique columns
@@ -100,9 +93,7 @@ class FileReader(LibraryAttributes):
         header_data_table.extend(table_data)
         return DataFrame(header_data_table, columns=None)
 
-    def read_data_type(self,
-                       path: Path
-        ) -> FileType:
+    def read_data_type(self, path: Path) -> FileType:
         """
         Converts the file types depending on the ending of the filename
         """
@@ -112,11 +103,11 @@ class FileReader(LibraryAttributes):
             return FileType.Excel
         if FileSuffix.Parquet.value in path.suffix:
             return FileType.Parquet
-        raise TypeError(f"Invalid file type of {Path(path).name}. Allowed files are {[file_type.value for file_type in FileType]}")
+        raise TypeError(
+            f"Invalid file type of {Path(path).name}. Allowed files are {[file_type.value for file_type in FileType]}"
+        )
 
-    def cast_column_type(self,
-                         column_value: int | str
-        ) -> int | str:
+    def cast_column_type(self, column_value: int | str) -> int | str:
         """
         Converts the value into int first (if possible) then to string. This way indexing and column names
         are stricktly sperated for further process.
@@ -126,9 +117,7 @@ class FileReader(LibraryAttributes):
         except (ValueError, TypeError):
             return str(column_value)
 
-    def cast_path_type(self,
-                       path: Path | str
-    ) -> str | Path:
+    def cast_path_type(self, path: Path | str) -> str | Path:
         if isinstance(path, Path):
             return path
 
@@ -137,10 +126,7 @@ class FileReader(LibraryAttributes):
             return valid_path
         return path
 
-    def validate_column(self,
-                        data: DataFrame,
-                        column_value: int | str
-        ) -> bool:
+    def validate_column(self, data: DataFrame, column_value: int | str) -> bool:
         """
         1) Validates whether the column value which should be extracted is int (index) or str(name of the column).
         Str type should only work if header is involed (!= ignore_header).
@@ -156,38 +142,30 @@ class FileReader(LibraryAttributes):
                 )
             if column_value not in data.iloc[0].tolist() and column_value not in data.columns:
                 raise ValueError(
-                    f"Couldn't find column '{column_value}' in the table. "
-                    f"Current columns are: {list(data.iloc[0])}"
+                    f"Couldn't find column '{column_value}' in the table. Current columns are: {list(data.iloc[0])}"
                 )
 
         elif isinstance(column_value, int):
             if column_value + 1 > data.shape[1]:
                 raise IndexError(
-                    f"Selected column is out of bounds. The size of the table is: "
-                    f"{data.shape[1]} columns."
+                    f"Selected column is out of bounds. The size of the table is: {data.shape[1]} columns."
                 )
 
         return True
 
-    def validate_row(self,
-                    data: DataFrame,
-                    row_value: int | list[Any]
-        ) -> bool:
+    def validate_row(self, data: DataFrame, row_value: int | list[Any]) -> bool:
         """
         Validates whether the row is out of bound.
         """
         if isinstance(row_value, int) and row_value + 1 > data.shape[0]:
             raise IndexError(
-                    f"Selected row is out of bounds. The size of the table is: {data.shape[0]} rows."
-                )
+                f"Selected row is out of bounds. The size of the table is: {data.shape[0]} rows."
+            )
         return True
 
-    def validate_data_list_with_table(self,
-                                      data: list,
-                                      table: DataFrame,
-                                      row: Any | None = None,
-                                      column: Any | None = None
-                                       ):
+    def validate_data_list_with_table(
+        self, data: list, table: DataFrame, row: Any | None = None, column: Any | None = None
+    ):
         """
         Reads the data(as list) and compares it with the provided table (as dataframe). It checks if rows or column size matches the one of the table.
         Returns an error if both rows and columns are not None.
@@ -197,9 +175,13 @@ class FileReader(LibraryAttributes):
         column: If not None the column size of the table will be checked.
         """
         if row is not None and column is not None:
-            raise ValueError("Cannot select both row and column if selected data is a list for manipulation.")
+            raise ValueError(
+                "Cannot select both row and column if selected data is a list for manipulation."
+            )
         if row is None and column is None:
-            raise ValueError("Cannot ignore both row and column if selected data is a list for manipulation.")
+            raise ValueError(
+                "Cannot ignore both row and column if selected data is a list for manipulation."
+            )
 
         selected_axis = 1 if row is not None else 0
         if len(data) != table.shape[selected_axis]:
@@ -210,29 +192,24 @@ class FileReader(LibraryAttributes):
             )
         return True
 
-
-    def read_csv(self,
-                 path: Path
-        ) -> DataFrame:
+    def read_csv(self, path: Path) -> DataFrame:
         """
         Opening up the csv file using and returning pandas dataframe.
         """
-        try:
-            _file_encoding = self.file_encoding.value
-        except Exception:
-            _file_encoding = self.file_encoding
-        return pd.read_csv(path,
-                         sep=self.separator.value,
-                         encoding=_file_encoding,
-                         header=None,
-                         #lineterminator="\r\n"  #TODO:the culprit for weird readings and writings of table
-                         )
+        return pd.read_csv(
+            path,
+            sep=self.separator.value,
+            encoding=self.file_encoding,
+            header=None,
+            # lineterminator="\r\n"  #TODO:the culprit for weird readings and writings of table
+        )
 
-    def validate_table_to_dataframe(self,
-                                    data: list[list] | DataFrame,
-                                    row: None | int = None,
-                                    column: None | str | int = None,
-                                    ) -> DataFrame:
+    def validate_table_to_dataframe(
+        self,
+        data: list[list] | DataFrame,
+        row: None | int = None,
+        column: None | str | int = None,
+    ) -> DataFrame:
         """Formats a table (list of lists or dataframe) to dataframe. Also checks
         if provided row or column are valid (see validate_row/ validate_column)."""
         if isinstance(data, list):
@@ -246,28 +223,18 @@ class FileReader(LibraryAttributes):
             self.validate_column(data, column)
 
         if self.file_type != FileType.Parquet and (isinstance(column, str) or self.ignore_header):
-                data.columns = data.iloc[0].to_list()
-                data = data[1:].reset_index(drop=True)
+            data.columns = data.iloc[0].to_list()
+            data = data[1:].reset_index(drop=True)
         return data
 
-
-
-    def read_excel(self,
-                   path: Path,
-                   **kwargs
-        ) -> DataFrame:
-        return pd.read_excel(path,
-                             header=None,
-                             sheet_name=kwargs.get("sheet_name", 0))
+    def read_excel(self, path: Path, **kwargs) -> DataFrame:
+        return pd.read_excel(path, header=None, sheet_name=kwargs.get("sheet_name", 0))
 
     def read_parquet(self, path: Path) -> DataFrame:
-        """
-        """
+        """ """
         return pd.read_parquet(path)
 
-    def read_table_file(self,
-                        path: Path
-                        ) -> DataFrame:
+    def read_table_file(self, path: Path) -> DataFrame:
         """
         Reading table file and returns a dataframe (without header settings) of it.
         """
@@ -290,30 +257,20 @@ class FileReader(LibraryAttributes):
 
         return table_df
 
-    def open_table_dataframe(
-            self,
-            alias: str,
-            path: Path
-    ) -> str:
+    def open_table_dataframe(self, alias: str, path: Path) -> str:
         """
         Reads a file and puts it in table_storage as cached table with path.
         """
         self.file_exists(path)
 
-        _df = self.read_table_file(
-            path=path
-        )
+        _df = self.read_table_file(path=path)
 
         self.file_sync.current_file = alias
         self.file_sync.table_storage[self.file_sync.current_file] = TableObject(path, _df)
 
         return self.file_sync.current_file
 
-    def create_empty_table_dataframe(
-            self,
-            alias: str,
-            headers: list
-        ):
+    def create_empty_table_dataframe(self, alias: str, headers: list):
         df = pd.DataFrame(columns=headers)
 
         self.file_sync.current_file = alias
@@ -321,10 +278,7 @@ class FileReader(LibraryAttributes):
 
         return self.file_sync.current_file
 
-    def close_table_dataframe(
-            self,
-            alias: str | None = None
-        ) -> bool:
+    def close_table_dataframe(self, alias: str | None = None) -> bool:
         """"""
         if not self.file_sync.table_storage:
             logger.info("Nothing to close - no file is opened!")
@@ -344,10 +298,7 @@ class FileReader(LibraryAttributes):
             f"Given file alias '{alias}' does not exist - check all opened files and their alias first!"
         )
 
-    def table_dataframe_switch(
-            self,
-            alias: str
-        ) -> str:
+    def table_dataframe_switch(self, alias: str) -> str:
         """
         Keyword to switch between opened excel files - only if more than one file is opened.
 

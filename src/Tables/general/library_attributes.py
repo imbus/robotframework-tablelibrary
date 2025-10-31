@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .. import Tables
 
-class LibraryAttributes:
 
+class LibraryAttributes:
     def __init__(self, library: "Tables") -> None:
         """
         Expose library attributes to all classes

@@ -1,27 +1,29 @@
 # SPDX-FileCopyrightText: 2025-present Marvin Klerx <marvinklerx20@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-from .__about__ import __version__
-
 from robot.api.deco import library
 from robotlibcore import HybridCore
-from typing import Any
 
-from .utils.settings import FileType, Delimiter, FileEncoding, LineTerminator, Quoting, QuotingCharacter
-from .utils.file_access import FileAccess
-
+from .__about__ import __version__
 from .keywords import (
     Configuration,
     Getter,
-    Writer,
-    Modifier
+    Modifier,
     # Excel
+    Writer,
+)
+from .utils.file_access import FileAccess
+from .utils.settings import (
+    Delimiter,
+    FileEncoding,
+    FileType,
+    LineTerminator,
+    Quoting,
+    QuotingCharacter,
 )
 
-@library(
-    scope='GLOBAL',
-    version=__version__
-)
+
+@library(scope="GLOBAL", version=__version__)
 class Tables(HybridCore):
     """
     ``TableLibrary`` is a generic automation library for working with files like csv, parquet, etc.
@@ -69,17 +71,17 @@ class Tables(HybridCore):
     | BuiltIn.Should Be True    ${result}
     """
 
-    def __init__(
-            self,
-            *,
-            file_type: FileType = FileType.CSV,
-            file_encoding: FileEncoding | Any = FileEncoding.UTF8,
-            separator: Delimiter = Delimiter[","],
-            ignore_header: bool = False,
-            line_terminator: LineTerminator = LineTerminator.LF,
-            quoting: Quoting = Quoting.MINIMAL,
-            quoting_character: QuotingCharacter = QuotingCharacter['"']
-        ):
+    def __init__(  # noqa: PLR0913
+        self,
+        *,
+        file_type: FileType = FileType.CSV,
+        file_encoding: FileEncoding | str = FileEncoding.UTF_8,
+        separator: Delimiter = Delimiter[","],
+        ignore_header: bool = False,
+        line_terminator: LineTerminator = LineTerminator.LF,
+        quoting: Quoting = Quoting.MINIMAL,
+        quoting_character: QuotingCharacter = QuotingCharacter['"'],
+    ):
         """
         ``TableLibrary`` can be controlled by the following arguments:
 
@@ -94,7 +96,9 @@ class Tables(HybridCore):
         """
         self._file_type = file_type
         self._separator = separator
-        self._file_encoding = file_encoding
+        self._file_encoding: str = (
+            file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
+        )
         self._ignore_header = ignore_header
         self._line_terminator = line_terminator
         self._quoting = quoting

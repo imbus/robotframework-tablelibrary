@@ -1,24 +1,21 @@
+from pathlib import Path
+from typing import Any, cast
+from uuid import uuid4
+
+import pandas as pd
+from assertionengine import AssertionOperator, verify_assertion
+from assertionengine.assertion_engine import NumericalOperators
 from robot.api.deco import keyword
 
 from ..general.library_attributes import LibraryAttributes
+from ..utils.file_access import FileAccess
 from ..utils.file_reader import Axis
 from ..utils.file_system import FileSystem
 from ..utils.settings import FileType, TableFormat
-from ..utils.file_access import FileAccess
-
-from typing import Any, cast
-from pathlib import Path
-import pandas as pd
-from uuid import uuid4
-
-from assertionengine import verify_assertion, AssertionOperator
-from assertionengine.assertion_engine import NumericalOperators
-
 
 
 class Getter(LibraryAttributes):
-
-    def __init__(self, library, file_access:FileAccess):
+    def __init__(self, library, file_access: FileAccess):
         self.library = library
         self.file_reader = file_access.file_reader
 
@@ -28,9 +25,7 @@ class Getter(LibraryAttributes):
 
     @keyword(tags=["Getter"])
     def read_table(
-            self,
-            path: Path,
-            return_type: TableFormat = TableFormat["List of lists"]
+        self, path: Path, return_type: TableFormat = TableFormat["List of lists"]
     ) -> list[list] | list[dict[str, Any]] | pd.DataFrame:
         """
         Keyword reads a table from the given path & returns the content.
@@ -58,8 +53,8 @@ class Getter(LibraryAttributes):
             data.insert(0, list(table_df.columns))
 
         if self.ignore_header and self.file_type != FileType.Parquet:
-                table_df = table_df.iloc[1:]
-                data = data[1:]
+            table_df = table_df.iloc[1:]
+            data = data[1:]
 
         if return_type == TableFormat["List of dicts"]:
             df_for_dicts = table_df
@@ -73,9 +68,9 @@ class Getter(LibraryAttributes):
 
     @keyword(tags=["Getter"])
     def open_table(
-            self,
-            path: Path,
-            alias: str | None = None,
+        self,
+        path: Path,
+        alias: str | None = None,
     ) -> str:
         """
         Keyword which is similar to read_table but saves the table in form of an alias.
@@ -96,18 +91,15 @@ class Getter(LibraryAttributes):
         if not alias:
             alias = str(uuid4())
 
-        self.file_reader.open_table_dataframe(
-            alias= alias,
-            path= path
-        )
+        self.file_reader.open_table_dataframe(alias=alias, path=path)
         return alias
 
     @keyword(tags=["Getter"])
     def create_table(
-            self,
-            headers: list,
-            alias: str | None = None,
-        ):
+        self,
+        headers: list,
+        alias: str | None = None,
+    ):
         """
         Keyword which creates a new internal empty table object which can be directly used to add data.
         Afterwards the data can be written into a new file.
@@ -143,10 +135,7 @@ class Getter(LibraryAttributes):
         return alias
 
     @keyword(tags=["Getter"])
-    def close_table(
-            self,
-            alias: str | None = None
-        ) -> bool:
+    def close_table(self, alias: str | None = None) -> bool:
         """
         Keyword which closes specific or all of the tables.
 
@@ -167,9 +156,9 @@ class Getter(LibraryAttributes):
 
     @keyword(tags=["Getter"])
     def switch_table(
-            self,
-            alias: str,
-     ) -> str:
+        self,
+        alias: str,
+    ) -> str:
         """
         Keyword which switches into current working table.
 
@@ -185,15 +174,12 @@ class Getter(LibraryAttributes):
         |
         | Tables.Switch Table   table 1     # switched to 'table 1' as current active table
         """
-        self.file_reader.table_dataframe_switch(
-            alias=alias
-        )
+        self.file_reader.table_dataframe_switch(alias=alias)
         return alias
 
     @keyword(tags=["Getter"])
     def get_table(
-            self,
-            return_type:TableFormat = TableFormat["List of lists"]
+        self, return_type: TableFormat = TableFormat["List of lists"]
     ) -> list[list] | list[dict] | pd.DataFrame:
         """
         Keyword which returns a table in form of either list of lists, list of dicts, pandas dataframe.
@@ -210,21 +196,22 @@ class Getter(LibraryAttributes):
         | @{dicts} =        Tables.Get Table    List of dicts
         | @{dataframe} =    Tables.Get Table    Dataframe
         """
-        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
-        table_df = self.file_reader.validate_table_to_dataframe(
-            data= current_df)
+        current_df = self.file_reader.file_sync.table_storage[
+            self.file_reader.file_sync.current_file
+        ].data
+        table_df = self.file_reader.validate_table_to_dataframe(data=current_df)
 
         return self.file_reader.convert_dataframe(table_df, return_type)
 
     @keyword(tags=["Getter"])
     def get_table_cell(
-            self,
-            row: int,
-            column: int | str,
-            assertion_operator: AssertionOperator | None = None,
-            assertion_expected: Any = None,
-            message: str = "",
-        ) -> Any:
+        self,
+        row: int,
+        column: int | str,
+        assertion_operator: AssertionOperator | None = None,
+        assertion_expected: Any = None,
+        message: str = "",
+    ) -> Any:
         """
         Keyword reads the currently opened table cell (see opened_table) with the given row & column index.
 
@@ -247,12 +234,12 @@ class Getter(LibraryAttributes):
         | Get Table Cell    1    name    ==    sascha
         """
         cell = None
-        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
+        current_df = self.file_reader.file_sync.table_storage[
+            self.file_reader.file_sync.current_file
+        ].data
         table_df = self.file_reader.validate_table_to_dataframe(
-            data= current_df,
-            row= row,
-            column= column)
-
+            data=current_df, row=row, column=column
+        )
 
         column = self.file_reader.cast_column_type(column)
 
@@ -260,23 +247,20 @@ class Getter(LibraryAttributes):
 
         if assertion_expected:
             if assertion_operator not in NumericalOperators:
-                raise ValueError(f"Unexpected operator for assertion: {assertion_operator}. Use only {[op.value for op in NumericalOperators]}.")
-            verify_assertion(
-                cell,
-                assertion_operator,
-                assertion_expected,
-                message
-            )
+                raise ValueError(
+                    f"Unexpected operator for assertion: {assertion_operator}. Use only {[op.value for op in NumericalOperators]}."
+                )
+            verify_assertion(cell, assertion_operator, assertion_expected, message)
         return cell
 
     @keyword(tags=["Getter"])
     def get_table_column(
-            self,
-            column: str | int,
-            assertion_operator: AssertionOperator | None = None,
-            assertion_expected: Any = None,
-            message: str = "",
-        ) -> list[Any]:
+        self,
+        column: str | int,
+        assertion_operator: AssertionOperator | None = None,
+        assertion_expected: Any = None,
+        message: str = "",
+    ) -> list[Any]:
         """
         Keyword to read the given table column from current opened table (see open_table).
         If ignore_header = True and searched column is a string then it will raise an error.
@@ -300,37 +284,34 @@ class Getter(LibraryAttributes):
             AssertionOperator["contains"],
             AssertionOperator["not contains"],
             AssertionOperator["validate"],
-            ]
+        ]
         column_list = []
-        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
-        table_df = self.file_reader.validate_table_to_dataframe(
-            data= current_df,
-            column= column)
+        current_df = self.file_reader.file_sync.table_storage[
+            self.file_reader.file_sync.current_file
+        ].data
+        table_df = self.file_reader.validate_table_to_dataframe(data=current_df, column=column)
         column = self.file_reader.cast_column_type(column)
 
-        column_df = table_df.loc[:,column] if isinstance(column, str) else table_df.iloc[:,column]
+        column_df = table_df.loc[:, column] if isinstance(column, str) else table_df.iloc[:, column]
         column_list = cast(list[Any], column_df.to_list())
 
         if assertion_expected:
             if assertion_operator not in valid_assertions:
-                raise ValueError(f"Unexpected operator for assertion: {assertion_operator}. Use only {list(valid_assertions)}.")
-            verify_assertion(
-                column_list,
-                assertion_operator,
-                assertion_expected,
-                message
-            )
+                raise ValueError(
+                    f"Unexpected operator for assertion: {assertion_operator}. Use only {list(valid_assertions)}."
+                )
+            verify_assertion(column_list, assertion_operator, assertion_expected, message)
 
         return column_list
 
     @keyword(tags=["Getter"])
     def get_table_row(
-            self,
-            row: int,
-            assertion_operator: AssertionOperator | None = None,
-            assertion_expected: Any = None,
-            message: str = "",
-        ) -> list[Any]:
+        self,
+        row: int,
+        assertion_operator: AssertionOperator | None = None,
+        assertion_expected: Any = None,
+        message: str = "",
+    ) -> list[Any]:
         """
         Keyword to read the given table column from current opened table (see open_table).
         | =`Arguments`= | =`Description`= |
@@ -352,35 +333,33 @@ class Getter(LibraryAttributes):
             AssertionOperator["contains"],
             AssertionOperator["not contains"],
             AssertionOperator["validate"],
-            ]
+        ]
         row_list = []
-        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
-        table_df = self.file_reader.validate_table_to_dataframe(
-            data= current_df,
-            row= row)
+        current_df = self.file_reader.file_sync.table_storage[
+            self.file_reader.file_sync.current_file
+        ].data
+        table_df = self.file_reader.validate_table_to_dataframe(data=current_df, row=row)
 
         row_list = cast(list[Any], table_df.iloc[row].to_list())
 
         if assertion_expected:
             if assertion_operator not in valid_assertions:
-                raise ValueError(f"Unexpected operator for assertion: {assertion_operator}. Use only {list(valid_assertions)}.")
-            verify_assertion(
-                row_list,
-                assertion_operator,
-                assertion_expected,
-                message
-            )
+                raise ValueError(
+                    f"Unexpected operator for assertion: {assertion_operator}. Use only {list(valid_assertions)}."
+                )
+            verify_assertion(row_list, assertion_operator, assertion_expected, message)
 
         return row_list
 
     @keyword(tags=["Getter"])
-    def count_table(self,
-                    path: Path | str,
-                    axis: Axis,
-                    assertion_operator: AssertionOperator | None = None,
-                    assertion_expected: Any = None,
-                    message: str = "",
-                        ) -> int:
+    def count_table(
+        self,
+        path: Path | str,
+        axis: Axis,
+        assertion_operator: AssertionOperator | None = None,
+        assertion_expected: Any = None,
+        message: str = "",
+    ) -> int:
         """
         Keyword for counting rows or columns in the provided table.
 
@@ -419,21 +398,16 @@ class Getter(LibraryAttributes):
             header_data_table.extend(table_data)
             df = pd.DataFrame(header_data_table, columns=None)
 
-
-        table_df = self.file_reader.validate_table_to_dataframe(
-            data= df)
+        table_df = self.file_reader.validate_table_to_dataframe(data=df)
         shape_index = 0 if axis == Axis.Rows else 1
 
         axis_count = cast(int, table_df.shape[shape_index])
 
         if assertion_expected:
             if assertion_operator not in NumericalOperators:
-                raise ValueError(f"Unexpected operator for assertion: {assertion_operator}. Use only {list(NumericalOperators)}.")
-            verify_assertion(
-                axis_count,
-                assertion_operator,
-                assertion_expected,
-                message
-            )
+                raise ValueError(
+                    f"Unexpected operator for assertion: {assertion_operator}. Use only {list(NumericalOperators)}."
+                )
+            verify_assertion(axis_count, assertion_operator, assertion_expected, message)
 
         return axis_count

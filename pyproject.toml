@@ -112,7 +112,7 @@ pretty = true
 [tool.ruff]
 fix = false
 target-version = "py310"
-line-length = 150
+line-length = 100
 exclude = [
   "__pycache__",
   ".venv",
@@ -130,7 +130,7 @@ ignore = [
   "T201",  # Print statements
   "INP001",  # part of an implicit namespace package
   "N999",  # Invalid module name
-  "I001",  # Import block is un-sorted or un-formatted
+  "E501", # Line Length
 ]
 select = [
   "E",
@@ -159,9 +159,6 @@ select = [
   "SIM",
   "RUF",
 ]
-
-[tool.ruff.pylint]
-max-args = 10
 
 [tool.robocop.lint]
 select = [
