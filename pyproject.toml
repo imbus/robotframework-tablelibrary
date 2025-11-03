@@ -4,26 +4,173 @@ build-backend = "hatchling.build"
 
 [project]
 name = "robotframework-tablelibrary"
-version = "0.0.1"
+dynamic = ["version"]
 description = "A Robot Framework library providing generic table keywords for several table file type like csv or excel."
-# authors = [
-#     { name = "Author", email = "Email" }
-# ]
 readme = "README.md"
-requires-python = ">=3.9"
-dependencies = [
-    "robotframework>=6.0",
+requires-python = ">=3.10"
+authors = [
+  { name = "imbus AG" }
 ]
+maintainers = [
+  { name = "Marvin Klerx", email = "marvinklerx20@gmail.com" }
+]
+license = { text = "Apache-2.0" }
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "overrides",
+  "robotframework>=5.0.1",
+  "robotframework-assertion-engine",
+  "robotframework-pythonlibcore",
+  "pandas",
+  "pyarrow",
+  "openpyxl",
+  "xlrd",
+]
+
 
 [project.optional-dependencies]
 dev = [
     "hatch",
-    "pytest"
+    "ruff",
+    "pytest",
+    "pre-commit",
+    "mypy",
+    "robotframework-robocop"
 ]
 
 [project.urls]
-Homepage = "https://github.com/MarvKler/robotframework-tablelibrary"
-Repository = "https://github.com/MarvKler/robotframework-tablelibrary"
+Repository = "https://github.com/imbus/robotframework-tablelibrary"
+Documentation = "https://github.com/imbus/robotframework-tablelibrary#readme"
+Contributing = "https://github.com/imbus/robotframework-tablelibrary/blob/main/DEVELOPMENT.md"
+Issues = "https://github.com/imbus/robotframework-tablelibrary/issues"
+KeywordDocs = "https://imbus.github.io/robotframework-tablelibrary/"
 
 [tool.hatch.build.targets.wheel]
-packages = ["robotframework-tablelibrary"]
+require-runtime-dependencies = true
+only-include = ["src/Tables"]
+sources = ["src"]
+
+[tool.hatch.version]
+path = "src/Tables/__about__.py"
+
+[tool.hatch.build]
+dev-mode-dirs = ["src"]
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/Tables tests}"
+
+[tool.coverage.run]
+source_pkgs = ["Tables", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/Tables/__about__.py",
+]
+
+[tool.coverage.paths]
+robotframework_tablelibrary = ["src/Tables", "*/src/Tables"]
+tests = ["tests", "*/robotframework-tablelibrary/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.hatch.envs.dev]
+dependencies = [
+  "ruff",
+  "pytest"
+]
+[tool.hatch.envs.dev.scripts]
+lint = "ruff check ."
+atest = "robot tests/atest/"
+utest = "pytest"
+docs = "libdoc src/Tables results/keyword_docs.html"
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+no_implicit_optional = true
+strict_optional = true
+warn_return_any = true
+warn_no_return = true
+warn_unreachable = true
+pretty = true
+
+[tool.ruff]
+fix = false
+target-version = "py310"
+line-length = 100
+exclude = [
+  "__pycache__",
+  ".venv",
+  "tools",
+  "model",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint]
+ignore = [
+  "N815",  # mixedCase variable in class scope
+  "N803",  # argument name should be lowercase
+  "T201",  # Print statements
+  "INP001",  # part of an implicit namespace package
+  "N999",  # Invalid module name
+  "E501", # Line Length
+]
+select = [
+  "E",
+  "F",
+  "W",
+  "C90",
+  "I",
+  "N",
+  "B",
+  "PYI",
+  "PL",
+  "PTH",
+  "UP",
+  "A",
+  "C4",
+  "DTZ",
+  "ISC",
+  "ICN",
+  "INP",
+  "PIE",
+  "T20",
+  "PYI",
+  "PT",
+  "RSE",
+  "RET",
+  "SIM",
+  "RUF",
+]
+
+[tool.robocop.lint]
+select = [
+  "LEN04",
+  "NAME02",
+]
+ignore = [
+  "DOC01",
+  "DOC02",
+  "DOC03",
+]
+reports = [
+  "rules_by_id",
+  "scan_timer",
+]

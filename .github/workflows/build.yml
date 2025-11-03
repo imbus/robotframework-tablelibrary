@@ -1,0 +1,141 @@
+name: Build & Check Package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.yml'
+      - '**.py'
+      - pyproject.toml
+  pull_request:
+    paths:
+      - '**.yml'
+      - '**.py'
+      - pyproject.toml
+
+jobs:
+  ruff-linter:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
+
+    - name: Run ruff lint
+      run: hatch run dev:lint
+
+  check-python-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
+
+    - name: Build wheel with Hatch
+      run: hatch build
+
+    - name: Install built wheel
+      run: pip install dist/*.whl
+
+    - name: Test import
+      run: python -c "import Tables"
+
+  run-acceptance-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
+
+    - name: Build wheel with Hatch
+      run: hatch build
+
+    - name: Run robot framework acceptance-tests
+      run: hatch run dev:atest
+
+  run-unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
+
+    - name: Build wheel with Hatch
+      run: hatch build
+
+    - name: Run unit tests with pytest
+      run: hatch run dev:utest
+
+  generate-libdoc-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install dependencies
+      run: hatch env create dev
+
+    - name: Generate keyword docs with libdoc
+      run: hatch run dev:docs
+    
+    # - name: Upload libdoc artifact
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: libdoc
+    #     path: results/keyword_docs.html
+    #     retention-days: 2
