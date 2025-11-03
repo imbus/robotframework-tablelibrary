@@ -155,9 +155,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install Robot Framework
+      - name: Install Dependencies
         run: |
-          pip install robotframework
+          pip install .[dev]
 
       - name: Generate libdoc
         run: |
