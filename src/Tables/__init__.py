@@ -64,7 +64,7 @@ class Tables(HybridCore):
     | ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
     | ${result} =    BuiltIn.Evaluate    "index" not in "${content}"
     | BuiltIn.Should Be True    ${result}
-    
+
     === File Format - Parquet ===
     | Tables.Configure File Type    Parquet
     | ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_05.parquet
@@ -76,25 +76,25 @@ class Tables(HybridCore):
     | VAR    @{headers} =    name    age
     | VAR    @{person1} =    Michael    34
     | VAR    @{person2} =    John    19
-    | 
+    |
     | # Create empty table object - internally in cache
     | ${uuid} =    Tables.Create Table    headers=${headers}
-    | 
+    |
     | # Append some rows
     | Tables.Append Row    ${person1}
     | Tables.Append Row    ${person2}
     | Count Table    ${uuid}    Rows    equal    ${3}
-    | 
+    |
     | # Append a column
     | VAR    @{column1} =    city    MG    ERL
     | Tables.Append Column    ${column1}
     | Count Table    ${uuid}    Columns    equal    ${3}
-    | 
+    |
     | # Optional: Set new table cell value
     | Get Table Cell    1    1    equals    34
     | Tables.Set Table Cell    25    0    1
     | Get Table Cell    1    1    equals    25
-    | 
+    |
     | # Insert a new row into the existing table object
     | VAR    @{insert_row} =    Lu    26    Hamburg
     | Insert Row    ${insert_row}    0
@@ -104,10 +104,10 @@ class Tables(HybridCore):
     === Create new empty table - save to file system ===
     | # Generate new headers which should be used in the table
     | VAR    @{headers} =    name    age
-    | 
+    |
     | # Create new table object
     | ${uuid} =    Create Table    ${headers}
-    | 
+    |
     | # Generate some random data & append as rows to new table
     | FOR    ${_}    IN RANGE    ${100}
     |     ${a} =    Generate Random String
@@ -115,16 +115,16 @@ class Tables(HybridCore):
     |     VAR    @{data}    ${a}    ${b}
     |     Tables.Append Row    ${data}
     | END
-    | 
+    |
     | # Ensure that data got written into internal table object
     | Count Table    ${uuid}    Rows    equals    ${101}
-    | 
+    |
     | # Write table to specific file path -> write from cache into persistant file
     | Write Table    ${uuid}    ${CURDIR}/results/test_writer_new_table.csv
     |
     | # Check table content again, but now read table from file path!
     | Count Table    ${CURDIR}/results/test_writer_new_table.csv    Rows    equals    ${101}
-    
+
     === Parquet ===
     | Tables.Configure File Type    Parquet
     | ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_05.parquet

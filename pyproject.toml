@@ -16,13 +16,11 @@ maintainers = [
 ]
 license = { text = "Apache-2.0" }
 classifiers = [
-  "Development Status :: 1 - Planning",
+  "Development Status :: 3 - Alpha",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
   "overrides",
@@ -49,7 +47,9 @@ dev = [
 [project.urls]
 Repository = "https://github.com/imbus/robotframework-tablelibrary"
 Documentation = "https://github.com/imbus/robotframework-tablelibrary#readme"
+Contributing = "https://github.com/imbus/robotframework-tablelibrary/blob/main/DEVELOPMENT.md"
 Issues = "https://github.com/imbus/robotframework-tablelibrary/issues"
+KeywordDocs = "https://imbus.github.io/robotframework-tablelibrary/"
 
 [tool.hatch.build.targets.wheel]
 require-runtime-dependencies = true
