@@ -139,3 +139,34 @@ jobs:
     #     name: libdoc
     #     path: results/keyword_docs.html
     #     retention-days: 2
+
+
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Robot Framework
+        run: |
+          pip install robotframework
+
+      - name: Generate libdoc
+        run: |
+          mkdir -p docs
+          libdoc src/Tables docs/Keywords.html
+
+      - name: Deploy to gh_pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh_pages
+          publish_dir: ./docs
