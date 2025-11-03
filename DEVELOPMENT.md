@@ -79,18 +79,7 @@ git push origin v0.0.5
 
 ### 2.1. Creating GitHub Release & Deploy Wheel Package to PyPi
 
-After pushing the new tag, two pipeline jobs are getting triggered automatically:
+After pushing the new tag, three pipeline jobs are getting triggered automatically:
 1. First job creates a new ``Release`` in github with the name of the created ``Tag``.
 2. Second job uploads the new wheel package to ``PyPi`` with the ``__version__`` from the ``__about__.py`` file.
-
-### 3. Upload new Keyword Documentation
-
-Switch to the main branch & execute the following command to generate a new libdoc keyword documentation:
-
-```
-cd <project-root-directory>
-libdoc src/Tables ./index.html
-```
-
-Save this generated html file on your local file system.\n
-Next, checkout the branch ``gh_pages``. Replace the actual ``index.html`` in the ``docs`` directory & push the new keyword documentation to GitHub into this branch!
+3. Third job generates a new keyword documentation via ``libdoc`` on the main branch, but pushes it to the ``gh_pages`` where it is available as public ``GitHub Page``.
