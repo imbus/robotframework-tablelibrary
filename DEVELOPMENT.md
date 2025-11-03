@@ -60,7 +60,7 @@ pre-commit run --all-files
 If you're working with a virtual environment, you might get problems with committing changes with the VS Code Git Controls.     
 In that case, please open a shell where your virtual environment is activated & add, commit & push your changes via git shell commands!
 
-## Upload to PyPi
+## Upload to PyPi / Release Creation
 
 ### Requirements
 
@@ -68,7 +68,9 @@ You are required to have a account for each pypi server - production & test serv
 - **[Test PyPi](https://test.pypi.org/)**
 - **[Prod PyPi](https://pypi.org/)**
 
-### Authentication
+Additionally, check that you have permissions for the project at PyPi & GitHub!
+
+### PyPi - Authentication
 
 Please generate an ``API Token`` for each ``PyPi`` instance (prod & test server).
 
@@ -106,6 +108,8 @@ pip install twine
 
 Open the file [_about__.py](src/Tables/__about__.py) and increase the version (0.0.5 = major.minor.path) before building & uploading the new python wheel package!
 
+Commit & push the changed version into the repository.
+
 ### Build Python Package
 
 Navigate to the repository root directy and execute the following command:
@@ -115,7 +119,7 @@ hatch build
 
 The built package is stored into the directory ``dist``.
 
-### Upload Package
+### Upload Package to PyPi
 
 Use the one of the following commands to upload the package to ``prod pypi`` or ``test pypi``.
 
@@ -128,3 +132,19 @@ twine upload -r pypi dist/*
 ```
 
 The parameter ``-r`` takes the configued registry from your ``.pypirc`` file.
+
+### Create new Tag
+
+Please create a new tag in GitHub with the syntax ``vX.X.X`` -> example: ``v1.0.5``.
+
+### Upload new Keyword Documentation
+
+Switch to the main branch & execute the following command to generate a new libdoc keyword documentation:
+
+```
+cd <project-root-directory>
+libdoc src/Tables ./TableLibraryDocumentation.html
+```
+
+Save this generated html file on your local file system.\n
+Next, checkout the branch ``gh_pages``. Replace the actual ``TableLibraryDocumentation`` in the ``docs`` directory & push the new keyword documentation to GitHub into this branch!

@@ -31,9 +31,8 @@ class Getter(LibraryAttributes):
         Keyword reads a table from the given path & returns the content.
 
         | =`Arguments`= | =`Description`= |
-        | ``path`` | Specify the path of the given tables file. |
-        | ``return_type`` | You can declare what type of table format it should be returned.
-                            Either list of lists, list of dictionaries or a pandas datarframe. Default: List of lists. |
+        | ``path`` | Specify the path of the your table file. |
+        | ``return_type`` | You can declare what type of table format it should be returned. Either list of lists, list of dictionaries or a pandas datarframe. Default: List of lists. |
 
         == Return Value ==
         Keyword returns the complete content of the given file.\n
@@ -217,10 +216,8 @@ class Getter(LibraryAttributes):
 
         | =`Arguments`= | =`Description`= |
         | ``row`` | Row to read the cell from |
-        | ``column`` | Column to read the cell from. Can be index number or a name of a column as a string.
-        |              If string, ignore_header must be False. |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
-        |                          Only numerical operators are allowed |
+        | ``column`` | Column to read the cell from. Can be index number or a name of a column as a string. If string, ignore_header must be False. |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.  Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
@@ -267,8 +264,7 @@ class Getter(LibraryAttributes):
 
         | =`Arguments`= | =`Description`= |
         | ``column`` | Column header name (str) or index (int) to return values from |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
-        |                          Only numerical operators are allowed |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
@@ -316,8 +312,7 @@ class Getter(LibraryAttributes):
         Keyword to read the given table column from current opened table (see open_table).
         | =`Arguments`= | =`Description`= |
         | ``row`` | Row index (int) to read values from |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.
-        |                          Only numerical operators are allowed |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. Only numerical operators are allowed. |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
@@ -366,8 +361,7 @@ class Getter(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``path`` | Either a filepath or a saved variable of 'Open Table' keyword. |
         | ``axis`` | Select 'Columns' or 'Rows' depending which axis should be checked |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. |
-        |                        |  Only numerical operators are allowed |
+        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. Only numerical operators are allowed |
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 

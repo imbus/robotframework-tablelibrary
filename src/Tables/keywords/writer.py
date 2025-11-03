@@ -25,8 +25,7 @@ class Writer(LibraryAttributes):
 
         | =`Arguments`= | =`Description`= |
         | ``data`` | Data object to store in a new file |
-        | ``file_path`` | The full path of the table file to save the content in. If alias from 'Open Table' is used,
-        |                 it will write the data in the aliases file path. If no file path is selected, then it will use current alias.|
+        | ``file_path`` | The full path of the table file to save the content in. If alias from 'Open Table' is used, it will write the data in the aliases file path. If no file path is selected, then it will use current alias. |
 
         == Data Object ==
         The given data object with the argument ``data`` needs to be a list of lists to replicate the table structure
@@ -64,10 +63,9 @@ class Writer(LibraryAttributes):
 
         | =`Arguments`= | =`Description`= |
         | ``data`` | The new value for the given table cell. |
-        | ``row`` | Define the index of the row to identify the cell. If header= True it will skip the first row (as header)
-        |           and 0th index is the row after the header.|
-        | ``column`` | Define the index of the column to identify the cell. Is column is a string then header should be set on True.|
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. Default: True|
+        | ``row`` | Define the index of the row to identify the cell. If header= True it will skip the first row (as header) and 0th index is the row after the header. |
+        | ``column`` | Define the index of the column to identify the cell. Is column is a string then header should be set on True. |
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. Default: True |
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
@@ -123,8 +121,7 @@ class Writer(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``data`` | The new values for the given table row - needs to be list object. |
         | ``row`` | Define the index of the row to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored.
-        |              If Header = False and row index = 0 it will overwrite a possible header, if there is one!|
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. If Header = False and row index = 0 it will overwrite a possible header, if there is one! |
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==

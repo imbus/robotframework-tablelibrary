@@ -19,8 +19,7 @@ class Modifier(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``row_data`` | List of values which should be inserted to the table. Must match the lenght of table row.  |
         | ``row_index`` | Define the index of the row to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. |
-        |            | If Header = False and row index = 0 it will overwrite a possible header, if there is one! |
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. If Header = False and row index = 0 it will overwrite a possible header, if there is one! |
 
         == Return Value ==
         Returns the dataframe of the changed table.
@@ -122,8 +121,7 @@ class Modifier(LibraryAttributes):
 
         | =`Arguments`= | =`Description`= |
         | ``row_index`` | Define the index of the row to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored.
-        |              If Header = False and row index = 0 it will remove a possible header, if there is one!|
+        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. If Header = False and row index = 0 it will remove a possible header, if there is one!|
 
         == Return Value ==
         Returns the dataframe of the changed table.
