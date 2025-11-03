@@ -8,12 +8,12 @@
 
 ## Statistics
 
-[![Release Creation](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/release.yml/badge.svg)](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/release.yml)
-[![Build & Check Package - Default Branch](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/build.yml/badge.svg)](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/build.yml)
-[![PyPI - Version](https://img.shields.io/pypi/v/robotframework-tablelibrary.svg)](https://pypi.org/project/robotframework-tablelibrary)    
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/robotframework-tablelibrary.svg)](https://pypi.org/project/robotframework-tablelibrary)   
-[![PyPI Downloads - Total](https://static.pepy.tech/badge/robotframework-tablelibrary)](https://pepy.tech/projects/robotframework-tablelibrary)    
-[![PyPI Downloads - Monthly](https://static.pepy.tech/badge/robotframework-tablelibrary/month)](https://pepy.tech/projects/robotframework-tablelibrary) 
+[![Latest Build Status -  Branch](https://img.shields.io/github/actions/workflow/status/imbus/robotframework-tablelibrary/release.yml?label=Release%20Creation)](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/release.yml)
+[![Latest Build Status - Default Branch](https://img.shields.io/github/actions/workflow/status/imbus/robotframework-tablelibrary/build.yml?branch=main&label=Build%20Status%20-%20Default%20Branch)](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/build.yml)
+[![PyPI - Version](https://img.shields.io/pypi/v/robotframework-tablelibrary.svg)](https://pypi.org/project/robotframework-tablelibrary)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/robotframework-tablelibrary.svg)](https://pypi.org/project/robotframework-tablelibrary)
+[![PyPI Downloads - Total](https://static.pepy.tech/badge/robotframework-tablelibrary)](https://pepy.tech/projects/robotframework-tablelibrary)
+[![PyPI Downloads - Monthly](https://static.pepy.tech/badge/robotframework-tablelibrary/month)](https://pepy.tech/projects/robotframework-tablelibrary)
 
 ## GitHub Repository
 
