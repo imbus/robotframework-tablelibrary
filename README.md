@@ -8,6 +8,8 @@
 
 ## Statistics
 
+[![Release Creation](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/release.yml/badge.svg)](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/release.yml)
+[![Build & Check Package - Default Branch](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/build.yml/badge.svg)](https://github.com/imbus/robotframework-tablelibrary/actions/workflows/build.yml)
 [![PyPI - Version](https://img.shields.io/pypi/v/robotframework-tablelibrary.svg)](https://pypi.org/project/robotframework-tablelibrary)    
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/robotframework-tablelibrary.svg)](https://pypi.org/project/robotframework-tablelibrary)   
 [![PyPI Downloads - Total](https://static.pepy.tech/badge/robotframework-tablelibrary)](https://pepy.tech/projects/robotframework-tablelibrary)    
