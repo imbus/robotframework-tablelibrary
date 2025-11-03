@@ -60,7 +60,16 @@ After pushing the new tag, three pipeline jobs are getting triggered automatical
 2. Second job uploads the new wheel package to ``PyPi`` with the ``__version__`` from the ``__about__.py`` file.
 3. Third job generates a new keyword documentation via ``libdoc`` on the main branch, but pushes it to the ``gh_pages`` where it is available as public ``GitHub Page``.
 
-## hatch
+## Installing Dev Dependencies
+
+Contributing to this project & working with it locally, requires you to install some ``dev dependencies`` - use the following command in the project root directory:
+```
+pip install -e .[dev]
+```
+
+Afterwards, the table library gets installed in ``editable mode`` & you will have a ``dev dependencies`` installed.
+
+## Hatch
 
 You will need the python package tool ``hatch`` for several operations in this repository.
 Hatch can be used to execute the linter, the tests or to build a wheel package.
