@@ -165,6 +165,7 @@ jobs:
         run: |
           mkdir -p docs
           libdoc src/Tables docs/Keywords.html
+          cp docs/Keywords.html docs/index.html
 
       - name: Deploy to gh_pages
         uses: peaceiris/actions-gh-pages@v4
