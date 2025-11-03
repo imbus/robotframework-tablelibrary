@@ -50,8 +50,10 @@ jobs:
         run: |
           twine upload dist/*
 
-  generate-docs:
+  deploy-keyword-documentation:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -64,14 +66,16 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install Robot Framework
+      - name: Install Dependencies
         run: |
-          pip install robotframework
+          pip install .[dev]
 
       - name: Generate libdoc
         run: |
           mkdir -p docs
-          libdoc src/Tables docs/Keywords.html
+          libdoc src/Tables docs/keywords.html
+          cp docs/keywords.html docs/index.html
+          touch docs/.nojekyll
 
       - name: Deploy to gh_pages
         uses: peaceiris/actions-gh-pages@v4
