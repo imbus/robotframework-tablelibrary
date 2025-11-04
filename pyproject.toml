@@ -45,11 +45,11 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/imbus/robotframework-tablelibrary"
+Homepage = "https://github.com/imbus/robotframework-tablelibrary"
 Documentation = "https://github.com/imbus/robotframework-tablelibrary#readme"
 Contributing = "https://github.com/imbus/robotframework-tablelibrary/blob/main/DEVELOPMENT.md"
 Issues = "https://github.com/imbus/robotframework-tablelibrary/issues"
-KeywordDocs = "https://imbus.github.io/robotframework-tablelibrary/keywords.html"
+KeywordDocumentation = "https://imbus.github.io/robotframework-tablelibrary/keywords.html"
 
 [tool.hatch.build.targets.wheel]
 require-runtime-dependencies = true
