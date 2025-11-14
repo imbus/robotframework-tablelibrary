@@ -107,6 +107,61 @@ Read Row Count - CSV - With Header
     ${row_count}  Tables.Count Table    ${file_path}    Rows
     BuiltIn.Should Be Equal    ${row_count}    ${6}
 
+
+# Check reading and opening of CSV file with ignore header true and false
+CSV has Headers - Read CSV Table and Ignore Header
+    Tables.Configure Ignore Header    ${True}
+    Tables.Count Table    ${CURDIR}${/}testdata${/}example_07.csv    Rows    ==    ${57}
+    ${data} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_07.csv
+    Length Should Be    ${data}    ${57}
+
+CSV has Headers - Open CSV Table and Ignore Header
+    Tables.Configure Ignore Header    ${True}
+    ${alias} =    Tables.Open Table    ${CURDIR}${/}testdata${/}example_07.csv
+    Tables.Count Table    ${alias}    Rows    ==    ${57}
+    ${data} =    Tables.Get Table
+    Length Should Be    ${data}    ${57}
+
+CSV has Headers - Read CSV Table and Not Ignore Header
+    Tables.Configure Ignore Header    ${False}
+    Tables.Count Table    ${CURDIR}${/}testdata${/}example_07.csv    Rows    ==    ${58}
+    ${data} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_07.csv
+    Length Should Be    ${data}    ${58}
+
+CSV has Headers - Open CSV Table and Not Ignore Header
+    Tables.Configure Ignore Header    ${False}
+    ${alias} =    Tables.Open Table    ${CURDIR}${/}testdata${/}example_07.csv
+    Tables.Count Table    ${alias}    Rows    ==    ${58}
+    ${data} =    Tables.Get Table
+    Length Should Be    ${data}    ${58}
+
+# No headers in file!
+CSV has No Headers - Read CSV Table and Ignore Header
+    Tables.Configure Ignore Header    ${True}
+    Tables.Count Table    ${CURDIR}${/}testdata${/}example_08.csv    Rows    ==    ${56}
+    ${data} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_08.csv
+    Length Should Be    ${data}    ${56}
+
+CSV has No Headers - Open CSV Table and Ignore Header
+    Tables.Configure Ignore Header    ${True}
+    ${alias} =    Tables.Open Table    ${CURDIR}${/}testdata${/}example_08.csv
+    Tables.Count Table    ${alias}    Rows    ==    ${56}
+    ${data} =    Tables.Get Table
+    Length Should Be    ${data}    ${56}
+
+CSV has No Headers - Read CSV Table and Not Ignore Header
+    Tables.Configure Ignore Header    ${False}
+    Tables.Count Table    ${CURDIR}${/}testdata${/}example_08.csv    Rows    ==    ${57}
+    ${data} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_08.csv
+    Length Should Be    ${data}    ${57}
+
+CSV has No Headers - Open CSV Table and Not Ignore Header
+    Tables.Configure Ignore Header    ${False}
+    ${alias} =    Tables.Open Table    ${CURDIR}${/}testdata${/}example_08.csv
+    Tables.Count Table    ${alias}    Rows    ==    ${57}
+    ${data} =    Tables.Get Table
+    Length Should Be    ${data}    ${57}
+
 ########################################################################################
 # TXT
 ########################################################################################

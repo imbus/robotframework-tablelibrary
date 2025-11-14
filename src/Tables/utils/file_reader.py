@@ -43,8 +43,6 @@ class FileReader(LibraryAttributes):
             if self.file_type == FileType.Parquet and not self.ignore_header:
                 list_data.insert(0, list(data.columns))
 
-            if self.ignore_header and self.file_type != FileType.Parquet:
-                return list_data[1:]
             return list_data
         if return_type == TableFormat["List of dicts"]:
             df_for_dicts = data
