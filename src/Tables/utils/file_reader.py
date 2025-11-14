@@ -231,13 +231,13 @@ class FileReader(LibraryAttributes):
     def read_parquet(self, path: Path) -> DataFrame:
         """ """
         df: DataFrame = pd.read_parquet(path)
-        
+
         # try to transform to ISO timeformat -> if transformation fails, just return original parquet dataframe
         try:
             return self._parquet_transform_to_iso_timeformat(df)
-        except:
+        except Exception:
             return pd.read_parquet(path)
-    
+
     def _parquet_transform_to_iso_timeformat(self, df: DataFrame) -> DataFrame:
         ts_cols = df.select_dtypes(include=["datetime64[ns]", "datetime64[ns, UTC]"]).columns
         for col in ts_cols:
