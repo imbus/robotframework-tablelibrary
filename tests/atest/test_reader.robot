@@ -89,6 +89,12 @@ Get Row and Column Count - CSV - With Header
     Tables.Count Table    ${uuid}    Rows     ==    ${6}
     Tables.Count Table    ${uuid}    Columns    ==    ${3}
 
+Count Table Rows with Validation Operator
+    Tables.Configure Ignore Header    False
+    VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
+    ${uuid} =    Tables.Open Table    ${file_path}
+    Tables.Count Table    ${uuid}    Rows    validate    5 < value < 7
+
 Get Row and Column Count - CSV - Without Header
     Tables.Configure Ignore Header    True
     VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pandas as pd
 from assertionengine import AssertionOperator, verify_assertion
-from assertionengine.assertion_engine import NumericalOperators
+from assertionengine.assertion_engine import EvaluationOperators, NumericalOperators
 from robot.api.deco import keyword
 
 from ..general.library_attributes import LibraryAttributes
@@ -398,10 +398,14 @@ class Getter(LibraryAttributes):
         axis_count = cast(int, table_df.shape[shape_index])
 
         if assertion_expected:
-            if assertion_operator not in NumericalOperators:
+            if (
+                assertion_operator in NumericalOperators
+                or
+                assertion_operator in EvaluationOperators
+            ):
+                verify_assertion(axis_count, assertion_operator, assertion_expected, message)
+            else:
                 raise ValueError(
                     f"Unexpected operator for assertion: {assertion_operator}. Use only {list(NumericalOperators)}."
                 )
-            verify_assertion(axis_count, assertion_operator, assertion_expected, message)
-
         return axis_count
