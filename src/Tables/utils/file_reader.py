@@ -230,7 +230,20 @@ class FileReader(LibraryAttributes):
 
     def read_parquet(self, path: Path) -> DataFrame:
         """ """
-        return pd.read_parquet(path)
+        df: DataFrame = pd.read_parquet(path)
+        
+        # try to transform to ISO timeformat -> if transformation fails, just return original parquet dataframe
+        try:
+            return self._parquet_transform_to_iso_timeformat(df)
+        except:
+            return pd.read_parquet(path)
+    
+    def _parquet_transform_to_iso_timeformat(self, df: DataFrame) -> DataFrame:
+        ts_cols = df.select_dtypes(include=["datetime64[ns]", "datetime64[ns, UTC]"]).columns
+        for col in ts_cols:
+            df[col] = df[col].dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            df[col] = df[col].str[:-3] + "Z"
+        return df
 
     def read_table_file(self, path: Path) -> DataFrame:
         """

@@ -206,6 +206,13 @@ Read Parquet File - Without Header
     ${result} =    BuiltIn.Evaluate    "_time" not in "${content}"
     BuiltIn.Should Be True    ${result}
 
+Open Table - Parquet
+    Tables.Configure Ignore Header    False
+    ${alias} =    Tables.Open Table    ${CURDIR}${/}testdata${/}example_03.parquet
+    @{data} =    Tables.Get Table
+    Should Contain    ${data}[1][0]    2025
+    Tables.Count Table    ${alias}    Rows    ==    ${1001}
+
 Get Table Cell - Parquet
     Tables.Configure Ignore Header    False
     Tables.Open Table    ${CURDIR}${/}testdata${/}example_03.parquet
