@@ -348,13 +348,14 @@ class Getter(LibraryAttributes):
         return row_list
 
     @keyword(tags=["Getter"])
-    def count_table(
+    def count_table( # noqa: PLR0913
         self,
         path: Path | str,
         axis: Axis,
         assertion_operator: AssertionOperator | None = None,
         assertion_expected: Any = None,
         message: str = "",
+        continue_on_failure: bool = True,
     ) -> int:
         """
         Keyword for counting rows or columns in the provided table.
@@ -408,6 +409,8 @@ class Getter(LibraryAttributes):
                     verify_assertion(axis_count, assertion_operator, assertion_expected, message)
                 except AssertionError as e:
                     err = message if message else str(e)
+                    if not continue_on_failure:
+                        raise AssertionError(err)    # noqa: B904
                     raise ContinuableFailure(err)    # noqa: B904
                 except Exception:
                     raise
