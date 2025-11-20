@@ -6,6 +6,7 @@ import pandas as pd
 from assertionengine import AssertionOperator, verify_assertion
 from assertionengine.assertion_engine import EvaluationOperators, NumericalOperators
 from robot.api.deco import keyword
+from robot.api.exceptions import ContinuableFailure
 
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_access import FileAccess
@@ -347,13 +348,14 @@ class Getter(LibraryAttributes):
         return row_list
 
     @keyword(tags=["Getter"])
-    def count_table(
+    def count_table( # noqa: PLR0913
         self,
         path: Path | str,
         axis: Axis,
         assertion_operator: AssertionOperator | None = None,
         assertion_expected: Any = None,
         message: str = "",
+        continue_on_failure: bool = True,
     ) -> int:
         """
         Keyword for counting rows or columns in the provided table.
@@ -403,9 +405,17 @@ class Getter(LibraryAttributes):
                 or
                 assertion_operator in EvaluationOperators
             ):
-                verify_assertion(axis_count, assertion_operator, assertion_expected, message)
+                try:
+                    verify_assertion(axis_count, assertion_operator, assertion_expected, message)
+                except AssertionError as e:
+                    err = message if message else str(e)
+                    if not continue_on_failure:
+                        raise AssertionError(err)    # noqa: B904
+                    raise ContinuableFailure(err)    # noqa: B904
+                except Exception:
+                    raise
             else:
                 raise ValueError(
-                    f"Unexpected operator for assertion: {assertion_operator}. Use only {list(NumericalOperators)}."
+                    f"Unexpected operator for assertion: {assertion_operator}. Use only {list(NumericalOperators)} or {list(EvaluationOperators)}."
                 )
         return axis_count
