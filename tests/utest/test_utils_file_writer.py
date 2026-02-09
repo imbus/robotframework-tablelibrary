@@ -62,6 +62,14 @@ def test_insert_row_and_column():
         writer.insert_row_to_dataframe(None, ["x"], table)
 
 
+def test_insert_column_parquet_skips_header_reset():
+    writer = make_writer_with_table()
+    writer.file_type = FileType.Parquet
+    table = writer.current_table.data
+    updated = writer.insert_column_to_dataframe(0, [9, 8, 7], table)
+    assert updated.shape[1] == EXPECTED_COLUMN_COUNT_AFTER_APPEND
+
+
 def test_append_and_remove_row_column():
     writer = make_writer_with_table()
     table = writer.add_header_in_dataframe(writer.current_table.data)
@@ -76,6 +84,14 @@ def test_append_and_remove_row_column():
 
     removed_row = writer.remove_row_dataframe(0, table)
     assert removed_row.shape[0] == EXPECTED_ROW_COUNT_AFTER_REMOVE
+
+
+def test_append_column_parquet_skips_header_reset():
+    writer = make_writer_with_table()
+    writer.file_type = FileType.Parquet
+    table = writer.current_table.data
+    updated = writer.append_column_to_dataframe([9, 8, 7], table)
+    assert updated.shape[1] == EXPECTED_COLUMN_COUNT_AFTER_APPEND
 
 
 def test_write_table_to_csv(tmp_path):
@@ -208,3 +224,15 @@ def test_set_dataframe_cells_validates_row():
         return_type=TableFormat["List of lists"],
     )
     assert result[2][0] == UPDATED_CELL_VALUE
+
+
+def test_update_cached_dataframe_without_current_file(monkeypatch):
+    writer = make_writer_with_table()
+    writer.file_sync.current_file = None
+    df = DataFrame([[1, 2]])
+
+    dummy = TableObject(Path("dummy.csv"), DataFrame([[1]]))
+    monkeypatch.setattr(FileWriter, "current_table", property(lambda self: dummy))
+
+    result = writer.update_cached_dataframe(df)
+    assert result.equals(dummy.data)

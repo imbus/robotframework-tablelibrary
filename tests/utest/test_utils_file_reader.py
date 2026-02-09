@@ -63,6 +63,26 @@ def test_validate_column_with_header_row():
         reader.validate_column(df, 5)
     with pytest.raises(ValueError, match="Couldn't find column"):
         reader.validate_column(df, MISSING_COLUMN_NAME)
+    assert reader.validate_column(df, 1) is True
+    assert reader.validate_column(df, 0) is True
+
+
+def test_validate_column_in_bounds_int_returns_true():
+    reader = make_reader()
+    df = DataFrame([[1, 2], [3, 4]])
+    assert reader.validate_column(df, 1) is True
+
+
+def test_validate_column_int_branch_no_out_of_bounds():
+    reader = make_reader()
+    df = DataFrame([[1, 2, 3]])
+    assert reader.validate_column(df, 0) is True
+
+
+def test_validate_column_casts_numeric_string_to_int_in_bounds():
+    reader = make_reader()
+    df = DataFrame([[1]])
+    assert reader.validate_column(df, "0") is True
 
 
 def test_validate_row_bounds():
@@ -97,6 +117,15 @@ def test_convert_dataframe_list_of_lists_and_dicts():
     as_lists = reader.convert_dataframe(df, TableFormat["List of lists"])
     assert as_lists == [["h1", "h2"], [1, 2]]
 
+    as_dicts = reader.convert_dataframe(df, TableFormat["List of dicts"])
+    assert as_dicts == [{"h1": 1, "h2": 2}]
+
+
+def test_convert_dataframe_list_of_dicts_ignores_header_logic_for_parquet():
+    reader = make_reader()
+    df = DataFrame([[1, 2]], columns=["h1", "h2"])
+    reader.file_type = FileType.Parquet
+    reader.ignore_header = False
     as_dicts = reader.convert_dataframe(df, TableFormat["List of dicts"])
     assert as_dicts == [{"h1": 1, "h2": 2}]
 
@@ -207,6 +236,14 @@ def test_reset_header_dataframe_parquet_default_header():
     assert reset.iloc[0].tolist() == [1, 2]
 
 
+def test_reset_header_dataframe_parquet_keeps_non_default_header():
+    reader = make_reader()
+    reader.file_type = FileType.Parquet
+    df = DataFrame([[1, 2]], columns=["h1", "h2"])
+    reset = reader.reset_header_dataframe(df)
+    assert reset.equals(df)
+
+
 def test_validate_table_to_dataframe_applies_header():
     reader = make_reader()
     reader.file_type = FileType.CSV
@@ -261,6 +298,12 @@ def test_read_table_file_unsupported_type(monkeypatch, tmp_path):
         reader.read_table_file(path)
 
 
+def test_read_table_file_none_path():
+    reader = make_reader()
+    result = reader.read_table_file(None)
+    assert result == {}
+
+
 def test_close_table_dataframe_missing_alias(tmp_path):
     reader = make_reader()
     csv_path = tmp_path / "data.csv"
@@ -277,6 +320,25 @@ def test_close_table_dataframe_all(tmp_path):
     reader.open_table_dataframe("t1", csv_path)
     assert reader.close_table_dataframe() is True
     assert reader.file_sync.current_file is None
+
+
+def test_close_table_dataframe_last_alias_clears_current(tmp_path):
+    reader = make_reader()
+    csv_path = tmp_path / "data.csv"
+    pd.DataFrame([[1, 2]]).to_csv(csv_path, index=False, header=False)
+    reader.open_table_dataframe("t1", csv_path)
+    assert reader.close_table_dataframe("t1") is True
+    assert reader.file_sync.current_file is None
+
+
+def test_close_table_dataframe_keeps_current_when_other_tables_open(tmp_path):
+    reader = make_reader()
+    csv_path = tmp_path / "data.csv"
+    pd.DataFrame([[1, 2]]).to_csv(csv_path, index=False, header=False)
+    reader.open_table_dataframe("t1", csv_path)
+    reader.open_table_dataframe("t2", csv_path)
+    assert reader.close_table_dataframe("t1") is True
+    assert reader.file_sync.current_file == "t2"
 
 
 def test_table_dataframe_switch_success(tmp_path):

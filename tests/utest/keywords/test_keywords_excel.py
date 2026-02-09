@@ -85,6 +85,24 @@ def test_excel_close_all_and_missing_alias(library, monkeypatch, tmp_path):
         excel.excel_close("missing")
 
 
+def test_excel_close_one_of_multiple(library, monkeypatch, tmp_path):
+    library._file_type = FileType.Excel
+    excel = Excel(library)
+
+    def fake_read_excel(self, file_path: Path, sheet_name=None):
+        return {SHEET_NAME: pd.DataFrame(SHEET_DATA)}
+
+    monkeypatch.setattr(FileReader, "read_excel", fake_read_excel)
+
+    path = tmp_path / "data.xlsx"
+    path.touch()
+
+    excel.excel_open("book_a", path)
+    excel.excel_open("book_b", path)
+    assert excel.excel_close("book_a") is True
+    assert excel.current_file == "book_b"
+
+
 def test_excel_file_switch_requires_multiple_files(library, monkeypatch, tmp_path):
     library._file_type = FileType.Excel
     excel = Excel(library)

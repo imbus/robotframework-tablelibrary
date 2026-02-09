@@ -44,6 +44,18 @@ def test_read_table_returns_list_of_dicts(getter, tmp_path, write_csv):
     ]
 
 
+def test_read_table_list_of_dicts_ignore_header(getter, tmp_path, write_csv):
+    path = tmp_path / "data.csv"
+    write_csv(path, ROWS)
+    getter.library._ignore_header = True
+
+    data = getter.read_table(path, TableFormat["List of dicts"])
+    assert data == [
+        {0: "a", 1: "b"},
+        {0: "c", 1: "d"},
+    ]
+
+
 def test_read_table_ignore_header(getter, tmp_path, write_csv):
     path = tmp_path / "data.csv"
     write_csv(path, ROWS)
@@ -107,6 +119,9 @@ def test_getter_invalid_assertion_operator(getter, tmp_path, write_csv):
     with pytest.raises(ValueError, match="Unexpected operator for assertion"):
         getter.count_table("t_ops", Axis.Rows, assertion_operator="bad", assertion_expected=1)
 
+    with pytest.raises(ValueError, match="Unexpected operator for assertion"):
+        getter.get_table_row(0, assertion_operator="bad", assertion_expected="a")
+
 
 def test_getter_close_and_switch_errors(getter, tmp_path, write_csv):
     assert getter.close_table() is False
@@ -162,6 +177,11 @@ def test_open_and_create_table_without_alias(getter, tmp_path, write_csv):
 
     table_alias = getter.create_table(["a", "b"])
     assert table_alias
+
+
+def test_create_table_with_alias(getter):
+    alias = getter.create_table(["x", "y"], alias="explicit")
+    assert alias == "explicit"
 
 
 def test_getter_internal_fs_property(getter):
@@ -222,4 +242,21 @@ def test_count_table_parquet_assertions(getter, tmp_path, monkeypatch):
             assertion_operator=AssertionOperator["=="],
             assertion_expected=99,
             continue_on_failure=True,
+        )
+
+
+def test_count_table_verify_assertion_exception(getter, tmp_path, write_csv, monkeypatch):
+    path = tmp_path / "data.csv"
+    write_csv(path, ROWS)
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("Tables.keywords.getter.verify_assertion", boom)
+    with pytest.raises(RuntimeError, match="boom"):
+        getter.count_table(
+            path,
+            Axis.Rows,
+            assertion_operator=AssertionOperator["=="],
+            assertion_expected=1,
         )
