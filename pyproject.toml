@@ -39,6 +39,7 @@ dev = [
     "hatch",
     "ruff",
     "pytest",
+    "pytest-cov",
     "pre-commit",
     "mypy",
     "robotframework-robocop"
@@ -91,12 +92,13 @@ exclude_lines = [
 [tool.hatch.envs.dev]
 dependencies = [
   "ruff",
-  "pytest"
+  "pytest",
+  "pytest-cov"
 ]
 [tool.hatch.envs.dev.scripts]
 lint = "ruff check ."
 atest = "robot tests/atest/"
-utest = "pytest"
+utest = "pytest --cov=Tables --cov-report=term-missing --cov-branch --cov-fail-under=95"
 docs = "libdoc src/Tables results/keyword_docs.html"
 
 [tool.mypy]

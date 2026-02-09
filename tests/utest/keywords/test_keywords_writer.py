@@ -32,6 +32,12 @@ def test_write_table_creates_file(writer, tmp_path):
     assert Path(result).exists()
 
 
+def test_write_table_from_alias(writer, opened_table, tmp_path):
+    output = tmp_path / "out_alias.csv"
+    result = writer.write_table("table", output)
+    assert Path(result).exists()
+
+
 def test_set_table_cell(writer, opened_table):
     result = writer.set_table_cell(UPDATED_VALUE, row=0, column="h1", header=True)
     assert result[0][0] == "h1"
@@ -46,3 +52,7 @@ def test_set_table_row(writer, opened_table):
 def test_set_table_column(writer, opened_table):
     table = writer.set_table_column(UPDATED_COLUMN, column=1, header=False)
     assert table[0][1] == UPDATED_COLUMN[0]
+
+
+def test_writer_fs_property(writer):
+    assert writer._fs is not None

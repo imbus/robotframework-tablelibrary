@@ -9,6 +9,7 @@ from Tables.utils.settings import FileType
 
 SHEET_NAME = "Sheet1"
 SHEET_DATA = [[1, 2], [3, 4]]
+MISSING_SHEET = "Missing"
 
 
 def test_excel_open_validates_file_type(library, tmp_path):
@@ -64,6 +65,26 @@ def test_excel_close_and_get_open_files(library, monkeypatch, tmp_path):
     assert excel.current_file is None
 
 
+def test_excel_close_all_and_missing_alias(library, monkeypatch, tmp_path):
+    library._file_type = FileType.Excel
+    excel = Excel(library)
+
+    def fake_read_excel(self, file_path: Path, sheet_name=None):
+        return {SHEET_NAME: pd.DataFrame(SHEET_DATA)}
+
+    monkeypatch.setattr(FileReader, "read_excel", fake_read_excel)
+
+    path = tmp_path / "data.xlsx"
+    path.touch()
+
+    excel.excel_open("book", path)
+    assert excel.excel_close() is True
+
+    excel.excel_open("book", path)
+    with pytest.raises(KeyError, match="Given file alias"):
+        excel.excel_close("missing")
+
+
 def test_excel_file_switch_requires_multiple_files(library, monkeypatch, tmp_path):
     library._file_type = FileType.Excel
     excel = Excel(library)
@@ -83,3 +104,20 @@ def test_excel_file_switch_requires_multiple_files(library, monkeypatch, tmp_pat
     excel.excel_open("book_b", path)
     excel.excel_file_switch("book_b")
     assert excel.current_file == "book_b"
+
+
+def test_excel_sheet_read_missing_sheet(library, monkeypatch, tmp_path):
+    library._file_type = FileType.Excel
+    excel = Excel(library)
+
+    def fake_read_excel(self, file_path: Path, sheet_name=None):
+        return {SHEET_NAME: pd.DataFrame(SHEET_DATA)}
+
+    monkeypatch.setattr(FileReader, "read_excel", fake_read_excel)
+
+    path = tmp_path / "data.xlsx"
+    path.touch()
+
+    excel.excel_open("book", path)
+    with pytest.raises(ValueError, match="Sheet 'Missing' not found"):
+        excel.excel_sheet_read(MISSING_SHEET)
