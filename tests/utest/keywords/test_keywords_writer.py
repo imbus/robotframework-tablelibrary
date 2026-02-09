@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from Tables.keywords.writer import Writer
+
 HEADER = ["h1", "h2"]
 ROW_1 = ["a", "b"]
 ROW_2 = ["c", "d"]

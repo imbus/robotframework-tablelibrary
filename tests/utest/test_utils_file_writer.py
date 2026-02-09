@@ -4,8 +4,8 @@ import pandas as pd
 import pytest
 from pandas import DataFrame
 
-from Tables.utils.file_system import FileSync, TableObject
 from Tables.utils.file_reader import FileReader
+from Tables.utils.file_system import FileSync, TableObject
 from Tables.utils.file_writer import FileWriter, ModifyAction
 from Tables.utils.settings import (
     Delimiter,
