@@ -1,5 +1,10 @@
 # Development
 
+## Unit Testing
+
+We are measuring the coverage of the unit tests & expect a minimum coverage of 95% - otherwise the pipeline job for the unit test execution will fail accordingly.    
+Please ensure you've added unit tests whenever adding new source code to the project.
+
 ## Release Creation
 
 ### Precondition
