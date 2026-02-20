@@ -5,6 +5,7 @@ from uuid import uuid4
 import pandas as pd
 from assertionengine import AssertionOperator, verify_assertion
 from assertionengine.assertion_engine import EvaluationOperators, NumericalOperators
+from robot.api import logger
 from robot.api.deco import keyword
 from robot.api.exceptions import ContinuableFailure
 
@@ -398,6 +399,9 @@ class Getter(LibraryAttributes):
         shape_index = 0 if axis == Axis.Rows else 1
 
         axis_count = cast(int, table_df.shape[shape_index])
+
+        # debugging
+        logger.debug(f"Count of {axis.name}: {axis_count}")
 
         if assertion_expected:
             if (
