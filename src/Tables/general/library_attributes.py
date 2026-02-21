@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from Tables.utils.settings import FileType
 from Tables.utils.settings_stack import SettingsStack
 
 if TYPE_CHECKING:
@@ -12,14 +13,6 @@ class LibraryAttributes:
         Expose library attributes to all classes
         """
         self.library = library
-
-    @property
-    def file_type(self):
-        return self.library._file_type
-
-    @file_type.setter
-    def file_type(self, value):
-        self.library._file_type = value
 
     @property
     def separator(self):
@@ -61,11 +54,11 @@ class LibraryAttributes:
     def quoting_character(self, value):
         self.library._quoting_character = value
 
-
     ###
     ### New strategy: use SettingsStack like in Browser library for different scopes
     ###
 
+    # ignore_header
     @property
     def ignore_header(self) -> bool:
         return self.library.scope_stack["ignore_header"].get()
@@ -77,3 +70,16 @@ class LibraryAttributes:
     @ignore_header_stack.setter
     def ignore_header_stack(self, stack: SettingsStack):
         self.library.scope_stack["ignore_header"] = stack
+
+    # file_type
+    @property
+    def file_type(self) -> FileType:
+        return self.library.scope_stack["file_type"].get()
+
+    @property
+    def file_type_stack(self) -> SettingsStack:
+        return self.library.scope_stack["file_type"]
+
+    @file_type_stack.setter
+    def file_type_stack(self, stack: SettingsStack):
+        self.library.scope_stack["file_type"] = stack

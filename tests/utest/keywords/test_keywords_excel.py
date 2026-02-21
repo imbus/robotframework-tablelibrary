@@ -13,7 +13,7 @@ MISSING_SHEET = "Missing"
 
 
 def test_excel_open_validates_file_type(library, tmp_path):
-    library._file_type = FileType.CSV
+    library.scope_stack["file_type"].set(FileType.CSV)
     excel = Excel(library)
     path = tmp_path / "data.xlsx"
     path.touch()
@@ -22,7 +22,7 @@ def test_excel_open_validates_file_type(library, tmp_path):
 
 
 def test_excel_open_and_sheet_read(library, monkeypatch, tmp_path):
-    library._file_type = FileType.Excel
+    library.scope_stack["file_type"].set(FileType.Excel)
     excel = Excel(library)
     path = tmp_path / "data.xlsx"
     path.touch()
@@ -44,7 +44,7 @@ def test_excel_open_and_sheet_read(library, monkeypatch, tmp_path):
 
 
 def test_excel_close_and_get_open_files(library, monkeypatch, tmp_path):
-    library._file_type = FileType.Excel
+    library.scope_stack["file_type"].set(FileType.Excel)
     excel = Excel(library)
 
     assert excel.excel_close() is False
@@ -66,7 +66,7 @@ def test_excel_close_and_get_open_files(library, monkeypatch, tmp_path):
 
 
 def test_excel_close_all_and_missing_alias(library, monkeypatch, tmp_path):
-    library._file_type = FileType.Excel
+    library.scope_stack["file_type"].set(FileType.Excel)
     excel = Excel(library)
 
     def fake_read_excel(self, file_path: Path, sheet_name=None):
@@ -86,7 +86,7 @@ def test_excel_close_all_and_missing_alias(library, monkeypatch, tmp_path):
 
 
 def test_excel_close_one_of_multiple(library, monkeypatch, tmp_path):
-    library._file_type = FileType.Excel
+    library.scope_stack["file_type"].set(FileType.Excel)
     excel = Excel(library)
 
     def fake_read_excel(self, file_path: Path, sheet_name=None):
@@ -104,7 +104,7 @@ def test_excel_close_one_of_multiple(library, monkeypatch, tmp_path):
 
 
 def test_excel_file_switch_requires_multiple_files(library, monkeypatch, tmp_path):
-    library._file_type = FileType.Excel
+    library.scope_stack["file_type"].set(FileType.Excel)
     excel = Excel(library)
 
     def fake_read_excel(self, file_path: Path, sheet_name=None):
@@ -125,7 +125,8 @@ def test_excel_file_switch_requires_multiple_files(library, monkeypatch, tmp_pat
 
 
 def test_excel_sheet_read_missing_sheet(library, monkeypatch, tmp_path):
-    library._file_type = FileType.Excel
+    library.scope_stack["file_type"].set(FileType.Excel)
+
     excel = Excel(library)
 
     def fake_read_excel(self, file_path: Path, sheet_name=None):

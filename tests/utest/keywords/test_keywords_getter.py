@@ -157,7 +157,7 @@ def test_count_table_by_path_and_alias(getter, tmp_path, write_csv):
 
 
 def test_read_table_parquet_header_handling(getter, tmp_path, monkeypatch):
-    getter.file_type = FileType.Parquet
+    getter.file_type_stack.set(FileType.Parquet)
 
     def fake_read_table_file(path: Path):
         return pd.DataFrame([["x", "y"], ["m", "n"]], columns=["c1", "c2"])
@@ -216,7 +216,7 @@ def test_getter_assertion_success_paths(getter, tmp_path, write_csv):
 
 
 def test_count_table_parquet_assertions(getter, tmp_path, monkeypatch):
-    getter.file_type = FileType.Parquet
+    getter.file_type_stack.set(FileType.Parquet)
 
     def fake_read_table_file(path: Path):
         return pd.DataFrame([[1, 2], [3, 4]], columns=["c1", "c2"])

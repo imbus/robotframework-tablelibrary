@@ -179,9 +179,7 @@ class Getter(LibraryAttributes):
         return alias
 
     @keyword(tags=["Getter"])
-    def get_table(
-        self, return_type: TableFormat = TableFormat["List of lists"]
-    ) -> list[list] | list[dict] | pd.DataFrame:
+    def get_table(self, return_type: TableFormat = TableFormat["List of lists"]) -> list[list] | list[dict] | pd.DataFrame:
         """
         Keyword which returns a table in form of either list of lists, list of dicts, pandas dataframe.
 
@@ -197,9 +195,7 @@ class Getter(LibraryAttributes):
         | @{dicts} =        Tables.Get Table    List of dicts
         | @{dataframe} =    Tables.Get Table    Dataframe
         """
-        current_df = self.file_reader.file_sync.table_storage[
-            self.file_reader.file_sync.current_file
-        ].data
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(data=current_df)
 
         return self.file_reader.convert_dataframe(table_df, return_type)
@@ -233,12 +229,8 @@ class Getter(LibraryAttributes):
         | Get Table Cell    1    name    ==    sascha
         """
         cell = None
-        current_df = self.file_reader.file_sync.table_storage[
-            self.file_reader.file_sync.current_file
-        ].data
-        table_df = self.file_reader.validate_table_to_dataframe(
-            data=current_df, row=row, column=column
-        )
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
+        table_df = self.file_reader.validate_table_to_dataframe(data=current_df, row=row, column=column)
 
         column = self.file_reader.cast_column_type(column)
 
@@ -284,9 +276,7 @@ class Getter(LibraryAttributes):
             AssertionOperator["validate"],
         ]
         column_list = []
-        current_df = self.file_reader.file_sync.table_storage[
-            self.file_reader.file_sync.current_file
-        ].data
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(data=current_df, column=column)
         column = self.file_reader.cast_column_type(column)
 
@@ -332,9 +322,7 @@ class Getter(LibraryAttributes):
             AssertionOperator["validate"],
         ]
         row_list = []
-        current_df = self.file_reader.file_sync.table_storage[
-            self.file_reader.file_sync.current_file
-        ].data
+        current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(data=current_df, row=row)
 
         row_list = cast(list[Any], table_df.iloc[row].to_list())
@@ -349,7 +337,7 @@ class Getter(LibraryAttributes):
         return row_list
 
     @keyword(tags=["Getter"])
-    def count_table( # noqa: PLR0913
+    def count_table(  # noqa: PLR0913
         self,
         path: Path | str,
         axis: Axis,
@@ -404,18 +392,14 @@ class Getter(LibraryAttributes):
         logger.debug(f"Count of {axis.name}: {axis_count}")
 
         if assertion_expected:
-            if (
-                assertion_operator in NumericalOperators
-                or
-                assertion_operator in EvaluationOperators
-            ):
+            if assertion_operator in NumericalOperators or assertion_operator in EvaluationOperators:
                 try:
                     verify_assertion(axis_count, assertion_operator, assertion_expected, message)
                 except AssertionError as e:
                     err = message if message else str(e)
                     if not continue_on_failure:
-                        raise AssertionError(err)    # noqa: B904
-                    raise ContinuableFailure(err)    # noqa: B904
+                        raise AssertionError(err)  # noqa: B904
+                    raise ContinuableFailure(err)  # noqa: B904
                 except Exception:
                     raise
             else:

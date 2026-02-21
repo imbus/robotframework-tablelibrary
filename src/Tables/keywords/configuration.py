@@ -27,7 +27,6 @@ class ConfigCtx:
 
 
 class Configuration(LibraryAttributes):
-
     @keyword(tags=["Configuration"])
     def get_library_configuration(self) -> dict:
         """
@@ -36,19 +35,19 @@ class Configuration(LibraryAttributes):
         Return value is type ``ConfigCtx`` and contains all relevant configuration parameters.
         """
         return asdict(
-                ConfigCtx(
+            ConfigCtx(
                 file_type=self.file_type,
                 separator=self.separator,
                 quoting=self.quoting,
                 quoting_character=self.quoting_character,
                 line_terminator=self.line_terminator,
                 file_encoding=self.file_encoding,
-                ignore_header=self.ignore_header
+                ignore_header=self.ignore_header,
             )
         )
 
     @keyword(tags=["Configuration"])
-    def configure_file_type(self, file_type: FileType):
+    def configure_file_type(self, file_type: FileType, scope: Scope = Scope.Suite):
         """
         Change the internal file type during your test execution dynamically.
 
@@ -60,7 +59,10 @@ class Configuration(LibraryAttributes):
         | Configure File Type    Excel
         | Configure File Type    Parquet
         """
-        self.file_type = file_type
+        old_config = self.file_type
+        self.file_type_stack.set(file_type, scope)
+        logger.debug(f"'file_type': old value: {old_config} - new value: {file_type}")
+        return old_config
 
     @keyword(tags=["Configuration"])
     def configure_separator(self, separator: Delimiter):
@@ -135,16 +137,10 @@ class Configuration(LibraryAttributes):
 
         see [Python Encoding Names|https://docs.python.org/3/library/codecs.html#standard-encodings]
         """
-        self.file_encoding = (
-            file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
-        )
+        self.file_encoding = file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
 
     @keyword(tags=["Configuration"])
-    def configure_ignore_header(
-            self,
-            ignore_header: bool,
-            scope: Scope = Scope.Suite
-        ):
+    def configure_ignore_header(self, ignore_header: bool, scope: Scope = Scope.Suite):
         """
         Change the internal setting to (not) ignore the data header lines during your test execution dynamically.
 

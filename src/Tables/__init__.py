@@ -168,13 +168,11 @@ class Tables(HybridCore):
 
         # following config variables are using SettingsStack engine with scopes
         self.scope_stack["ignore_header"] = SettingsStack(ignore_header, self)
+        self.scope_stack["file_type"] = SettingsStack(file_type, self)
 
         # following config variables are still using the old way
-        self._file_type = file_type
         self._separator = separator
-        self._file_encoding: str = (
-            file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
-        )
+        self._file_encoding: str = file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
         self._line_terminator = line_terminator
         self._quoting = quoting
         self._quoting_character = quoting_character

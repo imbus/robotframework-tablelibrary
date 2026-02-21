@@ -44,13 +44,13 @@ def test_insert_row_and_column():
     updated = writer.insert_column_to_dataframe(1, [10, 20, 30], table)
     assert updated.shape[1] == EXPECTED_COLUMN_COUNT_AFTER_APPEND
 
-    with pytest.raises(ValueError, match="Cannot insert row"):
+    with pytest.raises(ValueError, match="must be set"):
         writer.insert_row_to_dataframe(None, ["x"], table)
 
 
 def test_insert_column_parquet_skips_header_reset():
     writer = make_writer_with_table()
-    writer.file_type = FileType.Parquet
+    writer.file_type_stack.set(FileType.Parquet)
     table = writer.current_table.data
     updated = writer.insert_column_to_dataframe(0, [9, 8, 7], table)
     assert updated.shape[1] == EXPECTED_COLUMN_COUNT_AFTER_APPEND
@@ -74,7 +74,7 @@ def test_append_and_remove_row_column():
 
 def test_append_column_parquet_skips_header_reset():
     writer = make_writer_with_table()
-    writer.file_type = FileType.Parquet
+    writer.file_type_stack.set(FileType.Parquet)
     table = writer.current_table.data
     updated = writer.append_column_to_dataframe([9, 8, 7], table)
     assert updated.shape[1] == EXPECTED_COLUMN_COUNT_AFTER_APPEND
@@ -98,7 +98,7 @@ def test_write_table_dataframe(tmp_path):
 
 def test_write_table_parquet_list(tmp_path, monkeypatch):
     writer = make_writer_with_table()
-    writer.file_type = FileType.Parquet
+    writer.file_type_stack.set(FileType.Parquet)
     path = tmp_path / "out.parquet"
     data = [PARQUET_COLUMNS, [1, 2]]
 
@@ -142,7 +142,7 @@ def test_find_file_path_with_none_uses_current():
 
 def test_add_header_in_dataframe_parquet():
     writer = make_writer_with_table()
-    writer.file_type = FileType.Parquet
+    writer.file_type_stack.set(FileType.Parquet)
     df = DataFrame([[1, 2]], columns=PARQUET_COLUMNS)
     result = writer.add_header_in_dataframe(df)
     assert list(result.columns) == PARQUET_COLUMNS
@@ -152,7 +152,7 @@ def test_add_header_in_dataframe_parquet():
 def test_insert_column_rejects_invalid_inputs():
     writer = make_writer_with_table()
     table = writer.add_header_in_dataframe(writer.current_table.data)
-    with pytest.raises(ValueError, match="Cannot insert column"):
+    with pytest.raises(ValueError, match="must be set"):
         writer.insert_column_to_dataframe(None, [1], table)
     with pytest.raises(TypeError, match="Cannot modify table using column name"):
         writer.insert_column_to_dataframe("h1", [1, 2], table)

@@ -108,14 +108,6 @@ def test_set_forces_global_if_no_suite_ids_even_if_suite_scope_requested(ctx: Du
     assert setter_calls == ["g1"]
 
 
-def test_set_unknown_scope_raises(ctx: DummyLibrary):
-    ctx.suite_ids = {"suite1": None}
-    stack = SettingsStack("g0", ctx)
-
-    with pytest.raises(ValueError, match="Unknown scope"):
-        stack.set("x", Scope.Keyword)
-
-
 def test_end_calls_setter_only_if_setting_changes(ctx: DummyLibrary):
     setter_calls: list[str] = []
     stack = SettingsStack("g0", ctx, setter_calls.append)

@@ -6,11 +6,13 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from .. import Tables
 
+
 class Scope(Enum):
     """Some keywords which manipulates library settings have a scope argument.
     With that scope argument one can set the "live time" of that setting.
     Available Scopes are: ``Global``, ``Suite`` and ``Test`` / ``Task``.
-    Is a scope finished, this scoped setting, like timeout, will no longer be used and the previous higher scope setting applies again.
+    Is a scope finished, this scoped setting, like timeout, will no longer be used
+    and the previous higher scope setting applies again.
 
     Live Times:
 
@@ -32,7 +34,6 @@ class Scope(Enum):
     Suite = auto()
     Test = auto()
     Task = Test
-    Keyword = auto()
 
 
 @dataclass
@@ -50,9 +51,7 @@ class SettingsStack:
     ):
         self.library = ctx
         self.setter_function = setter_function
-        self._stack: dict[str, ScopedSetting] = {
-            "g": ScopedSetting(Scope.Global, global_setting)
-        }
+        self._stack: dict[str, ScopedSetting] = {"g": ScopedSetting(Scope.Global, global_setting)}
 
     @property
     def _last_id(self) -> str:
@@ -68,11 +67,7 @@ class SettingsStack:
 
     def end(self, identifier: str):
         previous = self._stack.pop(identifier, None)
-        if (
-            previous is not None
-            and self.setter_function is not None
-            and previous != self._last_setting
-        ):
+        if previous is not None and self.setter_function is not None and previous != self._last_setting:
             self.setter_function(self._last_setting.setting)
 
     def set(self, setting: Any, scope: Scope | None = Scope.Global):
@@ -85,9 +80,7 @@ class SettingsStack:
         elif scope == Scope.Suite or scope is None:
             if self._last_setting.typ == Scope.Test:
                 self._stack.popitem()
-            self._stack[list(self.library.suite_ids)[-1]] = ScopedSetting(
-                Scope.Suite, setting
-            )
+            self._stack[list(self.library.suite_ids)[-1]] = ScopedSetting(Scope.Suite, setting)
         elif scope == Scope.Test:
             if not self.library.is_test_case_running:
                 raise ValueError("Setting for test/task can not be set on suite level}")
