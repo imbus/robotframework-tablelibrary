@@ -65,7 +65,7 @@ class Configuration(LibraryAttributes):
         return old_config
 
     @keyword(tags=["Configuration"])
-    def configure_separator(self, separator: Delimiter):
+    def configure_separator(self, separator: Delimiter, scope: Scope = Scope.Suite):
         """
         Change the internal separator during your test execution dynamically.
 
@@ -77,7 +77,10 @@ class Configuration(LibraryAttributes):
         | Configure Delimiter    ,
         | Configure Delimiter    \\t
         """
-        self.separator = separator
+        old_config = self.separator
+        self.separator_stack.set(separator, scope)
+        logger.debug(f"'file_type': old value: {old_config} - new value: {separator}")
+        return old_config
 
     @keyword(tags=["Configuration"])
     def configure_quoting(self, quoting: Quoting):

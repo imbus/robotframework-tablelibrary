@@ -25,7 +25,6 @@ from Tables.utils.settings_stack import SettingsStack
 class DummyLibrary:
     def __init__(self, *, ignore_header: bool = False):
         # configuration attributes used by LibraryAttributes
-        self._separator = Delimiter[","]
         self._file_encoding = FileEncoding.UTF_8.value
         self._line_terminator = LineTerminator.LF
         self._quoting = Quoting.MINIMAL
@@ -39,3 +38,4 @@ class DummyLibrary:
 
         self.scope_stack["ignore_header"] = SettingsStack(ignore_header, self)
         self.scope_stack["file_type"] = SettingsStack(FileType.CSV, self)
+        self.scope_stack["separator"] = SettingsStack(Delimiter[","], self)

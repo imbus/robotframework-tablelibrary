@@ -23,7 +23,7 @@ def test_configuration_updates_file_type(config):
 
 def test_configuration_updates_separator(config):
     config.configure_separator(Delimiter[","])
-    assert config.separator == Delimiter[","]
+    assert config.separator_stack.get() == Delimiter[","]
 
 
 def test_configuration_updates_quoting(config):

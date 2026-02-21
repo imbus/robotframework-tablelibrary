@@ -12,7 +12,7 @@ from Tables.utils.settings import (
 def test_tables_init_defaults():
     tables = Tables()
     assert tables.scope_stack["file_type"].get() == FileType.CSV
-    assert tables._separator == Delimiter[","]
+    assert tables.scope_stack["separator"].get() == Delimiter[","]
     assert tables._file_encoding == FileEncoding.UTF_8.value
     assert tables.scope_stack["ignore_header"].get() is False
     assert tables._line_terminator == LineTerminator.LF
@@ -32,7 +32,7 @@ def test_tables_init_custom_values():
         quoting_character=QuotingCharacter["'"],
     )
     assert tables.scope_stack["file_type"].get() == FileType.Excel
-    assert tables._separator == Delimiter[";"]
+    assert tables.scope_stack["separator"].get() == Delimiter[";"]
     assert tables._file_encoding == "latin_1"
     assert tables.scope_stack["ignore_header"].get() is True
     assert tables._line_terminator == LineTerminator.CRLR

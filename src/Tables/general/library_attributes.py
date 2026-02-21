@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from Tables.utils.settings import FileType
+from Tables.utils.settings import Delimiter, FileType
 from Tables.utils.settings_stack import SettingsStack
 
 if TYPE_CHECKING:
@@ -13,14 +13,6 @@ class LibraryAttributes:
         Expose library attributes to all classes
         """
         self.library = library
-
-    @property
-    def separator(self):
-        return self.library._separator
-
-    @separator.setter
-    def separator(self, value):
-        self.library._separator = value
 
     @property
     def file_encoding(self):
@@ -83,3 +75,16 @@ class LibraryAttributes:
     @file_type_stack.setter
     def file_type_stack(self, stack: SettingsStack):
         self.library.scope_stack["file_type"] = stack
+
+    # separator / delimiter
+    @property
+    def separator(self) -> Delimiter:
+        return self.library.scope_stack["separator"].get()
+
+    @property
+    def separator_stack(self) -> SettingsStack:
+        return self.library.scope_stack["separator"]
+
+    @separator_stack.setter
+    def separator_stack(self, stack: SettingsStack):
+        self.library.scope_stack["separator"] = stack
