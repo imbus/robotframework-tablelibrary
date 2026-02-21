@@ -1,14 +1,20 @@
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 from pandas import DataFrame
 
+from Tables.utils.settings_stack import Scope
+
 from ..general.library_attributes import LibraryAttributes
+from ..keywords.configuration import Configuration
 from ..utils.file_system import FileSync, FileSystem
 from ..utils.settings import FileType, TableFormat
 from .file_reader import FileReader
+
+if TYPE_CHECKING:
+    pass
 
 
 class ModifyAction(Enum):
@@ -26,6 +32,10 @@ class FileWriter(LibraryAttributes):
         self.file_sync = file_sync
 
         self.header: bool = True
+
+    @property
+    def config(self):
+        return Configuration(self.library)
 
     @property
     def file_reader(self):
@@ -226,7 +236,7 @@ class FileWriter(LibraryAttributes):
 
         # overwrite ignore_header for validation keywords
         self.header = header
-        self.ignore_header = not self.header
+        self.config.configure_ignore_header(not self.header, Scope.Test)
 
         table_df = self.add_header_in_dataframe(table_df)
 
@@ -255,7 +265,7 @@ class FileWriter(LibraryAttributes):
 
         table_df = self.update_cached_dataframe(table_df)
 
-        self.ignore_header = original_ignore_header
+        self.config.configure_ignore_header(original_ignore_header, Scope.Test)
         self.header = original_header
 
         return self.file_reader.convert_dataframe(table_df, return_type)
@@ -279,7 +289,8 @@ class FileWriter(LibraryAttributes):
             self.header = False
         else:
             self.header = header
-        self.ignore_header = not self.header
+
+        self.config.configure_ignore_header(not self.header, Scope.Test)
 
         table_df = self.add_header_in_dataframe(table_df)
 
@@ -312,7 +323,7 @@ class FileWriter(LibraryAttributes):
 
         self.update_cached_dataframe(table_df)
 
-        self.ignore_header = original_ignore_header
+        self.config.configure_ignore_header(original_ignore_header, Scope.Test)
         self.header = original_header
 
         return table_df

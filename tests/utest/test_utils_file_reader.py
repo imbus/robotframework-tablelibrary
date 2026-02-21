@@ -7,29 +7,16 @@ from pandas import DataFrame
 from Tables.utils.file_reader import FileReader
 from Tables.utils.file_system import FileSync
 from Tables.utils.settings import (
-    Delimiter,
-    FileEncoding,
     FileType,
-    LineTerminator,
-    Quoting,
-    QuotingCharacter,
     TableFormat,
 )
+
+from .helper.helpers import DummyLibrary
 
 DEFAULT_HEADERS = ["A", "B"]
 MISSING_COLUMN_NAME = "missing"
 DATETIME_COLUMN = "ts"
 EXPECTED_PARQUET_HEADER = ["c1", "c2"]
-
-
-class DummyLibrary:
-    _file_type = FileType.CSV
-    _separator = Delimiter[","]
-    _file_encoding = FileEncoding.UTF_8.value
-    _line_terminator = LineTerminator.LF
-    _quoting = Quoting.MINIMAL
-    _quoting_character = QuotingCharacter['"']
-    _ignore_header = False
 
 
 EXPECTED_TABLE_SHAPE = (2, 2)
@@ -48,7 +35,7 @@ def test_cast_column_type():
 
 def test_validate_column_rejects_str_when_ignore_header_true():
     reader = make_reader()
-    reader.ignore_header = True
+    reader.ignore_header_stack.set(True)
     df = DataFrame([["h1", "h2"], [1, 2]])
     with pytest.raises(TypeError):
         reader.validate_column(df, "h1")
@@ -56,7 +43,7 @@ def test_validate_column_rejects_str_when_ignore_header_true():
 
 def test_validate_column_with_header_row():
     reader = make_reader()
-    reader.ignore_header = False
+    reader.ignore_header_stack.set(False)
     df = DataFrame([["h1", "h2"], [1, 2]])
     assert reader.validate_column(df, "h1") is True
     with pytest.raises(IndexError):
@@ -113,7 +100,7 @@ def test_convert_dataframe_list_of_lists_and_dicts():
     reader = make_reader()
     df = DataFrame([["h1", "h2"], [1, 2]])
     reader.file_type = FileType.CSV
-    reader.ignore_header = False
+    reader.ignore_header_stack.set(False)
     as_lists = reader.convert_dataframe(df, TableFormat["List of lists"])
     assert as_lists == [["h1", "h2"], [1, 2]]
 
@@ -125,7 +112,7 @@ def test_convert_dataframe_list_of_dicts_ignores_header_logic_for_parquet():
     reader = make_reader()
     df = DataFrame([[1, 2]], columns=["h1", "h2"])
     reader.file_type = FileType.Parquet
-    reader.ignore_header = False
+    reader.ignore_header_stack.set(False)
     as_dicts = reader.convert_dataframe(df, TableFormat["List of dicts"])
     assert as_dicts == [{"h1": 1, "h2": 2}]
 
@@ -134,7 +121,7 @@ def test_convert_dataframe_parquet_inserts_header_row():
     reader = make_reader()
     df = DataFrame([[1, 2]], columns=["c1", "c2"])
     reader.file_type = FileType.Parquet
-    reader.ignore_header = False
+    reader.ignore_header_stack.set(False)
     as_lists = reader.convert_dataframe(df, TableFormat["List of lists"])
     assert as_lists[0] == ["c1", "c2"]
 

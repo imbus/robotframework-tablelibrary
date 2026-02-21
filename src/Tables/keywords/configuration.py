@@ -1,3 +1,6 @@
+from dataclasses import asdict, dataclass
+
+from robot.api import logger
 from robot.api.deco import keyword
 
 from ..general.library_attributes import LibraryAttributes
@@ -9,9 +12,41 @@ from ..utils.settings import (
     Quoting,
     QuotingCharacter,
 )
+from ..utils.settings_stack import Scope
+
+
+@dataclass
+class ConfigCtx:
+    file_type: FileType
+    separator: Delimiter
+    quoting: Quoting
+    quoting_character: QuotingCharacter
+    line_terminator: LineTerminator
+    file_encoding: FileEncoding
+    ignore_header: bool
 
 
 class Configuration(LibraryAttributes):
+
+    @keyword(tags=["Configuration"])
+    def get_library_configuration(self) -> dict:
+        """
+        Keyword returns the current internal library configuration.
+
+        Return value is type ``ConfigCtx`` and contains all relevant configuration parameters.
+        """
+        return asdict(
+                ConfigCtx(
+                file_type=self.file_type,
+                separator=self.separator,
+                quoting=self.quoting,
+                quoting_character=self.quoting_character,
+                line_terminator=self.line_terminator,
+                file_encoding=self.file_encoding,
+                ignore_header=self.ignore_header
+            )
+        )
+
     @keyword(tags=["Configuration"])
     def configure_file_type(self, file_type: FileType):
         """
@@ -105,7 +140,11 @@ class Configuration(LibraryAttributes):
         )
 
     @keyword(tags=["Configuration"])
-    def configure_ignore_header(self, ignore_header: bool):
+    def configure_ignore_header(
+            self,
+            ignore_header: bool,
+            scope: Scope = Scope.Suite
+        ):
         """
         Change the internal setting to (not) ignore the data header lines during your test execution dynamically.
 
@@ -116,4 +155,8 @@ class Configuration(LibraryAttributes):
         | Configure Ignore Header    True
         | Configure Ignore Header    False
         """
-        self.ignore_header = ignore_header
+
+        old_config = self.ignore_header
+        self.ignore_header_stack.set(ignore_header, scope)
+        logger.debug(f"'ignore_header': old value: {old_config} - new value: {ignore_header}")
+        return old_config

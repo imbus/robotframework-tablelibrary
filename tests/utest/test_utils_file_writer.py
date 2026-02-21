@@ -8,25 +8,11 @@ from Tables.utils.file_reader import FileReader
 from Tables.utils.file_system import FileSync, TableObject
 from Tables.utils.file_writer import FileWriter, ModifyAction
 from Tables.utils.settings import (
-    Delimiter,
-    FileEncoding,
     FileType,
-    LineTerminator,
-    Quoting,
-    QuotingCharacter,
     TableFormat,
 )
 
-
-class DummyLibrary:
-    _file_type = FileType.CSV
-    _separator = Delimiter[","]
-    _file_encoding = FileEncoding.UTF_8.value
-    _line_terminator = LineTerminator.LF
-    _quoting = Quoting.MINIMAL
-    _quoting_character = QuotingCharacter['"']
-    _ignore_header = False
-
+from .helper.helpers import DummyLibrary
 
 UPDATED_CELL_VALUE = 99
 EXPECTED_ROW_COUNT_AFTER_REMOVE = 2

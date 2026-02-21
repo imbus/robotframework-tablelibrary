@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from Tables.utils.settings_stack import SettingsStack
+
 if TYPE_CHECKING:
     from .. import Tables
 
@@ -59,10 +61,19 @@ class LibraryAttributes:
     def quoting_character(self, value):
         self.library._quoting_character = value
 
-    @property
-    def ignore_header(self):
-        return self.library._ignore_header
 
-    @ignore_header.setter
-    def ignore_header(self, value):
-        self.library._ignore_header = value
+    ###
+    ### New strategy: use SettingsStack like in Browser library for different scopes
+    ###
+
+    @property
+    def ignore_header(self) -> bool:
+        return self.library.scope_stack["ignore_header"].get()
+
+    @property
+    def ignore_header_stack(self) -> SettingsStack:
+        return self.library.scope_stack["ignore_header"]
+
+    @ignore_header_stack.setter
+    def ignore_header_stack(self, stack: SettingsStack):
+        self.library.scope_stack["ignore_header"] = stack

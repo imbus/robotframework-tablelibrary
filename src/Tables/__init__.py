@@ -1,8 +1,11 @@
 # SPDX-FileCopyrightText: 2025-present Marvin Klerx <marvinklerx20@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+from robot import result, running
 from robot.api.deco import library
 from robotlibcore import HybridCore
+
+from Tables.utils.settings_stack import Scope, SettingsStack
 
 from .__about__ import __version__
 from .keywords import (
@@ -155,12 +158,23 @@ class Tables(HybridCore):
         | ``quoting`` | Define which values should be surrounded with quotes, please check the CSV quoting for more details. Default is ``MINIMAL``  |
         | ``quoting_character`` | Define quoting character to use for writing table files. Default is ``\"``  |
         """
+        self.ROBOT_LIBRARY_LISTENER = self
+
+        # required variables for SettingsScope mechanism
+        self.scope_stack: dict = {}
+        self.suite_ids: dict[str, None] = {}
+        self.current_test_id: str | None = None
+        self.is_test_case_running = False
+
+        # following config variables are using SettingsStack engine with scopes
+        self.scope_stack["ignore_header"] = SettingsStack(ignore_header, self)
+
+        # following config variables are still using the old way
         self._file_type = file_type
         self._separator = separator
         self._file_encoding: str = (
             file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
         )
-        self._ignore_header = ignore_header
         self._line_terminator = line_terminator
         self._quoting = quoting
         self._quoting_character = quoting_character
@@ -176,3 +190,29 @@ class Tables(HybridCore):
         ]
 
         super().__init__(libraries)
+
+    def _start_suite(self, _name: running.TestSuite, attrs: result.TestSuite):
+        self.suite_ids[attrs.id] = None
+        self._add_to_scope_stack(attrs.id, Scope.Suite)
+
+    def _start_test(self, _name: running.TestCase, attrs: result.TestCase):
+        self.current_test_id = attrs.id
+        self._add_to_scope_stack(attrs.id, Scope.Test)
+        self.is_test_case_running = True
+
+    def _end_test(self, _name: running.TestCase, attrs: result.TestCase):
+        self._remove_from_scope_stack(attrs.id)
+        self.current_test_id = None
+        self.is_test_case_running = False
+
+    def _end_suite(self, _name: running.TestSuite, attrs: result.TestSuite):
+        self._remove_from_scope_stack(attrs.id)
+        self.suite_ids.pop(attrs.id, None)
+
+    def _add_to_scope_stack(self, scope_id: str, scope: Scope):
+        for stack in self.scope_stack.values():
+            stack.start(scope_id, scope)
+
+    def _remove_from_scope_stack(self, scope_id):
+        for stack in self.scope_stack.values():
+            stack.end(scope_id)

@@ -47,7 +47,7 @@ def test_read_table_returns_list_of_dicts(getter, tmp_path, write_csv):
 def test_read_table_list_of_dicts_ignore_header(getter, tmp_path, write_csv):
     path = tmp_path / "data.csv"
     write_csv(path, ROWS)
-    getter.library._ignore_header = True
+    getter.library.scope_stack["ignore_header"].set(True)
 
     data = getter.read_table(path, TableFormat["List of dicts"])
     assert data == [
@@ -59,7 +59,7 @@ def test_read_table_list_of_dicts_ignore_header(getter, tmp_path, write_csv):
 def test_read_table_ignore_header(getter, tmp_path, write_csv):
     path = tmp_path / "data.csv"
     write_csv(path, ROWS)
-    getter.library._ignore_header = True
+    getter.library.scope_stack["ignore_header"].set(True)
 
     data = getter.read_table(path, TableFormat["List of lists"])
     assert data == [ROW_1, ROW_2]
@@ -98,7 +98,7 @@ def test_open_get_table_and_cell_access(getter, tmp_path, write_csv):
 def test_getter_ignore_header(getter, tmp_path, write_csv):
     path = tmp_path / "data.csv"
     write_csv(path, ROWS)
-    getter.library._ignore_header = True
+    getter.library.scope_stack["ignore_header"].set(True)
 
     getter.open_table(path, alias="t_ignore")
     table = getter.get_table()

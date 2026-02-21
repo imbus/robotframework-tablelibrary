@@ -3,9 +3,7 @@ import pytest
 from Tables.keywords.configuration import Configuration
 from Tables.utils.settings import Delimiter, FileEncoding, FileType
 
-
-class DummyLibrary:
-    pass
+from .helper.helpers import DummyLibrary
 
 
 @pytest.fixture
