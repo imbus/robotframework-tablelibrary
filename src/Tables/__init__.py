@@ -175,9 +175,7 @@ class Tables(HybridCore):
             file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding, self
         )
         self.scope_stack["quoting"] = SettingsStack(quoting, self)
-
-        # following config variables are still using the old way
-        self._quoting_character = quoting_character
+        self.scope_stack["quoting_character"] = SettingsStack(quoting_character, self)
 
         self.file_access = FileAccess(self)
 

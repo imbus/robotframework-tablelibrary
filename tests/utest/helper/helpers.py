@@ -24,8 +24,6 @@ from Tables.utils.settings_stack import SettingsStack
 
 class DummyLibrary:
     def __init__(self, *, ignore_header: bool = False):
-        # configuration attributes used by LibraryAttributes
-        self._quoting_character = QuotingCharacter['"']
 
         # attributes expected by SettingsStack
         self.scope_stack: dict = {}
@@ -39,3 +37,4 @@ class DummyLibrary:
         self.scope_stack["line_terminator"] = SettingsStack(LineTerminator.LF, self)
         self.scope_stack["file_encoding"] = SettingsStack(FileEncoding.UTF_8.value, self)
         self.scope_stack["quoting"] = SettingsStack(Quoting.MINIMAL, self)
+        self.scope_stack["quoting_character"] = SettingsStack(QuotingCharacter['"'], self)

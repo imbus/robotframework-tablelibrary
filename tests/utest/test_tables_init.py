@@ -17,7 +17,7 @@ def test_tables_init_defaults():
     assert tables.scope_stack["ignore_header"].get() is False
     assert tables.scope_stack["line_terminator"].get() == LineTerminator.LF
     assert tables.scope_stack["quoting"].get() == Quoting.MINIMAL
-    assert tables._quoting_character == QuotingCharacter['"']
+    assert tables.scope_stack["quoting_character"].get() == QuotingCharacter['"']
     assert tables.file_access is not None
 
 
@@ -37,4 +37,4 @@ def test_tables_init_custom_values():
     assert tables.scope_stack["ignore_header"].get() is True
     assert tables.scope_stack["line_terminator"].get() == LineTerminator.CRLR
     assert tables.scope_stack["quoting"].get() == Quoting.NONE
-    assert tables._quoting_character == QuotingCharacter["'"]
+    assert tables.scope_stack["quoting_character"].get() == QuotingCharacter["'"]

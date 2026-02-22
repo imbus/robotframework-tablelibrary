@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from Tables.utils.settings import Delimiter, FileEncoding, FileType, LineTerminator, Quoting
+from Tables.utils.settings import Delimiter, FileEncoding, FileType, LineTerminator, Quoting, QuotingCharacter
 from Tables.utils.settings_stack import SettingsStack
 
 if TYPE_CHECKING:
@@ -13,14 +13,6 @@ class LibraryAttributes:
         Expose library attributes to all classes
         """
         self.library = library
-
-    @property
-    def quoting_character(self):
-        return self.library._quoting_character
-
-    @quoting_character.setter
-    def quoting_character(self, value):
-        self.library._quoting_character = value
 
     ###
     ### New strategy: use SettingsStack like in Browser library for different scopes
@@ -103,3 +95,16 @@ class LibraryAttributes:
     @quoting_stack.setter
     def quoting_stack(self, stack: SettingsStack):
         self.library.scope_stack["quoting"] = stack
+
+    # quoting character
+    @property
+    def quoting_character(self) -> QuotingCharacter:
+        return self.library.scope_stack["quoting_character"].get()
+
+    @property
+    def quoting_character_stack(self) -> SettingsStack:
+        return self.library.scope_stack["quoting_character"]
+
+    @quoting_character_stack.setter
+    def quoting_character_stack(self, stack: SettingsStack):
+        self.library.scope_stack["quoting_character"] = stack

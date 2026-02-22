@@ -101,7 +101,7 @@ class Configuration(LibraryAttributes):
         return old_config
 
     @keyword(tags=["Configuration"])
-    def configure_quoting_character(self, quoting_character: QuotingCharacter):
+    def configure_quoting_character(self, quoting_character: QuotingCharacter, scope: Scope = Scope.Suite):
         """
         Change the internal quoting character during your test execution dynamically.
 
@@ -112,7 +112,10 @@ class Configuration(LibraryAttributes):
         | Configure Quoting Character    "
         | Configure Quoting Character    '
         """
-        self.quoting_character = quoting_character
+        old_config = self.quoting_character
+        self.quoting_character_stack.set(quoting_character, scope)
+        logger.debug(f"'file_type': old value: {old_config} - new value: {quoting_character}")
+        return old_config
 
     @keyword(tags=["Configuration"])
     def configure_line_terminator(self, line_terminator: LineTerminator, scope: Scope = Scope.Suite):
