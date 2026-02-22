@@ -1,5 +1,8 @@
 from typing import TYPE_CHECKING
 
+from Tables.utils.settings import Delimiter, FileEncoding, FileType, LineTerminator, Quoting, QuotingCharacter
+from Tables.utils.settings_stack import SettingsStack
+
 if TYPE_CHECKING:
     from .. import Tables
 
@@ -11,58 +14,97 @@ class LibraryAttributes:
         """
         self.library = library
 
+    ###
+    ### New strategy: use SettingsStack like in Browser library for different scopes
+    ###
+
+    # ignore_header
     @property
-    def file_type(self):
-        return self.library._file_type
-
-    @file_type.setter
-    def file_type(self, value):
-        self.library._file_type = value
-
-    @property
-    def separator(self):
-        return self.library._separator
-
-    @separator.setter
-    def separator(self, value):
-        self.library._separator = value
+    def ignore_header(self) -> bool:
+        return self.library.scope_stack["ignore_header"].get()
 
     @property
-    def file_encoding(self):
-        return self.library._file_encoding
+    def ignore_header_stack(self) -> SettingsStack:
+        return self.library.scope_stack["ignore_header"]
 
-    @file_encoding.setter
-    def file_encoding(self, value):
-        self.library._file_encoding = value
+    @ignore_header_stack.setter
+    def ignore_header_stack(self, stack: SettingsStack):
+        self.library.scope_stack["ignore_header"] = stack
+
+    # file_type
+    @property
+    def file_type(self) -> FileType:
+        return self.library.scope_stack["file_type"].get()
 
     @property
-    def line_terminator(self):
-        return self.library._line_terminator
+    def file_type_stack(self) -> SettingsStack:
+        return self.library.scope_stack["file_type"]
 
-    @line_terminator.setter
-    def line_terminator(self, value):
-        self.library._line_terminator = value
+    @file_type_stack.setter
+    def file_type_stack(self, stack: SettingsStack):
+        self.library.scope_stack["file_type"] = stack
+
+    # separator / delimiter
+    @property
+    def separator(self) -> Delimiter:
+        return self.library.scope_stack["separator"].get()
 
     @property
-    def quoting(self):
-        return self.library._quoting
+    def separator_stack(self) -> SettingsStack:
+        return self.library.scope_stack["separator"]
 
-    @quoting.setter
-    def quoting(self, value):
-        self.library._quoting = value
+    @separator_stack.setter
+    def separator_stack(self, stack: SettingsStack):
+        self.library.scope_stack["separator"] = stack
+
+    # line terminator
+    @property
+    def line_terminator(self) -> LineTerminator:
+        return self.library.scope_stack["line_terminator"].get()
 
     @property
-    def quoting_character(self):
-        return self.library._quoting_character
+    def line_terminator_stack(self) -> SettingsStack:
+        return self.library.scope_stack["line_terminator"]
 
-    @quoting_character.setter
-    def quoting_character(self, value):
-        self.library._quoting_character = value
+    @line_terminator_stack.setter
+    def line_terminator_stack(self, stack: SettingsStack):
+        self.library.scope_stack["line_terminator"] = stack
+
+    # file encoding
+    @property
+    def file_encoding(self) -> FileEncoding:
+        return self.library.scope_stack["file_encoding"].get()
 
     @property
-    def ignore_header(self):
-        return self.library._ignore_header
+    def file_encoding_stack(self) -> SettingsStack:
+        return self.library.scope_stack["file_encoding"]
 
-    @ignore_header.setter
-    def ignore_header(self, value):
-        self.library._ignore_header = value
+    @file_encoding_stack.setter
+    def file_encoding_stack(self, stack: SettingsStack):
+        self.library.scope_stack["file_encoding"] = stack
+
+    # quoting
+    @property
+    def quoting(self) -> Quoting:
+        return self.library.scope_stack["quoting"].get()
+
+    @property
+    def quoting_stack(self) -> SettingsStack:
+        return self.library.scope_stack["quoting"]
+
+    @quoting_stack.setter
+    def quoting_stack(self, stack: SettingsStack):
+        self.library.scope_stack["quoting"] = stack
+
+    # quoting character
+    @property
+    def quoting_character(self) -> QuotingCharacter:
+        return self.library.scope_stack["quoting_character"].get()
+
+    @property
+    def quoting_character_stack(self) -> SettingsStack:
+        return self.library.scope_stack["quoting_character"]
+
+    @quoting_character_stack.setter
+    def quoting_character_stack(self, stack: SettingsStack):
+        self.library.scope_stack["quoting_character"] = stack

@@ -42,9 +42,7 @@ class Excel(LibraryAttributes):
     ###
 
     @keyword(tags=["Excel", "Getter"])
-    def excel_open(
-        self, alias: str, path: str, sheet_name: str | list[str | int] | None = None
-    ) -> str:
+    def excel_open(self, alias: str, path: str, sheet_name: str | list[str | int] | None = None) -> str:
         """
         Keyword to open the given excel file.
 
@@ -97,9 +95,7 @@ class Excel(LibraryAttributes):
                 self.current_file = None
             logger.info(f"Excel file '{alias}' is closed!")
             return True
-        raise KeyError(
-            f"Given file alias '{alias}' does not exist - check all opened files and their alias first!"
-        )
+        raise KeyError(f"Given file alias '{alias}' does not exist - check all opened files and their alias first!")
 
     @keyword(tags=["Excel", "Getter"])
     def excel_get_open_files(self) -> list:

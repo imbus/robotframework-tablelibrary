@@ -1,14 +1,8 @@
 import pytest
 
 from Tables.keywords.getter import Getter
-from Tables.utils.settings import FileEncoding, FileType
 
-
-class DummyLibrary:
-    _file_encoding = FileEncoding.UTF_8
-    _file_type = FileType.CSV
-    separator = ","
-    ignore_header = False
+from .helper.helpers import DummyLibrary
 
 
 @pytest.fixture

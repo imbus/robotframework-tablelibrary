@@ -6,6 +6,9 @@ import pandas as pd
 from pandas import DataFrame
 from robot.api import logger
 
+from Tables.keywords.configuration import Configuration
+from Tables.utils.settings_stack import Scope
+
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_system import FileSync, TableObject
 from ..utils.settings import FileSuffix, FileType, TableFormat
@@ -20,6 +23,10 @@ class FileReader(LibraryAttributes):
     def __init__(self, library, file_sync: FileSync):
         super().__init__(library)
         self.file_sync = file_sync
+
+    @property
+    def config(self):
+        return Configuration(self.library)
 
     @property
     def opened_table_path(self) -> Path:
@@ -54,9 +61,7 @@ class FileReader(LibraryAttributes):
             return cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records"))
         if return_type == TableFormat["Dataframe"]:
             return data
-        raise ValueError(
-            f"Invalid TableFormat type. Please select valid values: {[key.name for key in TableFormat]}"
-        )
+        raise ValueError(f"Invalid TableFormat type. Please select valid values: {[key.name for key in TableFormat]}")
 
     def file_exists(self, path: Path) -> bool | FileNotFoundError:
         if not path.is_file():
@@ -64,7 +69,10 @@ class FileReader(LibraryAttributes):
         return True
 
     def check_default_dataframe_header(self, table: DataFrame) -> bool:
-        """Checks if Dataframe has default index ([0,1,2,3..]) and if it does returns True. If it detects unique columns returns False."""
+        """
+        Checks if Dataframe has default index ([0,1,2,3..]) and if it does returns True.
+        If it detects unique columns returns False.
+        """
         table_column_count = table.shape[1]
         default_index = [str(i) for i in range(table_column_count)]
         table_header = [str(i) for i in table.columns.to_list()]
@@ -73,9 +81,12 @@ class FileReader(LibraryAttributes):
         return table_header == default_index
 
     def reset_header_dataframe(self, table: DataFrame) -> DataFrame:
-        """Checks if Dataframe has default index ([0,1,2,3..]) and if it does the Dataframe remains the same. If it detects unique columns
+        """
+        Checks if Dataframe has default index ([0,1,2,3..]) and if it does the Dataframe remains the same.
+        If it detects unique columns
         it puts them into the body of dataframe and makes the header as basic index.
-        Parquet is special case since the default header is not index based but with unique columns. Thus it will not have index as headers."""
+        Parquet is special case since the default header is not index based but with unique columns.
+        Thus it will not have index as headers."""
         table_header = table.columns.to_list()
         table_data = table.values.tolist()
 
@@ -135,9 +146,7 @@ class FileReader(LibraryAttributes):
 
         if isinstance(column_value, str):
             if self.ignore_header:
-                raise TypeError(
-                    "Column identifier cannot be 'str' type when library setting 'ignore_header' is 'True'!"
-                )
+                raise TypeError("Column identifier cannot be 'str' type when library setting 'ignore_header' is 'True'!")
             if column_value not in data.iloc[0].tolist() and column_value not in data.columns:
                 raise ValueError(
                     f"Couldn't find column '{column_value}' in the table. Current columns are: {list(data.iloc[0])}"
@@ -145,9 +154,7 @@ class FileReader(LibraryAttributes):
 
         elif isinstance(column_value, int):
             if column_value + 1 > data.shape[1]:
-                raise IndexError(
-                    f"Selected column is out of bounds. The size of the table is: {data.shape[1]} columns."
-                )
+                raise IndexError(f"Selected column is out of bounds. The size of the table is: {data.shape[1]} columns.")
 
         return True
 
@@ -156,30 +163,24 @@ class FileReader(LibraryAttributes):
         Validates whether the row is out of bound.
         """
         if isinstance(row_value, int) and row_value + 1 > data.shape[0]:
-            raise IndexError(
-                f"Selected row is out of bounds. The size of the table is: {data.shape[0]} rows."
-            )
+            raise IndexError(f"Selected row is out of bounds. The size of the table is: {data.shape[0]} rows.")
         return True
 
-    def validate_data_list_with_table(
-        self, data: list, table: DataFrame, row: Any | None = None, column: Any | None = None
-    ):
+    def validate_data_list_with_table(self, data: list, table: DataFrame, row: Any | None = None, column: Any | None = None):
         """
-        Reads the data(as list) and compares it with the provided table (as dataframe). It checks if rows or column size matches the one of the table.
+        Reads the data(as list) and compares it with the provided table (as dataframe).
+            It checks if rows or column size matches the one of the table.
         Returns an error if both rows and columns are not None.
         data: Provided list whose size (len) should be checked.
-        table: the table which should be compared against. Depending if 'column' or 'row' parameters are not None, this axis would be checked.
+        table: the table which should be compared against.
+            Depending if 'column' or 'row' parameters are not None, this axis would be checked.
         row: If not None the row size of the table will be checked.
         column: If not None the column size of the table will be checked.
         """
         if row is not None and column is not None:
-            raise ValueError(
-                "Cannot select both row and column if selected data is a list for manipulation."
-            )
+            raise ValueError("Cannot select both row and column if selected data is a list for manipulation.")
         if row is None and column is None:
-            raise ValueError(
-                "Cannot ignore both row and column if selected data is a list for manipulation."
-            )
+            raise ValueError("Cannot ignore both row and column if selected data is a list for manipulation.")
 
         selected_axis = 1 if row is not None else 0
         if len(data) != table.shape[selected_axis]:
@@ -258,7 +259,8 @@ class FileReader(LibraryAttributes):
                 FileType.Excel: lambda: self.read_excel(path),
                 FileType.Parquet: lambda: self.read_parquet(path),
             }
-            self.file_type = self.read_data_type(path)
+
+            self.config.configure_file_type(self.read_data_type(path), Scope.Test)
 
             reader = readers.get(self.file_type)
             if reader:
@@ -305,9 +307,7 @@ class FileReader(LibraryAttributes):
                 self.file_sync.current_file = None
             logger.info(f"Selected file '{alias}' is closed!")
             return True
-        raise KeyError(
-            f"Given file alias '{alias}' does not exist - check all opened files and their alias first!"
-        )
+        raise KeyError(f"Given file alias '{alias}' does not exist - check all opened files and their alias first!")
 
     def table_dataframe_switch(self, alias: str) -> str:
         """

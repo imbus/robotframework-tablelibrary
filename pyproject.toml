@@ -112,27 +112,26 @@ warn_unreachable = true
 pretty = true
 
 [tool.ruff]
-fix = false
 target-version = "py310"
-line-length = 100
+line-length = 125
 exclude = [
   "__pycache__",
   ".venv",
   "tools",
   "model",
+  ".git",
+  "build",
+  "dist"
 ]
 
 [tool.ruff.format]
 quote-style = "double"
+indent-style = "space"
 
 [tool.ruff.lint]
 ignore = [
-  "N815",  # mixedCase variable in class scope
-  "N803",  # argument name should be lowercase
-  "T201",  # Print statements
-  "INP001",  # part of an implicit namespace package
   "N999",  # Invalid module name
-  "E501", # Line Length
+  "E501" # docstrings
 ]
 select = [
   "E",
@@ -161,6 +160,7 @@ select = [
   "SIM",
   "RUF",
 ]
+unfixable = []
 
 [tool.robocop.lint]
 select = [

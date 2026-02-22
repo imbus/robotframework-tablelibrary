@@ -40,9 +40,7 @@ class Writer(LibraryAttributes):
         | Tables.Write Table    ${data}    table 1      # write into new_statistics.csv
         """
         if isinstance(data, str):
-            current_df = self.file_reader.file_sync.table_storage[
-                self.file_reader.file_sync.current_file
-            ].data
+            current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
             table_df = self.file_reader.validate_table_to_dataframe(data=current_df)
             data = self.file_reader.convert_dataframe(table_df)
 
@@ -63,9 +61,9 @@ class Writer(LibraryAttributes):
 
         | =`Arguments`= | =`Description`= |
         | ``data`` | The new value for the given table cell. |
-        | ``row`` | Define the index of the row to identify the cell. If header= True it will skip the first row (as header) and 0th index is the row after the header. |
-        | ``column`` | Define the index of the column to identify the cell. Is column is a string then header should be set on True. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. Default: True |
+        | ``row`` | Define the index of the row to identify the cell. |
+        | ``column`` | Define the index of the column to identify the cell. Header must be True if column is string. |
+        | ``header`` | Local override for the ``ignore_header`` logic |
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==
@@ -121,7 +119,7 @@ class Writer(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``data`` | The new values for the given table row - needs to be list object. |
         | ``row`` | Define the index of the row to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. If Header = False and row index = 0 it will overwrite a possible header, if there is one! |
+        | ``header`` | Define local override for ignore_header logic. |
         | ``file_path`` | The full path of the existing table file. |
 
         == Example ==

@@ -34,9 +34,7 @@ class Modifier(LibraryAttributes):
         | Tables.Insert Row    ${column_list}    0    header=False  # inserting the 0 row with no header in mind
         """
 
-        return self.file_writer.modify_table(
-            action=ModifyAction.Insert_Row, data=row_data, row=row_index, header=header
-        )
+        return self.file_writer.modify_table(action=ModifyAction.Insert_Row, data=row_data, row=row_index, header=header)
 
     @keyword(tags=["Writer"])
     def insert_column(self, column_data: list, column_index: int) -> DataFrame:
@@ -135,9 +133,7 @@ class Modifier(LibraryAttributes):
         | Tables.Remove Row    0    header=False     # remove the 0st row without headers
         """
 
-        return self.file_writer.modify_table(
-            action=ModifyAction.Remove_Row, row=row_index, header=header
-        )
+        return self.file_writer.modify_table(action=ModifyAction.Remove_Row, row=row_index, header=header)
 
     @keyword(tags=["Writer"])
     def remove_column(

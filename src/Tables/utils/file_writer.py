@@ -1,14 +1,20 @@
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 from pandas import DataFrame
 
+from Tables.utils.settings_stack import Scope
+
 from ..general.library_attributes import LibraryAttributes
+from ..keywords.configuration import Configuration
 from ..utils.file_system import FileSync, FileSystem
 from ..utils.settings import FileType, TableFormat
 from .file_reader import FileReader
+
+if TYPE_CHECKING:
+    pass
 
 
 class ModifyAction(Enum):
@@ -26,6 +32,10 @@ class FileWriter(LibraryAttributes):
         self.file_sync = file_sync
 
         self.header: bool = True
+
+    @property
+    def config(self):
+        return Configuration(self.library)
 
     @property
     def file_reader(self):
@@ -55,7 +65,8 @@ class FileWriter(LibraryAttributes):
 
     def add_header_in_dataframe(self, table: DataFrame) -> DataFrame:
         """Adds header parameter to Dataframe if self.header = True. In case of Parquet:
-        It already has pre-determined header so it will be extracted and put as data first. Then it will check self.header
+        It already has pre-determined header so it will be extracted and put as data first.
+        Then it will check self.header
         state and work as regular dataframe."""
         if self.file_type == FileType.Parquet:
             table_header = table.columns.to_list()
@@ -84,30 +95,20 @@ class FileWriter(LibraryAttributes):
     ) -> DataFrame:
         if column_index is None or column_data is None:
             raise ValueError(
-                f"Cannot insert column if either column index ({column_index})or column data ({column_data}) is empty."
+                f"Cannot insert column: column index ({column_index}) or column data ({column_data}) must be set."
             )
         if isinstance(column_index, str):
             raise TypeError("Cannot modify table using column name as index. Use int instead")
         if self.file_type != FileType.Parquet:
-            table = self.file_reader.reset_header_dataframe(
-                table
-            )  # we reset the headers since column index doesn't matter
-        self.file_reader.validate_data_list_with_table(
-            data=column_data, table=table, column=column_index
-        )
-        table.insert(
-            loc=column_index, column=column_index, value=column_data, allow_duplicates=True
-        )
+            table = self.file_reader.reset_header_dataframe(table)  # we reset the headers since column index doesn't matter
+        self.file_reader.validate_data_list_with_table(data=column_data, table=table, column=column_index)
+        table.insert(loc=column_index, column=column_index, value=column_data, allow_duplicates=True)
         # reset column index in new dataframe
         return DataFrame(table.values)
 
-    def insert_row_to_dataframe(
-        self, row_index: int | None, row_data: list | None, table: DataFrame
-    ) -> DataFrame:
+    def insert_row_to_dataframe(self, row_index: int | None, row_data: list | None, table: DataFrame) -> DataFrame:
         if row_index is None or row_data is None:
-            raise ValueError(
-                f"Cannot insert row if either row index ({row_index})or row data ({row_data}) is empty."
-            )
+            raise ValueError(f"Cannot insert row: row index ({row_index}) and row data ({row_data}) must be set.")
         self.file_reader.validate_data_list_with_table(data=row_data, table=table, row=row_index)
         data_df = DataFrame(
             [row_data],
@@ -116,16 +117,12 @@ class FileWriter(LibraryAttributes):
 
         return pd.concat(objs=[table[:row_index], data_df, table[row_index:]], ignore_index=True)
 
-    def append_column_to_dataframe(
-        self, column_data: list | str | None, table: DataFrame
-    ) -> DataFrame:
+    def append_column_to_dataframe(self, column_data: list | str | None, table: DataFrame) -> DataFrame:
         if column_data is None:
             raise ValueError(f"Cannot append column if column data({column_data}) is empty.")
 
         if self.file_type != FileType.Parquet:
-            table = self.file_reader.reset_header_dataframe(
-                table
-            )  # we reset the headers since column index doesn't matter
+            table = self.file_reader.reset_header_dataframe(table)  # we reset the headers since column index doesn't matter
         self.file_reader.validate_data_list_with_table(data=column_data, table=table, column=1)
 
         new_column_index = table.shape[1]
@@ -145,15 +142,11 @@ class FileWriter(LibraryAttributes):
         table.loc[len(table)] = row_data
         return table
 
-    def remove_column_dataframe(
-        self, column_index: str | int | None, table: DataFrame
-    ) -> DataFrame:
+    def remove_column_dataframe(self, column_index: str | int | None, table: DataFrame) -> DataFrame:
         if column_index is None:
             raise ValueError(f"Cannot remove column if column index({column_index}) is empty.")
 
-        column_index = (
-            table.columns[column_index] if isinstance(column_index, int) else column_index
-        )
+        column_index = table.columns[column_index] if isinstance(column_index, int) else column_index
         table = table.drop(column_index, axis=1)
 
         # reset the index since it got changed
@@ -167,9 +160,7 @@ class FileWriter(LibraryAttributes):
         table = table.drop(row_index)
         return table.reset_index(drop=True)
 
-    def write_table(
-        self, data: DataFrame | list[list], file_path: Path | str | None = None
-    ) -> Path:
+    def write_table(self, data: DataFrame | list[list], file_path: Path | str | None = None) -> Path:
         """Keyword to create/overwrite table using dataframe tables."""
         file_path = self.find_file_path(file_path)
 
@@ -179,7 +170,7 @@ class FileWriter(LibraryAttributes):
         else:
             raise TypeError("Invalid file_path type.")
 
-        self.file_type = self.file_reader.read_data_type(file_path)
+        self.config.configure_file_type(self.file_reader.read_data_type(file_path), Scope.Test)
 
         if isinstance(data, list) and self.file_type == FileType.Parquet:
             data_df = pd.DataFrame(data[1:], columns=data[0])
@@ -188,7 +179,8 @@ class FileWriter(LibraryAttributes):
         else:
             data_df = data
 
-        # lists or 'headless' dataframes automatically add index in to_csv. We prevent that by puting first row as header
+        # lists or 'headless' dataframes automatically add index in to_csv.
+        # We prevent that by puting first row as header
         fixed_header = self.header and not isinstance(data, list)
 
         writers = {
@@ -226,7 +218,7 @@ class FileWriter(LibraryAttributes):
 
         # overwrite ignore_header for validation keywords
         self.header = header
-        self.ignore_header = not self.header
+        self.config.configure_ignore_header(not self.header, Scope.Test)
 
         table_df = self.add_header_in_dataframe(table_df)
 
@@ -239,9 +231,7 @@ class FileWriter(LibraryAttributes):
             )
 
         axis_row = row if row is not None else slice(None)
-        axis_column = (
-            self.file_reader.cast_column_type(column) if column is not None else slice(None)
-        )
+        axis_column = self.file_reader.cast_column_type(column) if column is not None else slice(None)
 
         if column:
             self.file_reader.validate_column(table_df, axis_column)
@@ -255,7 +245,7 @@ class FileWriter(LibraryAttributes):
 
         table_df = self.update_cached_dataframe(table_df)
 
-        self.ignore_header = original_ignore_header
+        self.config.configure_ignore_header(original_ignore_header, Scope.Test)
         self.header = original_header
 
         return self.file_reader.convert_dataframe(table_df, return_type)
@@ -269,7 +259,8 @@ class FileWriter(LibraryAttributes):
         header: bool = True,
     ) -> DataFrame:
         """
-        Depending on the action this Keyword changes table data by removing,inserting or appending row or column.
+        Depending on the action this Keyword changes table data
+        by removing,inserting or appending row or column.
         """
         table_df = self.current_table.data
         original_ignore_header = self.ignore_header
@@ -279,25 +270,20 @@ class FileWriter(LibraryAttributes):
             self.header = False
         else:
             self.header = header
-        self.ignore_header = not self.header
+
+        self.config.configure_ignore_header(not self.header, Scope.Test)
 
         table_df = self.add_header_in_dataframe(table_df)
 
         if column is not None and self.file_reader.validate_column(table_df, column):
             column = self.file_reader.cast_column_type(column)
 
-        if (
-            row is not None
-            and action is not ModifyAction.Append_Row
-            and action is not ModifyAction.Append_Column
-        ):
+        if row is not None and action is not ModifyAction.Append_Row and action is not ModifyAction.Append_Column:
             self.file_reader.validate_row(table_df, row)
 
         # Different actions
         actions = {
-            ModifyAction.Insert_Column: lambda: self.insert_column_to_dataframe(
-                column, data, table_df
-            ),
+            ModifyAction.Insert_Column: lambda: self.insert_column_to_dataframe(column, data, table_df),
             ModifyAction.Insert_Row: lambda: self.insert_row_to_dataframe(row, data, table_df),
             ModifyAction.Append_Column: lambda: self.append_column_to_dataframe(data, table_df),
             ModifyAction.Append_Row: lambda: self.append_row_to_dataframe(data, table_df),
@@ -312,7 +298,7 @@ class FileWriter(LibraryAttributes):
 
         self.update_cached_dataframe(table_df)
 
-        self.ignore_header = original_ignore_header
+        self.config.configure_ignore_header(original_ignore_header, Scope.Test)
         self.header = original_header
 
         return table_df

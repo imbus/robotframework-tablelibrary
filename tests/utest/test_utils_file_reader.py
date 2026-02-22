@@ -7,29 +7,16 @@ from pandas import DataFrame
 from Tables.utils.file_reader import FileReader
 from Tables.utils.file_system import FileSync
 from Tables.utils.settings import (
-    Delimiter,
-    FileEncoding,
     FileType,
-    LineTerminator,
-    Quoting,
-    QuotingCharacter,
     TableFormat,
 )
+
+from .helper.helpers import DummyLibrary
 
 DEFAULT_HEADERS = ["A", "B"]
 MISSING_COLUMN_NAME = "missing"
 DATETIME_COLUMN = "ts"
 EXPECTED_PARQUET_HEADER = ["c1", "c2"]
-
-
-class DummyLibrary:
-    _file_type = FileType.CSV
-    _separator = Delimiter[","]
-    _file_encoding = FileEncoding.UTF_8.value
-    _line_terminator = LineTerminator.LF
-    _quoting = Quoting.MINIMAL
-    _quoting_character = QuotingCharacter['"']
-    _ignore_header = False
 
 
 EXPECTED_TABLE_SHAPE = (2, 2)
@@ -48,7 +35,7 @@ def test_cast_column_type():
 
 def test_validate_column_rejects_str_when_ignore_header_true():
     reader = make_reader()
-    reader.ignore_header = True
+    reader.ignore_header_stack.set(True)
     df = DataFrame([["h1", "h2"], [1, 2]])
     with pytest.raises(TypeError):
         reader.validate_column(df, "h1")
@@ -56,7 +43,7 @@ def test_validate_column_rejects_str_when_ignore_header_true():
 
 def test_validate_column_with_header_row():
     reader = make_reader()
-    reader.ignore_header = False
+    reader.ignore_header_stack.set(False)
     df = DataFrame([["h1", "h2"], [1, 2]])
     assert reader.validate_column(df, "h1") is True
     with pytest.raises(IndexError):
@@ -96,13 +83,9 @@ def test_validate_row_bounds():
 def test_validate_data_list_with_table():
     reader = make_reader()
     df = DataFrame([[1, 2, 3], [4, 5, 6]])
-    with pytest.raises(
-        ValueError, match="Cannot ignore both row and column if selected data is a list"
-    ):
+    with pytest.raises(ValueError, match="Cannot ignore both row and column if selected data is a list"):
         reader.validate_data_list_with_table([1, 2], df)
-    with pytest.raises(
-        ValueError, match="Cannot select both row and column if selected data is a list"
-    ):
+    with pytest.raises(ValueError, match="Cannot select both row and column if selected data is a list"):
         reader.validate_data_list_with_table([1, 2], df, row=0, column=0)
     with pytest.raises(ValueError, match="Selected list is too small for the table"):
         reader.validate_data_list_with_table([1, 2], df, row=0)
@@ -112,8 +95,8 @@ def test_validate_data_list_with_table():
 def test_convert_dataframe_list_of_lists_and_dicts():
     reader = make_reader()
     df = DataFrame([["h1", "h2"], [1, 2]])
-    reader.file_type = FileType.CSV
-    reader.ignore_header = False
+    reader.file_type_stack.set(FileType.CSV)
+    reader.ignore_header_stack.set(False)
     as_lists = reader.convert_dataframe(df, TableFormat["List of lists"])
     assert as_lists == [["h1", "h2"], [1, 2]]
 
@@ -124,8 +107,8 @@ def test_convert_dataframe_list_of_lists_and_dicts():
 def test_convert_dataframe_list_of_dicts_ignores_header_logic_for_parquet():
     reader = make_reader()
     df = DataFrame([[1, 2]], columns=["h1", "h2"])
-    reader.file_type = FileType.Parquet
-    reader.ignore_header = False
+    reader.file_type_stack.set(FileType.Parquet)
+    reader.ignore_header_stack.set(False)
     as_dicts = reader.convert_dataframe(df, TableFormat["List of dicts"])
     assert as_dicts == [{"h1": 1, "h2": 2}]
 
@@ -133,8 +116,8 @@ def test_convert_dataframe_list_of_dicts_ignores_header_logic_for_parquet():
 def test_convert_dataframe_parquet_inserts_header_row():
     reader = make_reader()
     df = DataFrame([[1, 2]], columns=["c1", "c2"])
-    reader.file_type = FileType.Parquet
-    reader.ignore_header = False
+    reader.file_type_stack.set(FileType.Parquet)
+    reader.ignore_header_stack.set(False)
     as_lists = reader.convert_dataframe(df, TableFormat["List of lists"])
     assert as_lists[0] == ["c1", "c2"]
 
@@ -155,7 +138,7 @@ def test_convert_dataframe_invalid_format():
 
 def test_reset_header_dataframe_csv_moves_header_into_body():
     reader = make_reader()
-    reader.file_type = FileType.CSV
+    reader.file_type_stack.set(FileType.CSV)
     df = DataFrame([[1, 2], [3, 4]], columns=["A", "B"])
     reset = reader.reset_header_dataframe(df)
     assert reset.iloc[0].tolist() == ["A", "B"]
@@ -192,7 +175,7 @@ def test_read_table_file_and_open_close(tmp_path):
 
     table = reader.read_table_file(csv_path)
     assert table.shape == EXPECTED_TABLE_SHAPE
-    assert reader.file_type == FileType.CSV
+    assert reader.file_type_stack.set(FileType.CSV)
 
     alias = reader.open_table_dataframe("t1", csv_path)
     assert alias == "t1"
@@ -229,7 +212,7 @@ def test_file_exists_raises_for_missing_file(tmp_path):
 
 def test_reset_header_dataframe_parquet_default_header():
     reader = make_reader()
-    reader.file_type = FileType.Parquet
+    reader.file_type_stack.set(FileType.Parquet)
     df = DataFrame([[DEFAULT_HEADERS[0], DEFAULT_HEADERS[1]], [1, 2]])
     reset = reader.reset_header_dataframe(df)
     assert list(reset.columns) == DEFAULT_HEADERS
@@ -238,7 +221,7 @@ def test_reset_header_dataframe_parquet_default_header():
 
 def test_reset_header_dataframe_parquet_keeps_non_default_header():
     reader = make_reader()
-    reader.file_type = FileType.Parquet
+    reader.file_type_stack.set(FileType.Parquet)
     df = DataFrame([[1, 2]], columns=["h1", "h2"])
     reset = reader.reset_header_dataframe(df)
     assert reset.equals(df)
@@ -246,7 +229,7 @@ def test_reset_header_dataframe_parquet_keeps_non_default_header():
 
 def test_validate_table_to_dataframe_applies_header():
     reader = make_reader()
-    reader.file_type = FileType.CSV
+    reader.file_type_stack.set(FileType.CSV)
     data = [["h1", "h2"], [1, 2]]
     table = reader.validate_table_to_dataframe(data, column="h1")
     assert list(table.columns) == ["h1", "h2"]

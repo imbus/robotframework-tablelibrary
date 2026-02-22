@@ -4,24 +4,8 @@ from pathlib import Path
 import pytest
 
 from Tables.utils.file_access import FileAccess
-from Tables.utils.settings import (
-    Delimiter,
-    FileEncoding,
-    FileType,
-    LineTerminator,
-    Quoting,
-    QuotingCharacter,
-)
 
-
-class DummyLibrary:
-    _file_type = FileType.CSV
-    _separator = Delimiter[","]
-    _file_encoding = FileEncoding.UTF_8.value
-    _line_terminator = LineTerminator.LF
-    _quoting = Quoting.MINIMAL
-    _quoting_character = QuotingCharacter['"']
-    _ignore_header = False
+from ..helper.helpers import DummyLibrary
 
 
 def _write_csv(path: Path, rows: list[list[str | int]]) -> Path:
