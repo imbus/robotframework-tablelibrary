@@ -108,3 +108,16 @@ class LibraryAttributes:
     @quoting_character_stack.setter
     def quoting_character_stack(self, stack: SettingsStack):
         self.library.scope_stack["quoting_character"] = stack
+
+    # data streaming into files
+    @property
+    def enable_streaming(self) -> QuotingCharacter:
+        return self.library.scope_stack["enable_streaming"].get()
+
+    @property
+    def enable_streaming_stack(self) -> SettingsStack:
+        return self.library.scope_stack["enable_streaming"]
+
+    @enable_streaming_stack.setter
+    def enable_streaming_stack(self, stack: SettingsStack):
+        self.library.scope_stack["enable_streaming"] = stack

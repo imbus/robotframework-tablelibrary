@@ -283,11 +283,11 @@ class FileReader(LibraryAttributes):
 
         return self.file_sync.current_file
 
-    def create_empty_table_dataframe(self, alias: str, headers: list):
+    def create_empty_table_dataframe(self, alias: str, headers: list, path: Path | str = "unknown"):
         df = pd.DataFrame(columns=headers)
 
         self.file_sync.current_file = alias
-        self.file_sync.table_storage[self.file_sync.current_file] = TableObject(Path("unknown"), df)
+        self.file_sync.table_storage[self.file_sync.current_file] = TableObject(Path(path), df)
 
         return self.file_sync.current_file
 

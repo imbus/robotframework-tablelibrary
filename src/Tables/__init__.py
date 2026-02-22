@@ -158,7 +158,6 @@ class Tables(HybridCore):
         | ``quoting`` | Define which values should be surrounded with quotes, please check the CSV quoting for more details. Default is ``MINIMAL``  |
         | ``quoting_character`` | Define quoting character to use for writing table files. Default is ``\"``  |
         """
-        self.ROBOT_LIBRARY_LISTENER = self
 
         # required variables for SettingsScope mechanism
         self.scope_stack: dict = {}
@@ -176,8 +175,14 @@ class Tables(HybridCore):
         )
         self.scope_stack["quoting"] = SettingsStack(quoting, self)
         self.scope_stack["quoting_character"] = SettingsStack(quoting_character, self)
+        self.scope_stack["enable_streaming"] = SettingsStack(False, self)
 
         self.file_access = FileAccess(self)
+
+        self.ROBOT_LIBRARY_LISTENER = [
+            self,
+            Modifier(self, self.file_access),
+        ]
 
         libraries = [
             Configuration(self),

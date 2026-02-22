@@ -563,6 +563,24 @@ Quoting Characters - Double Quotes - Minimal
     BuiltIn.Should Contain    ${raw_content}    "marvin,sergej"
     BuiltIn.Should Contain    ${raw_content}    26
 
+Streaming - Write Data Continiously
+    [Documentation]    TBD
+    [Tags]  robot:exclude
+
+    Configure Streaming    True    Test
+
+    VAR    @{headers} =    name    age
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${CURDIR}/results/test_writer_live_streaming.csv
+
+    FOR    ${i}    IN RANGE    ${10}
+        VAR    @{row} =    counter    ${i}
+        Sleep    2s
+        Tables.Append Row    ${row}
+    END
+
+    ${table} =    Tables.Get Table
+    Log   1234
+
 
 *** Keywords ***
 Reset CSV Table

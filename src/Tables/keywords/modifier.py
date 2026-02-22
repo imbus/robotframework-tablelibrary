@@ -1,15 +1,38 @@
 from pandas import DataFrame
+from robot import result, running
 from robot.api.deco import keyword
+
+from Tables.utils.file_system import TableObject
 
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_access import FileAccess
 from ..utils.file_writer import ModifyAction
+from .getter import Getter
 
 
 class Modifier(LibraryAttributes):
     def __init__(self, library, file_access: FileAccess):
+        self.ROBOT_LIBRARY_LISTENER = self
         self.library = library
-        self.file_writer = file_access.file_writer
+        self.file_access = file_access
+        self.file_reader = self.file_access.file_reader
+        self.file_writer = self.file_access.file_writer
+
+    def _end_keyword(self, kw: running.Keyword, result: result.Keyword):
+        # register keywords for the streaming
+        streaming_keywords = ["Append Row"]
+
+        # check if last finished keyword is in list of registered keywords
+        if not self.enable_streaming or kw.name.replace("Tables.", "").replace("Tables", "") not in streaming_keywords:
+            return
+
+        # get current table content
+        getter = Getter(self, self.file_access)
+        current_data: list[list] = getter.get_table()
+
+        # write table into file
+        current_file_obj: TableObject = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file]
+        self.file_writer.write_table(current_data, current_file_obj.path)
 
     @keyword(tags=["Writer"])
     def insert_row(self, row_data: list, row_index: int, header: bool = True) -> DataFrame:
