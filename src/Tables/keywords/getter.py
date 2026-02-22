@@ -20,6 +20,7 @@ class Getter(LibraryAttributes):
     def __init__(self, library, file_access: FileAccess):
         self.library = library
         self.file_reader = file_access.file_reader
+        self.file_writer = file_access.file_writer
 
     @property
     def _fs(self):
@@ -100,6 +101,7 @@ class Getter(LibraryAttributes):
         self,
         headers: list,
         alias: str | None = None,
+        file_path: Path | None = None,
     ):
         """
         Keyword which creates a new internal empty table object which can be directly used to add data.
@@ -112,6 +114,7 @@ class Getter(LibraryAttributes):
         | =Argument= | =Description= |
         | ``headers`` | Define headers for the new table file. |
         | ``alias`` | Optional - if not given, uuid is generated as unique alias. |
+        | ``file_path`` | Optional - if given, new table will be immediately stored to the file system. |
 
         == Important ==
 
@@ -132,7 +135,14 @@ class Getter(LibraryAttributes):
         if not alias:
             alias = str(uuid4())
 
-        self.file_reader.create_empty_table_dataframe(alias, headers)
+        fp = file_path if isinstance(file_path, Path) else "unknown"
+        self.file_reader.create_empty_table_dataframe(alias, headers, fp)
+
+        # if defined, create the initial file in your file system after creation
+        if isinstance(file_path, Path):
+            data = self.get_table(TableFormat.Dataframe)
+            self.file_writer.write_table(data, file_path)
+
         return alias
 
     @keyword(tags=["Getter"])

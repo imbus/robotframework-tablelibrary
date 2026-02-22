@@ -48,6 +48,33 @@ class Tables(HybridCore):
     - latin-1
     - further more... (define your own file encoding with the given library argument)
 
+    == Live Data Streaming ==
+    Some keywords allow you to write the inserted or appended data directly into an output table file.
+    By default, the table library writes the modified table data first into the internal cache.
+    In this case, you decide when to write the data into a file.
+
+    If you require the modified data on the fly within the file on your file system, you can enable the streaming via ``Configure Streaming``.
+
+    Afterwards, every keyword that allows the on-the-fly streaming, writes the new data directly into the file system instead of modifying the table just in the cache.
+
+    Example:
+    |  # enable the streaming on-the-fly
+    |  Configure Streaming    True    Test
+    |
+    |  VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_append_row.csv
+    |  VAR    @{headers} =    counter    random
+    |  ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+    |
+    |  # append ten rows on-the-fly within the given csv file
+    |  FOR    ${i}    IN RANGE    ${10}
+    |      ${random} =    Generate Random String    10
+    |      VAR    @{row} =    ${i}    ${random}
+    |      Tables.Append Row    ${row}
+    |
+    |      ${table_content} =    Tables.Read Table    ${filepath}
+    |      Should Be Equal    ${table_content}[-1][1]    ${random}
+    |  END
+
     == Excel Files ==
     We have included a basic handling of ``Excel`` files,
     but for more complex excel features, please take a look at the following library:
@@ -158,7 +185,6 @@ class Tables(HybridCore):
         | ``quoting`` | Define which values should be surrounded with quotes, please check the CSV quoting for more details. Default is ``MINIMAL``  |
         | ``quoting_character`` | Define quoting character to use for writing table files. Default is ``\"``  |
         """
-        self.ROBOT_LIBRARY_LISTENER = self
 
         # required variables for SettingsScope mechanism
         self.scope_stack: dict = {}
@@ -176,8 +202,14 @@ class Tables(HybridCore):
         )
         self.scope_stack["quoting"] = SettingsStack(quoting, self)
         self.scope_stack["quoting_character"] = SettingsStack(quoting_character, self)
+        self.scope_stack["enable_streaming"] = SettingsStack(False, self)
 
         self.file_access = FileAccess(self)
+
+        self.ROBOT_LIBRARY_LISTENER = [
+            self,
+            Modifier(self, self.file_access),
+        ]
 
         libraries = [
             Configuration(self),

@@ -48,7 +48,7 @@ class Writer(LibraryAttributes):
 
         return str(file_path)
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def set_table_cell(
         self,
         data: str,
@@ -81,7 +81,7 @@ class Writer(LibraryAttributes):
         )
         return table_df
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def set_table_column(
         self,
         data: list,
@@ -106,7 +106,7 @@ class Writer(LibraryAttributes):
         )
         return table
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def set_table_row(
         self,
         data: list,

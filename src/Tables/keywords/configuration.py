@@ -24,6 +24,7 @@ class ConfigCtx:
     line_terminator: LineTerminator
     file_encoding: FileEncoding
     ignore_header: bool
+    enable_streaming: bool
 
 
 class Configuration(LibraryAttributes):
@@ -43,6 +44,7 @@ class Configuration(LibraryAttributes):
                 line_terminator=self.line_terminator,
                 file_encoding=self.file_encoding,
                 ignore_header=self.ignore_header,
+                enable_streaming=self.enable_streaming,
             )
         )
 
@@ -172,4 +174,28 @@ class Configuration(LibraryAttributes):
         old_config = self.ignore_header
         self.ignore_header_stack.set(ignore_header, scope)
         logger.debug(f"'ignore_header': old value: {old_config} - new value: {ignore_header}")
+        return old_config
+
+    @keyword(tags=["Configuration"])
+    def configure_streaming(self, enable_streaming: bool, scope: Scope = Scope.Suite):
+        """
+        Enable / disable the direct streaming of data into the given table file.
+
+        = Default Behaviour =
+        By default, you can open a table, modify the content in the internal cache of the Table library and afterwards to write it into a table file.
+
+        = Behaviour using Streaming =
+        Using the streaming behaviour enables you to write e.g. rows directly into the table file instead of the internal cache.
+        This can be required in case you need the data immediately in the file, and not in the cache.
+
+        | =`Arguments`= | =`Description`= |
+        | ``enable_streaming`` | Set to ``True`` to enable the streaming - default: ``False`` |
+
+        == Example ==
+        | Configure Streaming    True
+        | Configure Streaming    False
+        """
+        old_config = self.enable_streaming
+        self.enable_streaming_stack.set(enable_streaming, scope)
+        logger.debug(f"'file_type': old value: {old_config} - new value: {enable_streaming}")
         return old_config

@@ -563,6 +563,230 @@ Quoting Characters - Double Quotes - Minimal
     BuiltIn.Should Contain    ${raw_content}    "marvin,sergej"
     BuiltIn.Should Contain    ${raw_content}    26
 
+Streaming - Write Data Continiously - Insert Row
+
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming.csv
+
+    VAR    @{headers} =    counter    random
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${10}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}
+        Tables.Insert Row    ${row}    -1
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+
+Streaming - Write Data Continiously - Insert Column
+    [Teardown]    Remove File    ${tempfilepath}
+
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/testdata/example_09_streaming.csv
+    VAR    ${tempfilepath} =    ${CURDIR}/results/test_writer_live_streaming_columns.csv
+    Copy File    ${filepath}    ${tempfilepath}
+
+    VAR    @{headers} =    counter    random
+    ${uuid} =    Tables.Open Table    ${tempfilepath}
+    
+    VAR    @{col1} =    city    erlangen    moenchengladbach
+    VAR    @{col2} =    mobile    1234    5678
+    VAR    @{cols} =    ${col1}    ${col2}
+    FOR    ${column}    IN    @{cols}
+        Tables.Insert Column    ${column}    -1
+    END
+
+    ${table_content} =    Tables.Read Table    ${tempfilepath}
+    Should Be Equal    ${table_content}[-1][3]    moenchengladbach
+    Should Be Equal    ${table_content}[-1][4]    5678
+
+Streaming - Write Data Continiously - Append Row
+
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_append_row.csv
+
+    VAR    @{headers} =    counter    random
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${10}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}
+        Tables.Append Row    ${row}
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+
+Streaming - Write Data Continiously - Append Column
+    [Teardown]    Remove File    ${tempfilepath}
+
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/testdata/example_09_streaming.csv
+    VAR    ${tempfilepath} =    ${CURDIR}/results/test_writer_live_streaming_columns_append.csv
+    Copy File    ${filepath}    ${tempfilepath}
+
+    VAR    @{headers} =    counter    random
+    ${uuid} =    Tables.Open Table    ${tempfilepath}
+    
+    VAR    @{col1} =    city    erlangen    moenchengladbach
+    VAR    @{col2} =    mobile    1234    5678
+    VAR    @{cols} =    ${col1}    ${col2}
+    FOR    ${column}    IN    @{cols}
+        Tables.Append Column    ${column}
+    END
+
+    ${table_content} =    Tables.Read Table    ${tempfilepath}
+    Should Be Equal    ${table_content}[-1][3]    moenchengladbach
+    Should Be Equal    ${table_content}[-1][4]    5678
+
+Streaming - Remove Data Continiously - Remove Row
+
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_append_row.csv
+
+    VAR    @{headers} =    counter    random
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${10}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}
+        Tables.Append Row    ${row}
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+    Tables.Count Table    ${filepath}    Rows    ==    ${11}
+    Tables.Remove Row    -1
+    Tables.Remove Row    5
+    Tables.Count Table    ${filepath}    Rows    ==    ${9}
+
+Streaming - Remove Data Continiously - Remove Column
+
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_append_row.csv
+
+    VAR    @{headers} =    counter    random    city
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${10}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}    erlangen
+        Tables.Append Row    ${row}
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+    Tables.Count Table    ${filepath}    Columns    ==    ${3}
+    Tables.Remove Column    -1
+    Tables.Count Table    ${filepath}    Columns    ==    ${2}
+    Tables.Remove Column    0
+    Tables.Count Table    ${filepath}    Columns    ==    ${1}
+
+Streaming - Set Data Continiously - Set Table Cell
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_settablecell.csv
+
+    VAR    @{headers} =    counter    random    city
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${10}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}    erlangen
+        Tables.Append Row    ${row}
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+
+    Tables.Set Table Cell    marvin    1    1
+    
+    ${table_content} =    Tables.Read Table    ${filepath}
+    Should Be Equal    ${table_content}[2][1]    marvin
+
+Streaming - Set Data Continiously - Set Table Column - Column Name
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_settablecell.csv
+
+    VAR    @{headers} =    counter    random    city
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${2}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}    erlangen
+        Tables.Append Row    ${row}
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+
+    VAR    @{column} =    gladbach    muenchen
+    Tables.Set Table Column    ${column}    city
+    
+    ${table_content} =    Tables.Read Table    ${filepath}
+    Should Be Equal    ${table_content}[1][2]    gladbach
+    Should Be Equal    ${table_content}[2][2]    muenchen
+
+Streaming - Set Data Continiously - Set Table Column - Column Index
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_settablecell.csv
+
+    VAR    @{headers} =    counter    random    city
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${2}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}    erlangen
+        Tables.Append Row    ${row}
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+
+    VAR    @{column} =    gladbach    muenchen
+    Tables.Set Table Column    ${column}    -1
+    
+    ${table_content} =    Tables.Read Table    ${filepath}
+    Should Be Equal    ${table_content}[1][2]    gladbach
+    Should Be Equal    ${table_content}[2][2]    muenchen
+
+Streaming - Set Data Continiously - Set Table Row
+    Configure Streaming    True    Test
+
+    VAR    ${filepath} =    ${CURDIR}/results/test_writer_live_streaming_settablecell.csv
+
+    VAR    @{headers} =    counter    random    city
+    ${uuid} =    Tables.Create Table    headers=${headers}    file_path=${filepath}
+
+    FOR    ${i}    IN RANGE    ${10}
+        ${random} =    Generate Random String    10
+        VAR    @{row} =    ${i}    ${random}    erlangen
+        Tables.Append Row    ${row}
+        
+        ${table_content} =    Tables.Read Table    ${filepath}
+        Should Be Equal    ${table_content}[-1][1]    ${random}
+    END
+
+    VAR    @{row} =    new    row    data
+    Tables.Set Table Row    ${row}    -1
+    Tables.Set Table Row    ${row}    5
+    
+    ${table_content} =    Tables.Read Table    ${filepath}
+    Should Be Equal    ${table_content}[6][0]    new
+    Should Be Equal    ${table_content}[-1][0]    new
+
+
+
 
 *** Keywords ***
 Reset CSV Table
