@@ -24,6 +24,7 @@ class ConfigCtx:
     line_terminator: LineTerminator
     file_encoding: FileEncoding
     ignore_header: bool
+    enable_streaming: bool
 
 
 class Configuration(LibraryAttributes):
@@ -43,6 +44,7 @@ class Configuration(LibraryAttributes):
                 line_terminator=self.line_terminator,
                 file_encoding=self.file_encoding,
                 ignore_header=self.ignore_header,
+                enable_streaming=self.enable_streaming,
             )
         )
 

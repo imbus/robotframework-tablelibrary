@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import pandas as pd
 from pandas import DataFrame
@@ -102,6 +102,10 @@ class FileWriter(LibraryAttributes):
         if self.file_type != FileType.Parquet:
             table = self.file_reader.reset_header_dataframe(table)  # we reset the headers since column index doesn't matter
         self.file_reader.validate_data_list_with_table(data=column_data, table=table, column=column_index)
+
+        # calculate the correct row index to insert the data at the correct index
+        column_index = self.calculate_index_to_insert_data(column_index, table, "column")
+
         table.insert(loc=column_index, column=column_index, value=column_data, allow_duplicates=True)
         # reset column index in new dataframe
         return DataFrame(table.values)
@@ -114,6 +118,9 @@ class FileWriter(LibraryAttributes):
             [row_data],
             columns=table.columns.to_list() if self.header else None,
         )
+
+        # calculate the correct row index to insert the data at the correct index
+        row_index = self.calculate_index_to_insert_data(row_index, table, "row")
 
         return pd.concat(objs=[table[:row_index], data_df, table[row_index:]], ignore_index=True)
 
@@ -146,7 +153,10 @@ class FileWriter(LibraryAttributes):
         if column_index is None:
             raise ValueError(f"Cannot remove column if column index({column_index}) is empty.")
 
-        column_index = table.columns[column_index] if isinstance(column_index, int) else column_index
+        if isinstance(column_index, int):
+            column_index = self.calculate_index_to_insert_data(column_index, table, "column", "remove")
+            column_index = table.columns[column_index]
+
         table = table.drop(column_index, axis=1)
 
         # reset the index since it got changed
@@ -157,6 +167,9 @@ class FileWriter(LibraryAttributes):
     def remove_row_dataframe(self, row_index: int | None, table: DataFrame) -> DataFrame:
         if row_index is None:
             raise ValueError(f"Cannot remove row if row index({row_index}) is empty.")
+
+        row_index = self.calculate_index_to_insert_data(row_index, table, "row", "remove")
+
         table = table.drop(row_index)
         return table.reset_index(drop=True)
 
@@ -302,3 +315,15 @@ class FileWriter(LibraryAttributes):
         self.header = original_header
 
         return table_df
+
+    def calculate_index_to_insert_data(
+        self,
+        index: int,
+        table: DataFrame,
+        table_item: Literal["row", "column"],
+        modus: Literal["insert", "remove"] = "insert",
+    ):
+        n = len(table) if table_item == "row" else len(table.columns)
+        if index < 0:
+            index = n + index + 1 if modus == "insert" else n + index
+        return max(0, min(index, n))

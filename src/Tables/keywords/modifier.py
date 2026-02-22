@@ -19,11 +19,12 @@ class Modifier(LibraryAttributes):
         self.file_writer = self.file_access.file_writer
 
     def _end_keyword(self, kw: running.Keyword, result: result.Keyword):
-        # register keywords for the streaming
-        streaming_keywords = ["Append Row"]
+        """
+        Keyword for the live data streaming must have the tag ``datastreaming``!
+        """
 
         # check if last finished keyword is in list of registered keywords
-        if not self.enable_streaming or kw.name.replace("Tables.", "").replace("Tables", "") not in streaming_keywords:
+        if not self.enable_streaming or "datastreaming" not in result.tags:
             return
 
         # get current table content
@@ -34,7 +35,7 @@ class Modifier(LibraryAttributes):
         current_file_obj: TableObject = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file]
         self.file_writer.write_table(current_data, current_file_obj.path)
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def insert_row(self, row_data: list, row_index: int, header: bool = True) -> DataFrame:
         """
         Keyword to insert a new row into the currently opened table (see 'Open Table') at the given index.
@@ -59,7 +60,7 @@ class Modifier(LibraryAttributes):
 
         return self.file_writer.modify_table(action=ModifyAction.Insert_Row, data=row_data, row=row_index, header=header)
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def insert_column(self, column_data: list, column_index: int) -> DataFrame:
         """
         Keyword to insert a new column into the currently opened table (see 'Open Table') at the given index.
@@ -85,7 +86,7 @@ class Modifier(LibraryAttributes):
             column=column_index,
         )
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def append_row(self, row_data: list) -> DataFrame:
         """
         Keyword to append a new row into the currently opened table (see 'Open Table') at the end of the table.
@@ -106,7 +107,7 @@ class Modifier(LibraryAttributes):
 
         return self.file_writer.modify_table(action=ModifyAction.Append_Row, data=row_data, row=1)
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def append_column(
         self,
         column_data: list,
@@ -135,7 +136,7 @@ class Modifier(LibraryAttributes):
             column=1,
         )
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def remove_row(self, row_index: int, header: bool = True) -> DataFrame:
         """
         Keyword to remove the given row from the currently opened table (see 'Open Table').
@@ -158,7 +159,7 @@ class Modifier(LibraryAttributes):
 
         return self.file_writer.modify_table(action=ModifyAction.Remove_Row, row=row_index, header=header)
 
-    @keyword(tags=["Writer"])
+    @keyword(tags=["Writer", "datastreaming"])
     def remove_column(
         self,
         column_index: int | str,
