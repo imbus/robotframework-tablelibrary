@@ -13,7 +13,7 @@ def test_tables_init_defaults():
     tables = Tables()
     assert tables.scope_stack["file_type"].get() == FileType.CSV
     assert tables.scope_stack["separator"].get() == Delimiter[","]
-    assert tables._file_encoding == FileEncoding.UTF_8.value
+    assert tables.scope_stack["file_encoding"].get() == FileEncoding.UTF_8.value
     assert tables.scope_stack["ignore_header"].get() is False
     assert tables.scope_stack["line_terminator"].get() == LineTerminator.LF
     assert tables._quoting == Quoting.MINIMAL
@@ -33,7 +33,7 @@ def test_tables_init_custom_values():
     )
     assert tables.scope_stack["file_type"].get() == FileType.Excel
     assert tables.scope_stack["separator"].get() == Delimiter[";"]
-    assert tables._file_encoding == "latin_1"
+    assert tables.scope_stack["file_encoding"].get() == "latin_1"
     assert tables.scope_stack["ignore_header"].get() is True
     assert tables.scope_stack["line_terminator"].get() == LineTerminator.CRLR
     assert tables._quoting == Quoting.NONE

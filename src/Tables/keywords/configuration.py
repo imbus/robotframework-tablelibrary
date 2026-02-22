@@ -129,7 +129,7 @@ class Configuration(LibraryAttributes):
         return old_config
 
     @keyword(tags=["Configuration"])
-    def configure_file_encoding(self, file_encoding: FileEncoding | str):
+    def configure_file_encoding(self, file_encoding: FileEncoding | str, scope: Scope = Scope.Suite):
         """
         Change the internal file encoding during your test execution dynamically.
 
@@ -143,7 +143,12 @@ class Configuration(LibraryAttributes):
 
         see [Python Encoding Names|https://docs.python.org/3/library/codecs.html#standard-encodings]
         """
-        self.file_encoding = file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding
+        old_config = self.file_encoding
+        self.file_encoding_stack.set(
+            file_encoding.value if isinstance(file_encoding, FileEncoding) else file_encoding, scope
+        )
+        logger.debug(f"'file_type': old value: {old_config} - new value: {file_encoding}")
+        return old_config
 
     @keyword(tags=["Configuration"])
     def configure_ignore_header(self, ignore_header: bool, scope: Scope = Scope.Suite):

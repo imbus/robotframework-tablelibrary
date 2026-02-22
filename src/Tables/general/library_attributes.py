@@ -15,14 +15,6 @@ class LibraryAttributes:
         self.library = library
 
     @property
-    def file_encoding(self):
-        return self.library._file_encoding
-
-    @file_encoding.setter
-    def file_encoding(self, value):
-        self.library._file_encoding = value
-
-    @property
     def quoting(self):
         return self.library._quoting
 
@@ -93,3 +85,16 @@ class LibraryAttributes:
     @line_terminator_stack.setter
     def line_terminator_stack(self, stack: SettingsStack):
         self.library.scope_stack["line_terminator"] = stack
+
+    # file encoding
+    @property
+    def file_encoding(self) -> LineTerminator:
+        return self.library.scope_stack["file_encoding"].get()
+
+    @property
+    def file_encoding_stack(self) -> SettingsStack:
+        return self.library.scope_stack["file_encoding"]
+
+    @file_encoding_stack.setter
+    def file_encoding_stack(self, stack: SettingsStack):
+        self.library.scope_stack["file_encoding"] = stack
