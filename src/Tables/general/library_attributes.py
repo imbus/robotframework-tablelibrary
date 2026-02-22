@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from Tables.utils.settings import Delimiter, FileType
+from Tables.utils.settings import Delimiter, FileType, LineTerminator
 from Tables.utils.settings_stack import SettingsStack
 
 if TYPE_CHECKING:
@@ -21,14 +21,6 @@ class LibraryAttributes:
     @file_encoding.setter
     def file_encoding(self, value):
         self.library._file_encoding = value
-
-    @property
-    def line_terminator(self):
-        return self.library._line_terminator
-
-    @line_terminator.setter
-    def line_terminator(self, value):
-        self.library._line_terminator = value
 
     @property
     def quoting(self):
@@ -88,3 +80,16 @@ class LibraryAttributes:
     @separator_stack.setter
     def separator_stack(self, stack: SettingsStack):
         self.library.scope_stack["separator"] = stack
+
+    # line terminator
+    @property
+    def line_terminator(self) -> LineTerminator:
+        return self.library.scope_stack["line_terminator"].get()
+
+    @property
+    def line_terminator_stack(self) -> SettingsStack:
+        return self.library.scope_stack["line_terminator"]
+
+    @line_terminator_stack.setter
+    def line_terminator_stack(self, stack: SettingsStack):
+        self.library.scope_stack["line_terminator"] = stack

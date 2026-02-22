@@ -26,7 +26,6 @@ class DummyLibrary:
     def __init__(self, *, ignore_header: bool = False):
         # configuration attributes used by LibraryAttributes
         self._file_encoding = FileEncoding.UTF_8.value
-        self._line_terminator = LineTerminator.LF
         self._quoting = Quoting.MINIMAL
         self._quoting_character = QuotingCharacter['"']
 
@@ -39,3 +38,4 @@ class DummyLibrary:
         self.scope_stack["ignore_header"] = SettingsStack(ignore_header, self)
         self.scope_stack["file_type"] = SettingsStack(FileType.CSV, self)
         self.scope_stack["separator"] = SettingsStack(Delimiter[","], self)
+        self.scope_stack["line_terminator"] = SettingsStack(LineTerminator.LF, self)

@@ -38,7 +38,7 @@ def test_configuration_updates_quoting_character(config):
 
 def test_configuration_updates_line_terminator(config):
     config.configure_line_terminator(LineTerminator.LF)
-    assert config.line_terminator == LineTerminator.LF
+    assert config.line_terminator_stack.get() == LineTerminator.LF
 
 
 def test_configuration_updates_file_encoding(config):

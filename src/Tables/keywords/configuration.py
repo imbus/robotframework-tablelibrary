@@ -112,7 +112,7 @@ class Configuration(LibraryAttributes):
         self.quoting_character = quoting_character
 
     @keyword(tags=["Configuration"])
-    def configure_line_terminator(self, line_terminator: LineTerminator):
+    def configure_line_terminator(self, line_terminator: LineTerminator, scope: Scope = Scope.Suite):
         """
         Change the internal line terminator during your test execution dynamically.
 
@@ -123,7 +123,10 @@ class Configuration(LibraryAttributes):
         | Configure Line Terminator    LF
         | Configure Line Terminator    CRLF
         """
-        self.line_terminator = line_terminator
+        old_config = self.line_terminator
+        self.line_terminator_stack.set(line_terminator, scope)
+        logger.debug(f"'file_type': old value: {old_config} - new value: {line_terminator}")
+        return old_config
 
     @keyword(tags=["Configuration"])
     def configure_file_encoding(self, file_encoding: FileEncoding | str):
