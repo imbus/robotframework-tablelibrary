@@ -83,7 +83,7 @@ class Configuration(LibraryAttributes):
         return old_config
 
     @keyword(tags=["Configuration"])
-    def configure_quoting(self, quoting: Quoting):
+    def configure_quoting(self, quoting: Quoting, scope: Scope = Scope.Suite):
         """
         Change the internal quoting mode during your test execution dynamically.
 
@@ -95,7 +95,10 @@ class Configuration(LibraryAttributes):
         | Configure Quoting    NONNUMERIC
         | Configure Quoting    NONE
         """
-        self.quoting = quoting
+        old_config = self.quoting
+        self.quoting_stack.set(quoting, scope)
+        logger.debug(f"'file_type': old value: {old_config} - new value: {quoting}")
+        return old_config
 
     @keyword(tags=["Configuration"])
     def configure_quoting_character(self, quoting_character: QuotingCharacter):

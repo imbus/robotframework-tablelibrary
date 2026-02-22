@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from Tables.utils.settings import Delimiter, FileType, LineTerminator
+from Tables.utils.settings import Delimiter, FileEncoding, FileType, LineTerminator, Quoting
 from Tables.utils.settings_stack import SettingsStack
 
 if TYPE_CHECKING:
@@ -13,14 +13,6 @@ class LibraryAttributes:
         Expose library attributes to all classes
         """
         self.library = library
-
-    @property
-    def quoting(self):
-        return self.library._quoting
-
-    @quoting.setter
-    def quoting(self, value):
-        self.library._quoting = value
 
     @property
     def quoting_character(self):
@@ -88,7 +80,7 @@ class LibraryAttributes:
 
     # file encoding
     @property
-    def file_encoding(self) -> LineTerminator:
+    def file_encoding(self) -> FileEncoding:
         return self.library.scope_stack["file_encoding"].get()
 
     @property
@@ -98,3 +90,16 @@ class LibraryAttributes:
     @file_encoding_stack.setter
     def file_encoding_stack(self, stack: SettingsStack):
         self.library.scope_stack["file_encoding"] = stack
+
+    # quoting
+    @property
+    def quoting(self) -> Quoting:
+        return self.library.scope_stack["quoting"].get()
+
+    @property
+    def quoting_stack(self) -> SettingsStack:
+        return self.library.scope_stack["quoting"]
+
+    @quoting_stack.setter
+    def quoting_stack(self, stack: SettingsStack):
+        self.library.scope_stack["quoting"] = stack
