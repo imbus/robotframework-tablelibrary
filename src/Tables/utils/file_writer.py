@@ -183,7 +183,7 @@ class FileWriter(LibraryAttributes):
         else:
             raise TypeError("Invalid file_path type.")
 
-        self.config.configure_file_type(self.file_reader.read_data_type(file_path), Scope.Test)
+        self.config.configure_file_type(self.file_reader.read_data_type(file_path), Scope.Suite)
 
         if isinstance(data, list) and self.file_type == FileType.Parquet:
             data_df = pd.DataFrame(data[1:], columns=data[0])
@@ -231,7 +231,7 @@ class FileWriter(LibraryAttributes):
 
         # overwrite ignore_header for validation keywords
         self.header = header
-        self.config.configure_ignore_header(not self.header, Scope.Test)
+        self.config.configure_ignore_header(not self.header, Scope.Suite)
 
         table_df = self.add_header_in_dataframe(table_df)
 
@@ -251,14 +251,14 @@ class FileWriter(LibraryAttributes):
         if row:
             self.file_reader.validate_row(table_df, axis_row)
 
-        if isinstance(axis_column, str):
+        if isinstance(axis_column, str) or len(table_df) == 0:
             table_df.loc[axis_row, axis_column] = data
         else:
             table_df.iloc[axis_row, axis_column] = data
 
         table_df = self.update_cached_dataframe(table_df)
 
-        self.config.configure_ignore_header(original_ignore_header, Scope.Test)
+        self.config.configure_ignore_header(original_ignore_header, Scope.Suite)
         self.header = original_header
 
         return self.file_reader.convert_dataframe(table_df, return_type)
@@ -284,7 +284,7 @@ class FileWriter(LibraryAttributes):
         else:
             self.header = header
 
-        self.config.configure_ignore_header(not self.header, Scope.Test)
+        self.config.configure_ignore_header(not self.header, Scope.Suite)
 
         table_df = self.add_header_in_dataframe(table_df)
 
@@ -311,7 +311,7 @@ class FileWriter(LibraryAttributes):
 
         self.update_cached_dataframe(table_df)
 
-        self.config.configure_ignore_header(original_ignore_header, Scope.Test)
+        self.config.configure_ignore_header(original_ignore_header, Scope.Suite)
         self.header = original_header
 
         return table_df

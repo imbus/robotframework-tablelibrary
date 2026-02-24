@@ -260,7 +260,7 @@ class FileReader(LibraryAttributes):
                 FileType.Parquet: lambda: self.read_parquet(path),
             }
 
-            self.config.configure_file_type(self.read_data_type(path), Scope.Test)
+            self.config.configure_file_type(self.read_data_type(path), Scope.Suite)
 
             reader = readers.get(self.file_type)
             if reader:
