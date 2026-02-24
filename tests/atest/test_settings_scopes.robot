@@ -48,8 +48,13 @@ Suite Setup & Teardown - Verify Scope Settings
     Configure Ignore Header    False
     Tables.Create Table    ${header}
     Tables.Append Row    ${{["peter", "55"]}}
-    Tables.Set Table Row    ${{["peter", "55"]}}    0
+    Tables.Set Table Row    ${{["benni", "30"]}}    0
     Tables.Insert Row    ${{["peter", "55"]}}    -1
     Tables.Insert Row    ${{["marvin", "26"]}}    -1
     ${table} =    Tables.Get Table
+
+    Should Be Equal    ${table}[0][0]   name
+    Should Be Equal    ${table}[1][0]   benni
+    Should Be Equal    ${table}[2][0]   peter
+    Should Be Equal    ${table}[3][0]   marvin
     Tables.Write Table    ${table}    ${CURDIR}${/}results${/}setupteardown.csv
