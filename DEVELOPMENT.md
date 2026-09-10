@@ -20,19 +20,19 @@ In the ``root directory`` of this repository you will find a script called ``cre
 When executing this script, it expects exactly one argument: the new name of the release / tag.
 Here you need to provide always the syntax ``X.X.X``, e.g. ``0.1.9``, ``0.5.0`` or ``1.0.0``.
 
-The script will do two things automatically for you:
-1. Updating the version string in the **[\_\_about\_\_.py](src/Tables/__about__.py)**
-2. Creating & Pushing a new tag to GitHub.
+The package version is read from the Git tag. No version file needs to be changed or committed. Create and push a tag from the desired commit:
 
-Execute the following command to create a new release:
 ```
 cd <project-root-directory>
-./create_release.sh 1.0.0
+git checkout main
+git pull origin main
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
 ```
 
-After executing the script, three pipeline jobs are getting triggered automatically:
+After pushing the tag, three pipeline jobs are triggered automatically:
 1. First job creates a new ``Release`` in github with the name of the created ``Tag``.
-2. Second job uploads the new wheel package to ``PyPi`` with the ``__version__`` from the ``__about__.py`` file.
+2. Second job builds the wheel with the version from the Git tag and uploads it to ``PyPi``.
 3. Third job generates a new keyword documentation via ``libdoc`` on the main branch, but pushes it to the ``gh_pages`` where it is available as public ``GitHub Page``.
 
 ### *Backup* - Manual Version Bump & Tag Creation
@@ -40,29 +40,21 @@ After executing the script, three pipeline jobs are getting triggered automatica
 If the preferred way using the ``create_release.sh`` script does not work, you can also manually create a new release.
 Therefore, execute the following steps.
 
-#### 1. Increase Version
+#### Create a new tag
 
-Open the file **[\_\_about\_\_.py](src/Tables/__about__.py)** and increase the version (``0.0.5 = major.minor.path``) before building & uploading the new python wheel package!
-
-The new version **must be unique** & **not already existing** in ``PyPi`` & ``GitHub Releases``!!!
-
-Commit & push the changed version into the ``main`` branch of the repository.
-
-#### 2. Create new Tag
-
-Now, create a new tag from the main branch with the syntax ``vX.X.X`` -> example: ``v1.0.5``.
+Create a new tag from the desired commit with the syntax ``vX.X.X``. The version must be unique in PyPI and GitHub Releases.
 
 Use the following commands to create & push the tag:
 ```
-git tag v0.0.5
-git push origin v0.0.5
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
 ```
 
-#### 2.1. Creating GitHub Release & Deploy Wheel Package to PyPi
+#### Creating GitHub Release & Deploy Wheel Package to PyPi
 
 After pushing the new tag, three pipeline jobs are getting triggered automatically:
 1. First job creates a new ``Release`` in github with the name of the created ``Tag``.
-2. Second job uploads the new wheel package to ``PyPi`` with the ``__version__`` from the ``__about__.py`` file.
+2. Second job builds the wheel with the version from the Git tag and uploads it to ``PyPi``.
 3. Third job generates a new keyword documentation via ``libdoc`` on the main branch, but pushes it to the ``gh_pages`` where it is available as public ``GitHub Page``.
 
 ## Installing Dev Dependencies

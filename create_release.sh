@@ -8,25 +8,25 @@ if [ -z "$1" ]; then
 fi
 
 NEW_VERSION="$1"
-FILE="src/Tables/__about__.py"
+TAG="v${NEW_VERSION}"
 
-echo "🔧 Updating version to '${NEW_VERSION}' in '${FILE}'"
-
-# Example: __version__ = "0.0.6"  →  __version__ = "0.0.7"
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' -E "s/^(__version__ *= *\")[^\"]+/\1${NEW_VERSION}/" src/Tables/__about__.py
-else
-    sed -i.bak -E "s/^(__version__\s*=\s*\")[^\"]+\"/\1${NEW_VERSION}\"/" "$FILE"
+if git rev-parse "$TAG" >/dev/null 2>&1; then
+  echo "❌ Tag '${TAG}' already exists locally."
+  exit 1
 fi
 
-rm -f "${FILE}.bak"
+if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+  echo "❌ Tag '${TAG}' already exists on origin."
+  exit 1
+fi
 
-git checkout main
-git add "$FILE"
-git commit -m "Bump version to ${NEW_VERSION}"
-git push origin HEAD
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "❌ Working tree has uncommitted changes. Commit or stash them before creating a release."
+  exit 1
+fi
 
-git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
-git push origin "v${NEW_VERSION}"
+echo "🏷️ Creating '${TAG}' on the current commit"
+git tag -a "$TAG" -m "Release ${TAG}"
+git push origin "$TAG"
 
-echo "✅ Version bumped to '${NEW_VERSION}', committed and tagged. PyPi Release is going to be created... 🚀"
+echo "✅ Tag '${TAG}' created and pushed. GitHub Actions will build and publish the release."
