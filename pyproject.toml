@@ -26,7 +26,7 @@ classifiers = [
 ]
 dependencies = [
   "overrides",
-  "robotframework>=7.0",
+  "robotframework>=5.0",
   "robotframework-assertion-engine",
   "robotframework-pythonlibcore",
   "pandas",
