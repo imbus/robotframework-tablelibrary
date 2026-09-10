@@ -73,6 +73,17 @@ ${result} =    BuiltIn.Evaluate    "index" not in "${content}"
 BuiltIn.Should Be True    ${result}
 ```
 
+### Missing values
+
+Missing values are returned using pandas' default values by default. To return parsed missing values as Python `None` in list, dictionary, cell, row, and column results, enable the setting. This includes pandas missing-value types such as `NaN`, `pd.NA`, and `NaT`, as well as values recognized as missing by the active parser, such as `N/A` and `NULL`:
+
+```
+Tables.Configure Missing As None    True
+${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_01.csv
+```
+
+DataFrame results and the library's internal DataFrames are not changed by this setting.
+
 ### File Format - Parquet
 ```
 ${content} =    Tables.Read Table    ${CURDIR}${/}testdata${/}example_05.parquet

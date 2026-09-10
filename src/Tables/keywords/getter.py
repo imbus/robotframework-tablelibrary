@@ -58,6 +58,8 @@ class Getter(LibraryAttributes):
             table_df = table_df.iloc[1:]
             data = data[1:]
 
+        data = self.file_reader.convert_missing_values(data)
+
         if return_type == TableFormat["List of dicts"]:
             df_for_dicts = table_df
 
@@ -65,7 +67,9 @@ class Getter(LibraryAttributes):
                 header = [str(x) for x in df_for_dicts.iloc[0].tolist()]
                 df_for_dicts = df_for_dicts.iloc[1:].copy()
                 df_for_dicts.columns = header
-            return cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records"))
+            return self.file_reader.convert_missing_values(
+                cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records"))
+            )
         return data
 
     @keyword(tags=["Getter"])
@@ -196,6 +200,9 @@ class Getter(LibraryAttributes):
         | =`Arguments`= | =`Description`= |
         | ``return_type`` | Choose what type of table format it should return. Default: list of lists|
 
+        If ``Configure Missing As None`` is enabled, missing values are returned as
+        Python ``None`` for list and dictionary results. DataFrame results are unchanged.
+
         == Return Value ==
         Return table in form as either list of lists, list of dicts or dataframe.
 
@@ -229,6 +236,9 @@ class Getter(LibraryAttributes):
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
+        If ``Configure Missing As None`` is enabled, a missing cell is returned as
+        Python ``None`` and assertions are evaluated against the converted value.
+
         == Return Value ==
         Keyword returns the value of the given cell.
         In case of a failed assertion, the keyword will just fail without returning anything.
@@ -245,6 +255,7 @@ class Getter(LibraryAttributes):
         column = self.file_reader.cast_column_type(column)
 
         cell = table_df.loc[row, column] if isinstance(column, str) else table_df.iloc[row, column]
+        cell = self.file_reader.convert_missing_values(cell)
 
         if assertion_expected:
             if assertion_operator not in NumericalOperators:
@@ -272,6 +283,9 @@ class Getter(LibraryAttributes):
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
+        If ``Configure Missing As None`` is enabled, missing column values are returned
+        as Python ``None`` and assertions are evaluated against the converted values.
+
         == Return Value ==
         Returns column values as a list.
 
@@ -291,7 +305,7 @@ class Getter(LibraryAttributes):
         column = self.file_reader.cast_column_type(column)
 
         column_df = table_df.loc[:, column] if isinstance(column, str) else table_df.iloc[:, column]
-        column_list = cast(list[Any], column_df.to_list())
+        column_list = self.file_reader.convert_missing_values(cast(list[Any], column_df.to_list()))
 
         if assertion_expected:
             if assertion_operator not in valid_assertions:
@@ -318,6 +332,9 @@ class Getter(LibraryAttributes):
         | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
         | ``message`` | Custom error message for failed assertion |
 
+        If ``Configure Missing As None`` is enabled, missing row values are returned as
+        Python ``None`` and assertions are evaluated against the converted values.
+
         == Return Value ==
         Returns row values as a list.
 
@@ -335,7 +352,7 @@ class Getter(LibraryAttributes):
         current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(data=current_df, row=row)
 
-        row_list = cast(list[Any], table_df.iloc[row].to_list())
+        row_list = self.file_reader.convert_missing_values(cast(list[Any], table_df.iloc[row].to_list()))
 
         if assertion_expected:
             if assertion_operator not in valid_assertions:
@@ -347,7 +364,7 @@ class Getter(LibraryAttributes):
         return row_list
 
     @keyword(tags=["Getter"])
-    def count_table(  # noqa: PLR0913
+    def count_table(  # noqa PLR0913
         self,
         path: Path | str,
         axis: Axis,

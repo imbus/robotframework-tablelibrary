@@ -23,7 +23,7 @@ from Tables.utils.settings_stack import SettingsStack
 
 
 class DummyLibrary:
-    def __init__(self, *, ignore_header: bool = False):
+    def __init__(self, *, ignore_header: bool = False, missing_as_none: bool = False):
 
         # attributes expected by SettingsStack
         self.scope_stack: dict = {}
@@ -32,9 +32,11 @@ class DummyLibrary:
         self.is_test_case_running: bool = False
 
         self.scope_stack["ignore_header"] = SettingsStack(ignore_header, self)
+        self.scope_stack["missing_as_none"] = SettingsStack(missing_as_none, self)
         self.scope_stack["file_type"] = SettingsStack(FileType.CSV, self)
         self.scope_stack["separator"] = SettingsStack(Delimiter[","], self)
         self.scope_stack["line_terminator"] = SettingsStack(LineTerminator.LF, self)
         self.scope_stack["file_encoding"] = SettingsStack(FileEncoding.UTF_8.value, self)
         self.scope_stack["quoting"] = SettingsStack(Quoting.MINIMAL, self)
         self.scope_stack["quoting_character"] = SettingsStack(QuotingCharacter['"'], self)
+        self.scope_stack["enable_streaming"] = SettingsStack(False, self)

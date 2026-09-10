@@ -172,6 +172,7 @@ class Tables(HybridCore):
         line_terminator: LineTerminator = LineTerminator.LF,
         quoting: Quoting = Quoting.MINIMAL,
         quoting_character: QuotingCharacter = QuotingCharacter['"'],
+        missing_as_none: bool = False,
     ):
         """
         ``TableLibrary`` can be controlled by the following arguments:
@@ -184,6 +185,7 @@ class Tables(HybridCore):
         | ``line_terminator`` | Define the required line terminator for your table files. Default is ``False``  |
         | ``quoting`` | Define which values should be surrounded with quotes, please check the CSV quoting for more details. Default is ``MINIMAL``  |
         | ``quoting_character`` | Define quoting character to use for writing table files. Default is ``\"``  |
+        | ``missing_as_none`` | Return parsed missing values as Python ``None`` instead of pandas missing values. Default is ``False``  |
         """
 
         # required variables for SettingsScope mechanism
@@ -202,6 +204,7 @@ class Tables(HybridCore):
         )
         self.scope_stack["quoting"] = SettingsStack(quoting, self)
         self.scope_stack["quoting_character"] = SettingsStack(quoting_character, self)
+        self.scope_stack["missing_as_none"] = SettingsStack(missing_as_none, self)
         self.scope_stack["enable_streaming"] = SettingsStack(False, self)
 
         self.file_access = FileAccess(self)

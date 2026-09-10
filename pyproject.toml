@@ -103,6 +103,8 @@ docs = "libdoc src/Tables results/keyword_docs.html"
 
 [tool.mypy]
 python_version = "3.10"
+exclude = '(^|/)\.venv(/|$)'
+follow_imports = "skip"
 ignore_missing_imports = true
 no_implicit_optional = true
 strict_optional = true

@@ -18,6 +18,7 @@ def test_tables_init_defaults():
     assert tables.scope_stack["line_terminator"].get() == LineTerminator.LF
     assert tables.scope_stack["quoting"].get() == Quoting.MINIMAL
     assert tables.scope_stack["quoting_character"].get() == QuotingCharacter['"']
+    assert tables.scope_stack["missing_as_none"].get() is False
     assert tables.file_access is not None
 
 
@@ -30,6 +31,7 @@ def test_tables_init_custom_values():
         line_terminator=LineTerminator.CRLR,
         quoting=Quoting.NONE,
         quoting_character=QuotingCharacter["'"],
+        missing_as_none=True,
     )
     assert tables.scope_stack["file_type"].get() == FileType.Excel
     assert tables.scope_stack["separator"].get() == Delimiter[";"]
@@ -38,3 +40,4 @@ def test_tables_init_custom_values():
     assert tables.scope_stack["line_terminator"].get() == LineTerminator.CRLR
     assert tables.scope_stack["quoting"].get() == Quoting.NONE
     assert tables.scope_stack["quoting_character"].get() == QuotingCharacter["'"]
+    assert tables.scope_stack["missing_as_none"].get() is True
