@@ -225,12 +225,14 @@ class Tables(HybridCore):
         super().__init__(libraries)
 
     def _start_suite(self, _name: running.TestSuite, attrs: result.TestSuite):
-        self.suite_ids[attrs.id] = None
-        self._add_to_scope_stack(attrs.id, Scope.Suite)
+        suite_id = attrs.id
+        self.suite_ids[suite_id] = None
+        self._add_to_scope_stack(suite_id, Scope.Suite)
 
     def _start_test(self, _name: running.TestCase, attrs: result.TestCase):
-        self.current_test_id = attrs.id
-        self._add_to_scope_stack(attrs.id, Scope.Test)
+        test_id = attrs.id
+        self.current_test_id = test_id
+        self._add_to_scope_stack(test_id, Scope.Test)
         self.is_test_case_running = True
 
     def _end_test(self, _name: running.TestCase, attrs: result.TestCase):
@@ -239,8 +241,9 @@ class Tables(HybridCore):
         self.is_test_case_running = False
 
     def _end_suite(self, _name: running.TestSuite, attrs: result.TestSuite):
-        self._remove_from_scope_stack(attrs.id)
-        self.suite_ids.pop(attrs.id, None)
+        suite_id = attrs.id
+        self._remove_from_scope_stack(suite_id)
+        self.suite_ids.pop(suite_id, None)
 
     def _add_to_scope_stack(self, scope_id: str, scope: Scope):
         for stack in self.scope_stack.values():

@@ -21,10 +21,12 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
   "overrides",
-  "robotframework>=5.0.1",
+  "robotframework>=7.0",
   "robotframework-assertion-engine",
   "robotframework-pythonlibcore",
   "pandas",
@@ -69,6 +71,22 @@ extra-dependencies = [
 ]
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/Tables tests}"
+
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "robotframework=={matrix:robotframework}",
+]
+
+[tool.hatch.envs.test.scripts]
+atest = "robot tests/atest/"
+utest = "pytest --cov=Tables --cov-report=term-missing --cov-branch --cov-fail-under=95"
+all = ["utest", "atest"]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+robotframework = ["7.0", "7.4.2"]
 
 [tool.coverage.run]
 source_pkgs = ["Tables", "tests"]

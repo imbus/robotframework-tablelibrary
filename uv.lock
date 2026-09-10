@@ -1959,7 +1959,7 @@ requires-dist = [
     { name = "pyarrow" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "robotframework", specifier = ">=5.0.1" },
+    { name = "robotframework", specifier = ">=7.0" },
     { name = "robotframework-assertion-engine" },
     { name = "robotframework-pythonlibcore" },
     { name = "robotframework-robocop", marker = "extra == 'dev'" },
