@@ -49,3 +49,18 @@ def test_configuration_updates_file_encoding(config):
 def test_configuration_updates_ignore_header(config):
     config.configure_ignore_header(True)
     assert config.ignore_header is True
+
+
+def test_configuration_updates_missing_as_none(config):
+    assert config.configure_missing_as_none(True) is False
+    assert config.missing_as_none is True
+    assert config.configure_missing_as_none(False) is True
+    assert config.missing_as_none is False
+
+
+def test_configuration_reports_missing_as_none(config):
+    configuration = config.get_library_configuration()
+
+    assert configuration["missing_as_none"] is False
+    config.configure_missing_as_none(True)
+    assert config.get_library_configuration()["missing_as_none"] is True

@@ -121,3 +121,16 @@ class LibraryAttributes:
     @enable_streaming_stack.setter
     def enable_streaming_stack(self, stack: SettingsStack):
         self.library.scope_stack["enable_streaming"] = stack
+
+    # missing values
+    @property
+    def missing_as_none(self) -> bool:
+        return self.library.scope_stack["missing_as_none"].get()
+
+    @property
+    def missing_as_none_stack(self) -> SettingsStack:
+        return self.library.scope_stack["missing_as_none"]
+
+    @missing_as_none_stack.setter
+    def missing_as_none_stack(self, stack: SettingsStack):
+        self.library.scope_stack["missing_as_none"] = stack

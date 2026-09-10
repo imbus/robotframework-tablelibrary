@@ -172,6 +172,7 @@ class Tables(HybridCore):
         line_terminator: LineTerminator = LineTerminator.LF,
         quoting: Quoting = Quoting.MINIMAL,
         quoting_character: QuotingCharacter = QuotingCharacter['"'],
+        missing_as_none: bool = False,
     ):
         """
         ``TableLibrary`` can be controlled by the following arguments:
@@ -184,6 +185,7 @@ class Tables(HybridCore):
         | ``line_terminator`` | Define the required line terminator for your table files. Default is ``False``  |
         | ``quoting`` | Define which values should be surrounded with quotes, please check the CSV quoting for more details. Default is ``MINIMAL``  |
         | ``quoting_character`` | Define quoting character to use for writing table files. Default is ``\"``  |
+        | ``missing_as_none`` | Return parsed missing values as Python ``None`` instead of pandas missing values. Default is ``False``  |
         """
 
         # required variables for SettingsScope mechanism
@@ -202,6 +204,7 @@ class Tables(HybridCore):
         )
         self.scope_stack["quoting"] = SettingsStack(quoting, self)
         self.scope_stack["quoting_character"] = SettingsStack(quoting_character, self)
+        self.scope_stack["missing_as_none"] = SettingsStack(missing_as_none, self)
         self.scope_stack["enable_streaming"] = SettingsStack(False, self)
 
         self.file_access = FileAccess(self)
@@ -222,12 +225,14 @@ class Tables(HybridCore):
         super().__init__(libraries)
 
     def _start_suite(self, _name: running.TestSuite, attrs: result.TestSuite):
-        self.suite_ids[attrs.id] = None
-        self._add_to_scope_stack(attrs.id, Scope.Suite)
+        suite_id = attrs.id
+        self.suite_ids[suite_id] = None
+        self._add_to_scope_stack(suite_id, Scope.Suite)
 
     def _start_test(self, _name: running.TestCase, attrs: result.TestCase):
-        self.current_test_id = attrs.id
-        self._add_to_scope_stack(attrs.id, Scope.Test)
+        test_id = attrs.id
+        self.current_test_id = test_id
+        self._add_to_scope_stack(test_id, Scope.Test)
         self.is_test_case_running = True
 
     def _end_test(self, _name: running.TestCase, attrs: result.TestCase):
@@ -236,8 +241,9 @@ class Tables(HybridCore):
         self.is_test_case_running = False
 
     def _end_suite(self, _name: running.TestSuite, attrs: result.TestSuite):
-        self._remove_from_scope_stack(attrs.id)
-        self.suite_ids.pop(attrs.id, None)
+        suite_id = attrs.id
+        self._remove_from_scope_stack(suite_id)
+        self.suite_ids.pop(suite_id, None)
 
     def _add_to_scope_stack(self, scope_id: str, scope: Scope):
         for stack in self.scope_stack.values():

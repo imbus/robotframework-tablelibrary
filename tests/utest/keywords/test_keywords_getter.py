@@ -74,6 +74,88 @@ def test_read_table_returns_dataframe(getter, tmp_path, write_csv):
     assert isinstance(data, pd.DataFrame)
 
 
+def test_missing_as_none_converts_all_non_dataframe_results(getter, tmp_path, write_csv):
+    path = tmp_path / "missing.csv"
+    write_csv(path, [["name", "email", "empty"], ["Alice", "alice@example.com", ""], ["Bob", "", ""]])
+    getter.library.scope_stack["missing_as_none"].set(True)
+
+    assert getter.read_table(path) == [
+        ["name", "email", "empty"],
+        ["Alice", "alice@example.com", None],
+        ["Bob", None, None],
+    ]
+    assert getter.read_table(path, TableFormat["List of dicts"]) == [
+        {"name": "Alice", "email": "alice@example.com", "empty": None},
+        {"name": "Bob", "email": None, "empty": None},
+    ]
+
+    getter.open_table(path, alias="missing")
+    assert getter.get_table() == [
+        ["name", "email", "empty"],
+        ["Alice", "alice@example.com", None],
+        ["Bob", None, None],
+    ]
+    assert getter.get_table(TableFormat["List of dicts"]) == [
+        {"name": "Alice", "email": "alice@example.com", "empty": None},
+        {"name": "Bob", "email": None, "empty": None},
+    ]
+    dataframe = getter.get_table(TableFormat["Dataframe"])
+    assert isinstance(dataframe, pd.DataFrame)
+    assert pd.isna(dataframe.iloc[2, 1])
+    assert getter.get_table_cell(1, "email") is None
+    assert getter.get_table_column("empty") == [None, None]
+    assert getter.get_table_row(2) == ["Bob", None, None]
+
+
+def test_missing_as_none_does_not_change_dataframe_or_default_results(getter, tmp_path, write_csv):
+    path = tmp_path / "missing.csv"
+    write_csv(path, [["name", "email"], ["Bob", ""]])
+
+    default_data = getter.read_table(path)
+    assert pd.isna(default_data[1][1])
+    getter.library.scope_stack["missing_as_none"].set(True)
+    dataframe = getter.read_table(path, TableFormat["Dataframe"])
+    assert pd.isna(dataframe.iloc[1, 1])
+
+
+def test_missing_as_none_preserves_parser_missing_value_detection(getter, tmp_path, write_csv):
+    path = tmp_path / "parser-missing.csv"
+    write_csv(path, [["name", "value"], ["Alice", "N/A"], ["Bob", "NULL"]])
+    getter.library.scope_stack["missing_as_none"].set(True)
+
+    assert getter.read_table(path) == [["name", "value"], ["Alice", None], ["Bob", None]]
+
+
+def test_missing_as_none_converts_pandas_missing_types(getter, tmp_path, monkeypatch):
+    getter.library.scope_stack["missing_as_none"].set(True)
+
+    def fake_read_table_file(path: Path):
+        return pd.DataFrame([["h1", "h2", "h3"], [pd.NA, pd.NaT, float("nan")]])
+
+    monkeypatch.setattr(getter.file_reader, "read_table_file", fake_read_table_file)
+
+    assert getter.read_table(tmp_path / "data.csv") == [["h1", "h2", "h3"], [None, None, None]]
+
+
+def test_missing_as_none_is_used_for_assertions(getter, tmp_path, write_csv, monkeypatch):
+    path = tmp_path / "assertion-missing.csv"
+    write_csv(path, [["h1", "h2"], ["", "value"]])
+    getter.library.scope_stack["missing_as_none"].set(True)
+    getter.open_table(path, alias="assertion-missing")
+    asserted_values = []
+
+    def record_assertion(value, *_args):
+        asserted_values.append(value)
+
+    monkeypatch.setattr("Tables.keywords.getter.verify_assertion", record_assertion)
+    operator = AssertionOperator["=="]
+    getter.get_table_cell(0, "h1", assertion_operator=operator, assertion_expected="expected")
+    getter.get_table_column("h1", assertion_operator=AssertionOperator["contains"], assertion_expected="expected")
+    getter.get_table_row(1, assertion_operator=AssertionOperator["contains"], assertion_expected="expected")
+
+    assert asserted_values == [None, [None], [None, "value"]]
+
+
 def test_open_get_table_and_cell_access(getter, tmp_path, write_csv):
     path = tmp_path / "data.csv"
 

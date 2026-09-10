@@ -97,6 +97,24 @@ hatch run dev:atest
 hatch run dev:utest
 ```
 
+### Execute Tests Against the Version Matrix
+
+Install Python 3.10 through 3.14 locally and make sure Hatch can find these interpreters. The test matrix covers Python 3.10-3.14 and Robot Framework 7.0 and 7.4.2.
+
+Run all unit and acceptance tests against every matrix combination:
+
+```shell
+hatch run test:all
+```
+
+To test one combination only, for example Python 3.14 with Robot Framework 7.4.2:
+
+```shell
+hatch run test.py3.14-7.4.2:all
+```
+
+Use `hatch env show` to list the generated matrix environments.
+
 ### Generate Docs via libdoc
 
 ```shell

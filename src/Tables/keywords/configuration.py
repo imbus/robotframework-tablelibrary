@@ -25,6 +25,7 @@ class ConfigCtx:
     file_encoding: FileEncoding
     ignore_header: bool
     enable_streaming: bool
+    missing_as_none: bool
 
 
 class Configuration(LibraryAttributes):
@@ -45,6 +46,7 @@ class Configuration(LibraryAttributes):
                 file_encoding=self.file_encoding,
                 ignore_header=self.ignore_header,
                 enable_streaming=self.enable_streaming,
+                missing_as_none=self.missing_as_none,
             )
         )
 
@@ -198,4 +200,27 @@ class Configuration(LibraryAttributes):
         old_config = self.enable_streaming
         self.enable_streaming_stack.set(enable_streaming, scope)
         logger.debug(f"'file_type': old value: {old_config} - new value: {enable_streaming}")
+        return old_config
+
+    @keyword(tags=["Configuration"])
+    def configure_missing_as_none(self, missing_as_none: bool, scope: Scope = Scope.Suite):
+        """
+        Configure whether parsed missing values are returned as Python ``None``.
+
+        When enabled, pandas missing values such as ``NaN``, ``pd.NA`` and ``NaT``
+        are converted to ``None`` in list, dictionary, cell, row and column results.
+        Values recognized as missing by the active parser, such as ``N/A`` and ``NULL``,
+        are included. DataFrame results and the library's internal DataFrames are not changed.
+
+        | =`Arguments`= | =`Description`= |
+        | ``missing_as_none`` | Set to ``True`` to return missing values as Python ``None``. Default: ``False`` |
+        | ``scope`` | Scope in which the setting applies. |
+
+        == Example ==
+        | Configure Missing As None    True
+        | Configure Missing As None    False
+        """
+        old_config = self.missing_as_none
+        self.missing_as_none_stack.set(missing_as_none, scope)
+        logger.debug(f"'missing_as_none': old value: {old_config} - new value: {missing_as_none}")
         return old_config

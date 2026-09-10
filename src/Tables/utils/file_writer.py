@@ -219,8 +219,8 @@ class FileWriter(LibraryAttributes):
     def set_dataframe_cells(
         self,
         data: Any,
-        row: None | int = None,
-        column: None | str | int = None,
+        row: int | None = None,
+        column: str | int | None = None,
         header: bool = True,
         return_type: TableFormat = TableFormat["Dataframe"],
     ) -> list[list] | list[dict] | DataFrame:

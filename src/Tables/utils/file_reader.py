@@ -50,7 +50,7 @@ class FileReader(LibraryAttributes):
             if self.file_type == FileType.Parquet and not self.ignore_header:
                 list_data.insert(0, list(data.columns))
 
-            return list_data
+            return self.convert_missing_values(list_data)
         if return_type == TableFormat["List of dicts"]:
             df_for_dicts = data
 
@@ -58,10 +58,24 @@ class FileReader(LibraryAttributes):
                 header = [str(x) for x in df_for_dicts.iloc[0].tolist()]
                 df_for_dicts = df_for_dicts.iloc[1:].copy()
                 df_for_dicts.columns = header
-            return cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records"))
+            return self.convert_missing_values(cast(list[dict[str, Any]], df_for_dicts.to_dict(orient="records")))
         if return_type == TableFormat["Dataframe"]:
             return data
         raise ValueError(f"Invalid TableFormat type. Please select valid values: {[key.name for key in TableFormat]}")
+
+    def convert_missing_values(self, value: Any) -> Any:
+        if not self.missing_as_none:
+            return value
+        if isinstance(value, list):
+            return [self.convert_missing_values(item) for item in value]
+        if isinstance(value, dict):
+            return {key: self.convert_missing_values(item) for key, item in value.items()}
+        try:
+            if bool(pd.isna(value)):
+                return None
+        except (TypeError, ValueError):
+            pass
+        return value
 
     def file_exists(self, path: Path) -> bool | FileNotFoundError:
         if not path.is_file():
@@ -206,8 +220,8 @@ class FileReader(LibraryAttributes):
     def validate_table_to_dataframe(
         self,
         data: list[list] | DataFrame,
-        row: None | int = None,
-        column: None | str | int = None,
+        row: int | None = None,
+        column: str | int | None = None,
     ) -> DataFrame:
         """Formats a table (list of lists or dataframe) to dataframe. Also checks
         if provided row or column are valid (see validate_row/ validate_column)."""
