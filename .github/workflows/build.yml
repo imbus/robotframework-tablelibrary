@@ -56,6 +56,12 @@ jobs:
     - name: Install dependencies
       run: hatch env create test.py${{ matrix.python-version }}-${{ matrix.robotframework }}
 
+    - name: Show installed Python version
+      run: hatch run test.py${{ matrix.python-version }}-${{ matrix.robotframework }}:python --version
+
+    - name: Show installed Robot Framework version
+      run: hatch run test.py${{ matrix.python-version }}-${{ matrix.robotframework }}:robot --version
+
     - name: Build wheel with Hatch
       run: hatch build
 
