@@ -60,7 +60,7 @@ jobs:
       run: hatch run test.py${{ matrix.python-version }}-${{ matrix.robotframework }}:python --version
 
     - name: Show installed Robot Framework version
-      run: hatch run test.py${{ matrix.python-version }}-${{ matrix.robotframework }}:robot --version
+      run: hatch run test.py${{ matrix.python-version }}-${{ matrix.robotframework }}:robot --version || test $? -eq 251
 
     - name: Build wheel with Hatch
       run: hatch build
