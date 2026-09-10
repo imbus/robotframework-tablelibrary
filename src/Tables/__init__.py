@@ -7,7 +7,7 @@ from robotlibcore import HybridCore
 
 from Tables.utils.settings_stack import Scope, SettingsStack
 
-from .__about__ import __version__
+from ._version import __version__
 from .keywords import (
     Configuration,
     Getter,

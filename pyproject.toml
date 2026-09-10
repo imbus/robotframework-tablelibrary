@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -60,7 +60,10 @@ only-include = ["src/Tables"]
 sources = ["src"]
 
 [tool.hatch.version]
-path = "src/Tables/__about__.py"
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/Tables/_version.py"
 
 [tool.hatch.build]
 dev-mode-dirs = ["src"]
@@ -93,7 +96,7 @@ source_pkgs = ["Tables", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/Tables/__about__.py",
+  "src/Tables/_version.py",
 ]
 
 [tool.coverage.paths]
