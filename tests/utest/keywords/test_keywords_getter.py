@@ -187,6 +187,16 @@ def test_getter_ignore_header(getter, tmp_path, write_csv):
     assert table == [ROW_1, ROW_2]
 
 
+def test_getter_ignore_header_keeps_single_data_row(getter, tmp_path, write_csv):
+    path = tmp_path / "data.csv"
+    write_csv(path, [["11:00:00", 230.56]])
+    getter.library.scope_stack["ignore_header"].set(True)
+
+    getter.open_table(path, alias="t_single_row")
+
+    assert getter.get_table() == [["11:00:00", 230.56]]
+
+
 def test_getter_invalid_assertion_operator(getter, tmp_path, write_csv):
     path = tmp_path / "data.csv"
     write_csv(path, ROWS)

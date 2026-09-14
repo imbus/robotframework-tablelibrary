@@ -235,7 +235,9 @@ class FileReader(LibraryAttributes):
             column = self.cast_column_type(column)
             self.validate_column(data, column)
 
-        if self.file_type != FileType.Parquet and (isinstance(column, str) or self.ignore_header):
+        if self.file_type != FileType.Parquet and (
+            isinstance(column, str) or (self.ignore_header and len(data) > 1)
+        ):
             data.columns = data.iloc[0].to_list()
             data = data[1:].reset_index(drop=True)
         return data
