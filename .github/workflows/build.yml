@@ -36,7 +36,7 @@ jobs:
     - name: Run ruff lint
       run: hatch run dev:lint
 
-  check-python-compatibility:
+  run-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
