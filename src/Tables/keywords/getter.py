@@ -33,18 +33,24 @@ class Getter(LibraryAttributes):
         """
         Keyword reads a table from the given path & returns the content.
 
-        | =`Arguments`= | =`Description`= |
-        | ``path`` | Specify the path of the your table file. |
-        | ``return_type`` | You can declare what type of table format it should be returned. Either list of lists, list of dictionaries or a pandas datarframe. Default: List of lists. |
+        Args:
+            path: Specify the path of the your table file.
+            return_type: You can declare what type of table format it should be returned. Either list of lists, list of dictionaries or a pandas datarframe. Default: List of lists.
 
-        == Return Value ==
-        Keyword returns the complete content of the given file.\n
-        Raises an error if the file does not exist!
+        Returns:
+            Keyword returns the complete content of the given file.\n
 
-        == Example ==
-        | ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv    List of lists
-        | ${result} =    BuiltIn.Evaluate    "${content}[0][0]" == "index"
-        | BuiltIn.Should Be True    ${result} # checking if the first column is 'index'
+        Raises:
+            FileNotFoundError: Raises an error if the file does not exist!
+
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Read Table
+            ${data} =    Read Table    ${CURDIR}/testdata/statistics.csv    List of lists
+            ${result} =    BuiltIn.Evaluate    "${content}[0][0]" == "index"
+            BuiltIn.Should Be True    ${result} # checking if the first column is 'index'
+        ```
         """
         table_df = self.file_reader.read_table_file(path)
         if return_type == TableFormat["Dataframe"]:
@@ -82,17 +88,20 @@ class Getter(LibraryAttributes):
         Keyword which is similar to read_table but saves the table in form of an alias.
         The saved table can be further modified but it will not change the file which was the table was opened from.
 
-        | =`Arguments`= | =`Description`= |
-        | ``path`` | Specify the path of the given tables file. |
-        | ``alias`` | Define an alias name to identified opened table file. |
+        Args:
+            path: Specify the path of the given table file.
+            alias: Define an alias name to identify the opened table file.
 
-        == Return Value ==
-        Returns the alias string.
+        Returns:
+            The alias string.
 
-        == Example ==
-        | # Opening and saving multiple tables in cache
-        | Tables.Open Table    table 1   table.csv
-        | Tables.Open Table    table 2   table_1.csv    # currently table 2 is active
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Open And Save Multiple Tables
+            Tables.Open Table    table 1   table.csv
+            Tables.Open Table    table 2   table_1.csv    # currently table 2 is active
+        ```
         """
         if not alias:
             alias = str(uuid4())
@@ -114,27 +123,29 @@ class Getter(LibraryAttributes):
         Creating a new empty table requires headers. This leads to a better understanding of the data for each column
         and wont be a problem for further workflows with the table data.
 
-        == Arguments ==
-        | =Argument= | =Description= |
-        | ``headers`` | Define headers for the new table file. |
-        | ``alias`` | Optional - if not given, uuid is generated as unique alias. |
-        | ``file_path`` | Optional - if given, new table will be immediately stored to the file system. |
+        Args:
+            headers: Define headers for the new table file.
+            alias: Optional. If not given, a UUID is generated as a unique alias.
+            file_path: Optional. If given, the new table is immediately stored in the file system.
 
-        == Important ==
-
+        ## Important
         Adding ``initial`` data to the empty table, MUST be done via ``Append Row`` or ``Append Column`` keyword - see example.
 
-        == Example ==
+        ## Example
         This example creates a new empty table, appends row & columns and writes it to a new csv file.
-        |  VAR    @{headers} =    name    age
-        |  VAR    @{person_1} =    name    age
-        |  ${uuid} =    Create Table    headers=${headers}
-        |  Append Row    ${person_1}
-        |
-        |  VAR    @{new_column} =    city    MG
-        |  Append Column    ${new_column}
-        |
-        |  Write Table    ${uuid}    ${filepath}
+        ```robotframework
+        *** Test Cases ***
+        Create And Write Table
+            VAR    @{headers} =    name    age
+            VAR    @{person_1} =    name    age
+            ${uuid} =    Create Table    headers=${headers}
+            Append Row    ${person_1}
+
+            VAR    @{new_column} =    city    MG
+            Append Column    ${new_column}
+
+            Write Table    ${uuid}    ${filepath}
+        ```
         """
         if not alias:
             alias = str(uuid4())
@@ -154,17 +165,20 @@ class Getter(LibraryAttributes):
         """
         Keyword which closes specific or all of the tables.
 
-        | =`Arguments`= | =`Description`= |
-        | ``alias`` | Use the name of saved alias. If None was selected, then all copened tables will be closed. |
+        Args:
+            alias: Use the alias of the saved table. If omitted, all opened tables are closed.
 
-        == Return Value ==
-        Returns True if the table is successfully closed. False if no open tables are available.
+        Returns:
+            ``True`` if the table is successfully closed; ``False`` if no tables are open.
 
-        == Example ==
-        | Tables.Open Table    table 1   table.csv
-        | Tables.Open Table    table 2   table_1.csv
-        |
-        | Tables.Close Table    table 1     # close table 1
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Close A Table
+            Tables.Open Table    table 1   table.csv
+            Tables.Open Table    table 2   table_1.csv
+            Tables.Close Table    table 1     # close table 1
+        ```
         """
         expected: bool = self.file_reader.close_table_dataframe(alias=alias)
         return expected
@@ -177,17 +191,20 @@ class Getter(LibraryAttributes):
         """
         Keyword which switches into current working table.
 
-        | =`Arguments`= | =`Description`= |
-        | ``alias`` | Use the name of saved alias. |
+        Args:
+            alias: Use the alias of the saved table.
 
-        == Return Value ==
-        Return the string of the alias it switched to.
+        Returns:
+            The alias that was selected as the current table.
 
-        == Example ==
-        | Tables.Open Table    table 1   table.csv
-        | Tables.Open Table    table 2   table_1.csv    # current active table
-        |
-        | Tables.Switch Table   table 1     # switched to 'table 1' as current active table
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Switch Between Tables
+            Tables.Open Table    table 1   table.csv
+            Tables.Open Table    table 2   table_1.csv    # current active table
+            Tables.Switch Table   table 1     # switch to table 1
+        ```
         """
         self.file_reader.table_dataframe_switch(alias=alias)
         return alias
@@ -197,20 +214,23 @@ class Getter(LibraryAttributes):
         """
         Keyword which returns a table in form of either list of lists, list of dicts, pandas dataframe.
 
-        | =`Arguments`= | =`Description`= |
-        | ``return_type`` | Choose what type of table format it should return. Default: list of lists|
+        If ``Configure Missing As None`` is enabled, missing values are returned as Python ``None`` for list and dictionary results. DataFrame results are unchanged.
 
-        If ``Configure Missing As None`` is enabled, missing values are returned as
-        Python ``None`` for list and dictionary results. DataFrame results are unchanged.
+        Args:
+            return_type: Choose the table format to return. Default: list of lists.
 
-        == Return Value ==
-        Return table in form as either list of lists, list of dicts or dataframe.
+        Returns:
+            The table as a list of lists, list of dictionaries, or DataFrame.
 
-        == Example ==
-        | Tables.Open Table    table 1   table.csv
-        | @{lists} =        Tables.Get Table
-        | @{dicts} =        Tables.Get Table    List of dicts
-        | @{dataframe} =    Tables.Get Table    Dataframe
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Get Table In Different Formats
+            Tables.Open Table    table 1   table.csv
+            @{lists} =        Tables.Get Table
+            @{dicts} =        Tables.Get Table    List of dicts
+            @{dataframe} =    Tables.Get Table    Dataframe
+        ```
         """
         current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(data=current_df)
@@ -229,24 +249,27 @@ class Getter(LibraryAttributes):
         """
         Keyword reads the currently opened table cell (see opened_table) with the given row & column index.
 
-        | =`Arguments`= | =`Description`= |
-        | ``row`` | Row to read the cell from |
-        | ``column`` | Column to read the cell from. Can be index number or a name of a column as a string. If string, ignore_header must be False. |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details.  Only numerical operators are allowed |
-        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
-        | ``message`` | Custom error message for failed assertion |
-
         If ``Configure Missing As None`` is enabled, a missing cell is returned as
         Python ``None`` and assertions are evaluated against the converted value.
 
-        == Return Value ==
-        Keyword returns the value of the given cell.
-        In case of a failed assertion, the keyword will just fail without returning anything.
+        Args:
+            row: Row to read the cell from.
+            column: Column to read from. Can be an index or a column name. A string requires ``ignore_header`` to be False.
+            assertion_operator: See ``robotframework-assertion-engine`` for more details. Only numerical operators are allowed.
+            assertion_expected: Expected value for the assertion.
+            message: Custom error message for a failed assertion.
 
-        == Example ==
-        | Tables.Configure Ignore Header    False
-        | Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
-        | Get Table Cell    1    name    ==    sascha
+        Returns:
+            The value of the selected cell.
+
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Get A Table Cell
+            Tables.Configure Ignore Header    False
+            Tables.Open Table    table 1    ${CURDIR}${/}testdata${/}example_01.csv
+            Get Table Cell    1    name    ==    sascha
+        ```
         """
         cell = None
         current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
@@ -277,22 +300,26 @@ class Getter(LibraryAttributes):
         Keyword to read the given table column from current opened table (see open_table).
         If ignore_header = True and searched column is a string then it will raise an error.
 
-        | =`Arguments`= | =`Description`= |
-        | ``column`` | Column header name (str) or index (int) to return values from |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. Only numerical operators are allowed |
-        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
-        | ``message`` | Custom error message for failed assertion |
-
         If ``Configure Missing As None`` is enabled, missing column values are returned
         as Python ``None`` and assertions are evaluated against the converted values.
 
-        == Return Value ==
-        Returns column values as a list.
+        Args:
+            column: Column header name or index to return values from.
+            assertion_operator: See ``robotframework-assertion-engine`` for more details. Only collection operators are allowed.
+            assertion_expected: Expected value for the assertion.
+            message: Custom error message for a failed assertion.
 
-        == Example ==
-        | Tables.Configure Ignore Header    False
-        | Tables.Open Table    table 1    example_01.csv
-        | Get Table Column    name    contains    alex
+        Returns:
+            The selected column values as a list.
+
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Get A Table Column
+            Tables.Configure Ignore Header    False
+            Tables.Open Table    table 1    example_01.csv
+            Get Table Column    name    contains    alex
+        ```
         """
         valid_assertions = [
             AssertionOperator["contains"],
@@ -326,22 +353,27 @@ class Getter(LibraryAttributes):
     ) -> list[Any]:
         """
         Keyword to read the given table column from current opened table (see open_table).
-        | =`Arguments`= | =`Description`= |
-        | ``row`` | Row index (int) to read values from |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. Only numerical operators are allowed. |
-        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
-        | ``message`` | Custom error message for failed assertion |
 
         If ``Configure Missing As None`` is enabled, missing row values are returned as
         Python ``None`` and assertions are evaluated against the converted values.
 
-        == Return Value ==
-        Returns row values as a list.
+        Args:
+            row: Row index to return values from.
+            assertion_operator: See ``robotframework-assertion-engine`` for more details. Only collection operators are allowed.
+            assertion_expected: Expected value for the assertion.
+            message: Custom error message for a failed assertion.
 
-        == Example ==
-        | Tables.Configure Ignore Header    False
-        | Tables.Open Table    table 1   example_01.csv
-        | Tables.Get Table Row    0    contains    age
+        Returns:
+            The selected row values as a list.
+
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Get A Table Row
+            Tables.Configure Ignore Header    False
+            Tables.Open Table    table 1   example_01.csv
+            Tables.Get Table Row    0    contains    age
+        ```
         """
         valid_assertions = [
             AssertionOperator["contains"],
@@ -376,26 +408,31 @@ class Getter(LibraryAttributes):
         """
         Keyword for counting rows or columns in the provided table.
 
-        | =`Arguments`= | =`Description`= |
-        | ``path`` | Either a filepath or a saved variable of 'Open Table' keyword. |
-        | ``axis`` | Select 'Columns' or 'Rows' depending which axis should be checked |
-        | ``assertion_operator`` | See ``robotframework-assertion-engine`` for more details. Only numerical operators are allowed |
-        | ``assertion_expected`` | See ``robotframework-assertion-engine`` for more details |
-        | ``message`` | Custom error message for failed assertion |
+        Args:
+            path: File path or alias returned by ``Open Table``.
+            axis: Select ``Columns`` or ``Rows`` to determine what is counted.
+            assertion_operator: See ``robotframework-assertion-engine`` for more details. Numerical and evaluation operators are allowed.
+            assertion_expected: Expected count for the assertion.
+            message: Custom error message for a failed assertion.
+            continue_on_failure: Whether the test should continue after a failed assertion.
 
-        == Return Value ==
-        Keyword returns a number count of either rows or columns.
+        Returns:
+            The number of rows or columns.
 
-        == Example ==
-        | CSV:
-        | VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
-        | Tables.Open Table     table 1    ${file_path}
-        | Tables.Count Table    table 1    Rows     ==    ${6}
-        | Tables.Count Table    table 1    Columns    ==    ${3}
-        |
-        | VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
-        | ${row_count}  Tables.Count Table    ${file_path}    Rows
-        | BuiltIn.Should Be Equal    ${row_count}    ${6}
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Count Table Rows And Columns
+            # CSV
+            VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
+            Tables.Open Table     table 1    ${file_path}
+            Tables.Count Table    table 1    Rows       ==    ${6}
+            Tables.Count Table    table 1    Columns    ==    ${3}
+
+            VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv
+            ${row_count}  Tables.Count Table    ${file_path}    Rows
+            BuiltIn.Should Be Equal    ${row_count}    ${6}
+        ```
         """
         casted_path = self.file_reader.cast_path_type(path)
         if isinstance(casted_path, Path):

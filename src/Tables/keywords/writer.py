@@ -23,21 +23,24 @@ class Writer(LibraryAttributes):
         """
         Keyword to write the given data to a new file or overwrite an existing file.
 
-        | =`Arguments`= | =`Description`= |
-        | ``data`` | Data object to store in a new file |
-        | ``file_path`` | The full path of the table file to save the content in. If alias from 'Open Table' is used, it will write the data in the aliases file path. If no file path is selected, then it will use current alias. |
+        Args:
+            data: Data object to store in a new file.
+            file_path: Full path of the table file to save the content in. If an alias from `Open Table` is used, the data is written to the alias file path. If no file path is selected, the current alias is used.
 
-        == Data Object ==
+        ## Data Object
         The given data object with the argument ``data`` needs to be a list of lists to replicate the table structure
 
-        == Return Value ==
-        Returns the path of written table as a string.
+        Returns:
+            Returns the path of written table as a string.
 
-        == Example ==
-        | Write Table    ${data}    statistics.csv     # write into file location
-        |
-        | Tables.Open Table    table 1    new_statistics.csv
-        | Tables.Write Table    ${data}    table 1      # write into new_statistics.csv
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Write A Table
+            Write Table    ${data}    statistics.csv
+            Tables.Open Table    table 1    new_statistics.csv
+            Tables.Write Table    ${data}    table 1
+        ```
         """
         if isinstance(data, str):
             current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
@@ -59,17 +62,20 @@ class Writer(LibraryAttributes):
         """
         Keyword to (over-) write the value of a specific cell of the current table (see Open Table).
 
-        | =`Arguments`= | =`Description`= |
-        | ``data`` | The new value for the given table cell. |
-        | ``row`` | Define the index of the row to identify the cell. |
-        | ``column`` | Define the index of the column to identify the cell. Header must be True if column is string. |
-        | ``header`` | Local override for the ``ignore_header`` logic |
-        | ``file_path`` | The full path of the existing table file. |
+        Args:
+            data: The new value for the given table cell.
+            row: Define the index of the row to identify the cell.
+            column: Define the index of the column to identify the cell. `header` must be `True` if the column is a string.
+            header: Local override for the `ignore_header` logic.
 
-        == Example ==
-        |  Tables.Open Table    table 1    ${csv_path}
-        |  Set Table Cell    New York    row=20    column=2    header=False
-        |  Set Table Cell    Apple    row=1    column=Fruit    header=True
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Set A Table Cell
+            Tables.Open Table    table 1    ${csv_path}
+            Set Table Cell    New York    row=20    column=2    header=False
+            Set Table Cell    Apple    row=1    column=Fruit    header=True
+        ```
         """
 
         table_df: list[list] = self.file_writer.set_dataframe_cells(
@@ -91,15 +97,18 @@ class Writer(LibraryAttributes):
         """
         Keyword to (over-) write the values of a specific column.
 
-        | =`Arguments`= | =`Description`= |
-        | ``data`` | The new values for the given table column - needs to be list object. |
-        | ``column`` | Define the index of the column to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. |
-        | ``file_path`` | The full path of the existing table file. |
+        Args:
+            data: The new values for the given table column. Must be a list.
+            column: Define the index of the column to modify.
+            header: Set to `True` if the header should be recognized. If `False`, it is ignored.
 
-        == Example ==
-        |  VAR   @{column_list}    month    august    march
-        |  Set Table Column    ${column_list}    2    ${CURDIR}/output/statistics.csv    True
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Set A Table Column
+            VAR    @{column_list}    month    august    march
+            Set Table Column    ${column_list}    2    header=True
+        ```
         """
         table: list[list] = self.file_writer.set_dataframe_cells(
             data=data, column=column, header=header, return_type=TableFormat["List of lists"]
@@ -116,14 +125,17 @@ class Writer(LibraryAttributes):
         """
         Keyword to (over-) write the values of a specific row.
 
-        | =`Arguments`= | =`Description`= |
-        | ``data`` | The new values for the given table row - needs to be list object. |
-        | ``row`` | Define the index of the row to modify. |
-        | ``header`` | Define local override for ignore_header logic. |
-        | ``file_path`` | The full path of the existing table file. |
+        Args:
+            data: The new values for the given table row. Must be a list.
+            row: Define the index of the row to modify.
+            header: Define a local override for the `ignore_header` logic.
 
-        == Example ==
-        |  Set Table Row    ${list_of_values}    3    ${CURDIR}/output/statistics.csv    True
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Set A Table Row
+            Set Table Row    ${list_of_values}    3    header=True
+        ```
         """
         table: list[list] = self.file_writer.set_dataframe_cells(
             data=data, row=row, header=header, return_type=TableFormat["List of lists"]

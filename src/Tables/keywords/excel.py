@@ -48,16 +48,20 @@ class Excel(LibraryAttributes):
 
         Opened file will be stored internally & further keywords can be executed to read & validate the excel data from this data.
 
-        | =`Arguments`= | =`Description`= |
-        | ``alias`` | Define a alias name to identified the open excel file |
-        | ``path`` | Path to the excel file |
-        | ``sheet_name`` | Define one or more sheet names to read only specific sheets from the file - default is ``None``to read the complete file |
+        Args:
+            alias: Define an alias name to identify the opened Excel file.
+            path: Path to the Excel file.
+            sheet_name: Define one or more sheet names to read only specific sheets. The default is `None`, which reads the complete file.
 
-        == Return Value ==
-        Keyword will return the given alias name.
+        Returns:
+            Keyword will return the given alias name.
 
-        == Example ==
-        | Excel Open    ${directory_to_file}/excel_file.xlsx
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Open Excel File
+            Excel Open    ${directory_to_file}/excel_file.xlsx
+        ```
         """
         self._file_type_validation()
         self.file_reader.file_exists(path)
@@ -72,14 +76,17 @@ class Excel(LibraryAttributes):
         """
         Keyword to close all or just the given excel file.
 
-        | =`Arguments`= | =`Description`= |
-        | ``alias`` | Optional: If given, only the file with this alias is closed. |
+        Args:
+            alias: Optional. If given, only the file with this alias is closed.
 
-        == Example ==
-        | ${alias} =    Excel Open    statistics    ${directory_to_file}/excel_file.xlsx
-        |
-        | Excel Close    ${alias}    # close only one file
-        | Excel Close    # close all opened files
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Close Excel Files
+            ${alias} =    Excel Open    statistics    ${directory_to_file}/excel_file.xlsx
+            Excel Close    ${alias}    # close only one file
+            Excel Close    # close all opened files
+        ```
         """
         if not self.df:
             logger.info("Nothing to close - no file is opened!")
@@ -103,8 +110,12 @@ class Excel(LibraryAttributes):
         Keyword returns a list of all currently opened excel files.\n
         It returns the file name alias, defined when the files were opened.
 
-        == Example ==
-        | @{files} =    Excel Get Open Files
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Get Open Excel Files
+            @{files} =    Excel Get Open Files
+        ```
         """
         files = []
         try:
@@ -119,12 +130,16 @@ class Excel(LibraryAttributes):
         """
         Keyword to switch between opened excel files - only if more than one file is opened.
 
-        | =`Arguments`= | =`Description`= |
-        | ``alias`` | The defined ``alias`` of the file to switch to. |
+        Args:
+            alias: The defined alias of the file to switch to.
 
-        == Example ==
-        | Excel File Switch    file_a
-        | Excel File Switch    file_b
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Switch Excel Files
+            Excel File Switch    file_a
+            Excel File Switch    file_b
+        ```
         """
         if len(self.data) <= 1:
             raise KeyError(
@@ -139,11 +154,15 @@ class Excel(LibraryAttributes):
 
         The currently opened excel file is taken for reading the data - see ``File Open`` & ``File Switch`` keywords.
 
-        | =`Arguments`= | =`Description`= |
-        | ``sheet_name`` | Excel sheet name to read the data from - must be read during file open keyword. |
+        Args:
+            sheet_name: Excel sheet name to read. It must have been read during the file open keyword.
 
-        == Example ==
-        | ${sheet_data} =    Excel Sheet Read    Sheet_Persons
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Read Excel Sheet
+            ${sheet_data} =    Excel Sheet Read    Sheet_Persons
+        ```
         """
         df = self.data[self.current_file].get(sheet_name)
         if df is None:
@@ -155,7 +174,11 @@ class Excel(LibraryAttributes):
         """
         Keyword returns the available sheets within the currently opened excel file.
 
-        == Example ==
-        | @{sheets} =    Excel Get Available Sheets
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Get Available Excel Sheets
+            @{sheets} =    Excel Get Available Sheets
+        ```
         """
         return list(self.data[self.current_file].keys())

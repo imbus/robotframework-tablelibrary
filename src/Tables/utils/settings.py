@@ -22,9 +22,11 @@ QuotingCharacter = Enum(
 )
 QuotingCharacter.__doc__ = """
     Available quoting characters - default is ``\"``.
-    | = Delimiter = | = Description = |
-    | ``\"`` | Using the \" as separator. |
-    | ``'`` | Using the ' as separator. |
+
+    | Delimiter | Description |
+    | --- | --- |
+    | `\"` | Using the \" as separator. |
+    | `'` | Using the ' as separator. |
 """
 
 TableFormat = Enum(
@@ -38,10 +40,12 @@ TableFormat = Enum(
 
 TableFormat.__doc__ = """
     Available table formats. Mostly used as return type during reading/getting the table.
-    | = Delimiter = | = Description = |
-    | ``List of lists`` | Using the table format as list[list] |
-    | ``List of dicts`` | Using the table format as list[dict] |
-    | ``Dataframe``     | Using the table format as pandas.DataFrame |
+
+    | Delimiter | Description |
+    | --- | --- |
+    | `List of lists` | Using the table format as [list]. |
+    | `List of dicts` | Using the table format as [dict]. |
+    | `Dataframe` | Using the table format as pandas.DataFrame. |
 """
 
 
@@ -72,7 +76,7 @@ class FileEncoding(Enum):
     """
     Available file encodings for working with table files.
 
-    see [Python Encoding Names|https://docs.python.org/3/library/codecs.html#standard-encodings]
+    See [Python Encoding Names](https://docs.python.org/3/library/codecs.html#standard-encodings).
     """
 
     ASCII = "ascii"
@@ -193,11 +197,13 @@ Delimiter = Enum(
 )
 Delimiter.__doc__ = """
     Available separators for splitting data columns in any table file - default is ``,``.
-    | = Delimiter = | = Description = |
-    | ``;`` | Using the semicolon as separator. |
-    | ``,`` | Using the comma as separator. |
-    | ``\\t`` | Using the ``tab`` character as separator. |
-    | ... | In case of any missing separator, feel free to add it... |
+
+    | Delimiter | Description |
+    | --- | --- |
+    | `;` | Using the semicolon as separator. |
+    | `,` | Using the comma as separator. |
+    | `\\t` | Using the `tab` character as separator. |
+    | `...` | In case of any missing separator, feel free to add it. |
 """
 
 DecimalSeperator = Enum("DecimalSeperator", {".": ".", ",": ","})

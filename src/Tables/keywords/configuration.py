@@ -30,11 +30,33 @@ class ConfigCtx:
 
 class Configuration(LibraryAttributes):
     @keyword(tags=["Configuration"])
-    def get_library_configuration(self) -> dict:
+    def get_library_configuration(self) -> ConfigCtx:
         """
         Keyword returns the current internal library configuration.
 
-        Return value is type ``ConfigCtx`` and contains all relevant configuration parameters.
+        Returns:
+            Return value is type ``ConfigCtx`` and contains all relevant configuration parameters.
+
+        ## ConfigCtx Dto
+        ```python
+        class ConfigCtx:
+            file_type: FileType
+            separator: Delimiter
+            quoting: Quoting
+            quoting_character: QuotingCharacter
+            line_terminator: LineTerminator
+            file_encoding: FileEncoding
+            ignore_header: bool
+            enable_streaming: bool
+            missing_as_none: bool
+        ```
+
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Get Library Configuration
+            &{cfg} =    Get Library Configuration
+        ```
         """
         return asdict(
             ConfigCtx(
@@ -55,13 +77,18 @@ class Configuration(LibraryAttributes):
         """
         Change the internal file type during your test execution dynamically.
 
-        | =`Arguments`= | =`Description`= |
-        | ``file_type`` | Choose the new file type |
+        Args:
+            file_type: Choose the new file type.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure File Type    CSV
-        | Configure File Type    Excel
-        | Configure File Type    Parquet
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure File Type
+            Configure File Type    CSV
+            Configure File Type    Excel
+            Configure File Type    Parquet
+        ```
         """
         old_config = self.file_type
         self.file_type_stack.set(file_type, scope)
@@ -73,13 +100,18 @@ class Configuration(LibraryAttributes):
         """
         Change the internal separator during your test execution dynamically.
 
-        | =`Arguments`= | =`Description`= |
-        | ``separator`` | Define a new separator |
+        Args:
+            separator: Define a new separator.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure Delimiter    ;
-        | Configure Delimiter    ,
-        | Configure Delimiter    \\t
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure Separator
+            Configure Separator    ;
+            Configure Separator    ,
+            Configure Separator    \\t
+        ```
         """
         old_config = self.separator
         self.separator_stack.set(separator, scope)
@@ -91,13 +123,18 @@ class Configuration(LibraryAttributes):
         """
         Change the internal quoting mode during your test execution dynamically.
 
-        | =`Arguments`= | =`Description`= |
-        | ``quoting`` | Define a new quoting mode |
+        Args:
+            quoting: Define a new quoting mode.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure Quoting    MINIMAL
-        | Configure Quoting    NONNUMERIC
-        | Configure Quoting    NONE
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure Quoting
+            Configure Quoting    MINIMAL
+            Configure Quoting    NONNUMERIC
+            Configure Quoting    NONE
+        ```
         """
         old_config = self.quoting
         self.quoting_stack.set(quoting, scope)
@@ -109,12 +146,17 @@ class Configuration(LibraryAttributes):
         """
         Change the internal quoting character during your test execution dynamically.
 
-        | =`Arguments`= | =`Description`= |
-        | ``quoting`` | Define a new quoting mode |
+        Args:
+            quoting_character: Define a new quoting character.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure Quoting Character    "
-        | Configure Quoting Character    '
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure Quoting Character
+            Configure Quoting Character    "
+            Configure Quoting Character    '
+        ```
         """
         old_config = self.quoting_character
         self.quoting_character_stack.set(quoting_character, scope)
@@ -126,12 +168,17 @@ class Configuration(LibraryAttributes):
         """
         Change the internal line terminator during your test execution dynamically.
 
-        | =`Arguments`= | =`Description`= |
-        | ``line_terminator`` | Define a new line_terminator |
+        Args:
+            line_terminator: Define a new line terminator.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure Line Terminator    LF
-        | Configure Line Terminator    CRLF
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure Line Terminator
+            Configure Line Terminator    LF
+            Configure Line Terminator    CRLF
+        ```
         """
         old_config = self.line_terminator
         self.line_terminator_stack.set(line_terminator, scope)
@@ -143,15 +190,20 @@ class Configuration(LibraryAttributes):
         """
         Change the internal file encoding during your test execution dynamically.
 
-        | =`Arguments`= | =`Description`= |
-        | ``file_encoding`` | Define a new file encoding |
+        Args:
+            file_encoding: Define a new file encoding.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure File Encoding    UTF_8
-        | Configure File Encoding    UTF_16
-        | Configure File Encoding    LATIN_1
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure File Encoding
+            Configure File Encoding    UTF_8
+            Configure File Encoding    UTF_16
+            Configure File Encoding    LATIN_1
+        ```
 
-        see [Python Encoding Names|https://docs.python.org/3/library/codecs.html#standard-encodings]
+        See [Python Encoding Names](https://docs.python.org/3/library/codecs.html#standard-encodings).
         """
         old_config = self.file_encoding
         self.file_encoding_stack.set(
@@ -165,12 +217,17 @@ class Configuration(LibraryAttributes):
         """
         Change the internal setting to (not) ignore the data header lines during your test execution dynamically.
 
-        | =`Arguments`= | =`Description`= |
-        | ``ignore_header`` | Ignore / recognize header columns |
+        Args:
+            ignore_header: Ignore or recognize header columns.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure Ignore Header    True
-        | Configure Ignore Header    False
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure Ignore Header
+            Configure Ignore Header    True
+            Configure Ignore Header    False
+        ```
         """
 
         old_config = self.ignore_header
@@ -183,19 +240,24 @@ class Configuration(LibraryAttributes):
         """
         Enable / disable the direct streaming of data into the given table file.
 
-        = Default Behaviour =
+        ## Default Behaviour
         By default, you can open a table, modify the content in the internal cache of the Table library and afterwards to write it into a table file.
 
-        = Behaviour using Streaming =
+        ## Behaviour Using Streaming
         Using the streaming behaviour enables you to write e.g. rows directly into the table file instead of the internal cache.
         This can be required in case you need the data immediately in the file, and not in the cache.
 
-        | =`Arguments`= | =`Description`= |
-        | ``enable_streaming`` | Set to ``True`` to enable the streaming - default: ``False`` |
+        Args:
+            enable_streaming: Set to `True` to enable streaming. Default: `False`.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure Streaming    True
-        | Configure Streaming    False
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure Streaming
+            Configure Streaming    True
+            Configure Streaming    False
+        ```
         """
         old_config = self.enable_streaming
         self.enable_streaming_stack.set(enable_streaming, scope)
@@ -212,13 +274,17 @@ class Configuration(LibraryAttributes):
         Values recognized as missing by the active parser, such as ``N/A`` and ``NULL``,
         are included. DataFrame results and the library's internal DataFrames are not changed.
 
-        | =`Arguments`= | =`Description`= |
-        | ``missing_as_none`` | Set to ``True`` to return missing values as Python ``None``. Default: ``False`` |
-        | ``scope`` | Scope in which the setting applies. |
+        Args:
+            missing_as_none: Set to `True` to return missing values as Python `None`. Default: `False`.
+            scope: Scope in which the setting applies.
 
-        == Example ==
-        | Configure Missing As None    True
-        | Configure Missing As None    False
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Configure Missing As None
+            Configure Missing As None    True
+            Configure Missing As None    False
+        ```
         """
         old_config = self.missing_as_none
         self.missing_as_none_stack.set(missing_as_none, scope)
