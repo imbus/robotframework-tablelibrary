@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        robotframework: ["7.0", "7.4.2"]
+        robotframework: ["7.0", "7.4.2", "7.5"]
     steps:
     - uses: actions/checkout@v4
 
