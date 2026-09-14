@@ -40,22 +40,25 @@ class Modifier(LibraryAttributes):
         """
         Keyword to insert a new row into the currently opened table (see 'Open Table') at the given index.
 
-        | =`Arguments`= | =`Description`= |
-        | ``row_data`` | List of values which should be inserted to the table. Must match the lenght of table row.  |
-        | ``row_index`` | Define the index of the row to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. If Header = False and row index = 0 it will overwrite a possible header, if there is one! |
+        Args:
+            row_data: List of values to insert. Must match the length of a table row.
+            row_index: Define the index of the row to modify.
+            header: Set to `True` if the header should be recognized. If `False` and `row_index` is `0`, a possible header is overwritten.
 
-        == Return Value ==
-        Returns the dataframe of the changed table.
+        Returns:
+            Returns the dataframe of the changed table.
 
-        == Example ==
-        | VAR    ${csv_path} =   test_writer.csv
-        | VAR    @{row_list} =     2001    04
-        | VAR    @{column_list} =   column 1    column 2
-
-        | Tables.Open Table    table 1    ${csv_path}
-        | Tables.Insert Row    ${row_list}    0    header=True      # inserting the 0 row with a header in mind
-        | Tables.Insert Row    ${column_list}    0    header=False  # inserting the 0 row with no header in mind
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Insert Rows
+            VAR    ${csv_path} =   test_writer.csv
+            VAR    @{row_list} =     2001    04
+            VAR    @{column_list} =     column 1    column 2
+            Tables.Open Table    table 1    ${csv_path}
+            Tables.Insert Row    ${row_list}    0    header=True
+            Tables.Insert Row    ${column_list}    0    header=False
+        ```
         """
 
         return self.file_writer.modify_table(action=ModifyAction.Insert_Row, data=row_data, row=row_index, header=header)
@@ -65,19 +68,22 @@ class Modifier(LibraryAttributes):
         """
         Keyword to insert a new column into the currently opened table (see 'Open Table') at the given index.
 
-        | =`Arguments`= | =`Description`= |
-        | ``column_data`` | List of values which should be inserted to the table. Must match the size of table column. |
-        | ``column_index`` | Define the index of the column to modify. |
+        Args:
+            column_data: List of values to insert. Must match the size of a table column.
+            column_index: Define the index of the column to modify.
 
-        == Return Value ==
-        Returns the dataframe of the changed table.
+        Returns:
+            Returns the dataframe of the changed table.
 
-        == Example ==
-        | VAR    ${csv_path} =   test_writer.csv
-        | VAR    @{column_list} =    month      june      july
-
-        | Tables.Open Table    table 1    ${csv_path}
-        | Tables.Insert Column    ${column_list}        1   # inserting between index 0 and 1
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Insert A Column
+            VAR    ${csv_path} =   test_writer.csv
+            VAR    @{column_list} =    month      june      july
+            Tables.Open Table    table 1    ${csv_path}
+            Tables.Insert Column    ${column_list}        1
+        ```
         """
 
         return self.file_writer.modify_table(
@@ -91,18 +97,21 @@ class Modifier(LibraryAttributes):
         """
         Keyword to append a new row into the currently opened table (see 'Open Table') at the end of the table.
 
-        | =`Arguments`= | =`Description`= |
-        | ``row_data`` | List of values which should be inserted to the table. Must match the lenght of table row. |
+        Args:
+            row_data: List of values to append. Must match the length of a table row.
 
-        == Return Value ==
-        Returns the dataframe of the changed table.
+        Returns:
+            Returns the dataframe of the changed table.
 
-        == Example ==
-        | VAR    ${csv_path} =   test_writer.csv
-        | VAR    @{row_list} =     2001    04
-
-        | Tables.Open Table    table 1    ${csv_path}
-        | Tables.Append Row    ${row_list}
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Append A Row
+            VAR    ${csv_path} =   test_writer.csv
+            VAR    @{row_list} =     2001    04
+            Tables.Open Table    table 1    ${csv_path}
+            Tables.Append Row    ${row_list}
+        ```
         """
 
         return self.file_writer.modify_table(action=ModifyAction.Append_Row, data=row_data, row=1)
@@ -115,19 +124,21 @@ class Modifier(LibraryAttributes):
         """
         Keyword to append a new column into the currently opened table (see 'Open Table') at the end of the table.
 
-        | =`Arguments`= | =`Description`= |
-        | ``column_data`` | List of values which should be inserted to the table. Must match the lenght of table column. |
+        Args:
+            column_data: List of values to append. Must match the length of a table column.
 
-        == Return Value ==
-        Returns the dataframe of the changed table.
+        Returns:
+            Returns the dataframe of the changed table.
 
-        == Example ==
-        | VAR    ${csv_path} =   test_writer.csv
-        | VAR    @{column_list} =    month      june      july
-
-
-        | Tables.Open Table    table 1    ${csv_path}
-        | Tables.Append Column    ${column_list}
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Append A Column
+            VAR    ${csv_path} =   test_writer.csv
+            VAR    @{column_list} =    month      june      july
+            Tables.Open Table    table 1    ${csv_path}
+            Tables.Append Column    ${column_list}
+        ```
         """
 
         return self.file_writer.modify_table(
@@ -141,20 +152,22 @@ class Modifier(LibraryAttributes):
         """
         Keyword to remove the given row from the currently opened table (see 'Open Table').
 
-        | =`Arguments`= | =`Description`= |
-        | ``row_index`` | Define the index of the row to modify. |
-        | ``header`` | Set to ``True`` if header should be recognized during file modifications - if ``False`, its ignored. If Header = False and row index = 0 it will remove a possible header, if there is one!|
+        Args:
+            row_index: Define the index of the row to modify.
+            header: Set to `True` if the header should be recognized. If `False` and `row_index` is `0`, a possible header is removed.
 
-        == Return Value ==
-        Returns the dataframe of the changed table.
+        Returns:
+            Returns the dataframe of the changed table.
 
-        == Example ==
-        | VAR    ${csv_path} =   test_writer.csv
-
-
-        | Tables.Open Table    table 1    ${csv_path}
-        | Tables.Remove Row    1    header=True     # remove the 1st row after the header
-        | Tables.Remove Row    0    header=False     # remove the 0st row without headers
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Remove Rows
+            VAR    ${csv_path} =   test_writer.csv
+            Tables.Open Table    table 1    ${csv_path}
+            Tables.Remove Row    1    header=True
+            Tables.Remove Row    0    header=False
+        ```
         """
 
         return self.file_writer.modify_table(action=ModifyAction.Remove_Row, row=row_index, header=header)
@@ -167,19 +180,21 @@ class Modifier(LibraryAttributes):
         """
         Keyword to remove the given column from the currently opened table (see 'Open Table').
 
-        | =`Arguments`= | =`Description`= |
-        | ``column_index`` | Define the index of the column to remove. It can be either an integer (index) or a string.|
+        Args:
+            column_index: Define the index of the column to remove. It can be an integer or a string.
 
-        == Return Value ==
-        Returns the dataframe of the changed table.
+        Returns:
+            Returns the dataframe of the changed table.
 
-        == Example ==
-        | VAR    ${csv_path} =   test_writer.csv
-
-
-        | Tables.Open Table    table 1    ${csv_path}
-        | Tables.Remove Column    0         # remove the very first column
-        | Tables.Remove Column    temp      # remove the column with a header (or first row) called 'temp'
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Remove Columns
+            VAR    ${csv_path} =   test_writer.csv
+            Tables.Open Table    table 1    ${csv_path}
+            Tables.Remove Column    0
+            Tables.Remove Column    temp
+        ```
         """
 
         return self.file_writer.modify_table(

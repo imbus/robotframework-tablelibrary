@@ -72,7 +72,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install .[dev]
+          pip install .[dev] robotframework==7.5 markdown Pygments
 
       - name: Generate libdoc
         run: |
