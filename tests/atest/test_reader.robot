@@ -1,5 +1,6 @@
 *** Settings ***
 Library    Tables    separator=,
+Library    OperatingSystem
 
 
 *** Test Cases ***
@@ -162,6 +163,30 @@ CSV has No Headers - Open CSV Table and Not Ignore Header
     ${data} =    Tables.Get Table
     Length Should Be    ${data}    ${57}
 
+Issue 45 - Keep Single Data Row When Ignoring Header
+    [Teardown]    Reset Issue 45 Test File
+    VAR    @{single_row} =    11:00:00    230.56
+    VAR    @{table} =    ${single_row}
+    ${file_path} =    Set Variable    ${TEMPDIR}${/}tablelibrary_issue45.csv
+
+    Tables.Configure Ignore Header    ${True}
+    Tables.Write Table    ${table}    ${file_path}
+    Tables.Open Table    ${file_path}
+    ${data} =    Tables.Get Table
+    Length Should Be    ${data}    ${1}
+    Length Should Be    ${data}[0]    ${2}
+    Should Be Equal As Strings    ${data}[0][0]    11:00:00
+    Should Be Equal As Strings    ${data}[0][1]    230.56
+
+    Tables.Close Table
+    Tables.Configure Ignore Header    ${False}
+    Tables.Open Table    ${file_path}
+    ${data} =    Tables.Get Table
+    Length Should Be    ${data}    ${1}
+    Length Should Be    ${data}[0]    ${2}
+    Should Be Equal As Strings    ${data}[0][0]    11:00:00
+    Should Be Equal As Strings    ${data}[0][1]    230.56
+
 ########################################################################################
 # TXT
 ########################################################################################
@@ -248,5 +273,11 @@ Read Row and Column Count - Parquet
     Tables.Configure Ignore Header    True
     Tables.Count Table    ${parquet_path}    Rows     ==    ${1000}
     Tables.Count Table    ${parquet_path}    Columns    ==    ${2}
+
+*** Keywords ***
+Reset Issue 45 Test File
+    Tables.Close Table
+    Tables.Configure Ignore Header    ${False}
+    Remove File    ${TEMPDIR}${/}tablelibrary_issue45.csv
 
 

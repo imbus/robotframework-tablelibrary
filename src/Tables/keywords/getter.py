@@ -60,7 +60,7 @@ class Getter(LibraryAttributes):
         if self.file_type == FileType.Parquet and not self.ignore_header:
             data.insert(0, list(table_df.columns))
 
-        if self.ignore_header and self.file_type != FileType.Parquet:
+        if self.ignore_header and self.file_type != FileType.Parquet and len(data) > 1:
             table_df = table_df.iloc[1:]
             data = data[1:]
 
