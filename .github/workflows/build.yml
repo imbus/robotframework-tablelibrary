@@ -86,9 +86,6 @@ jobs:
     - name: Install Hatch
       run: pip install hatch
 
-    - name: Install libdoc dependencies
-      run: pip install robotframework==7.5 markdown Pygments
-
     - name: Install dependencies
       run: hatch env create dev
 

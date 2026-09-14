@@ -72,12 +72,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install .[dev] robotframework==7.5 markdown Pygments
+          pip install .[dev]
 
       - name: Generate libdoc
         run: |
           mkdir -p docs
-          libdoc src/Tables docs/keywords.html
+          libdoc -F MARKDOWN src/Tables docs/keywords.html
           cp docs/keywords.html docs/index.html
           touch docs/.nojekyll
 
