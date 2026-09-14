@@ -26,7 +26,7 @@ classifiers = [
 ]
 dependencies = [
   "overrides",
-  "robotframework>=5.0.1",
+  "robotframework>=7.0.0",
   "robotframework-assertion-engine",
   "robotframework-pythonlibcore",
   "pandas",
@@ -89,7 +89,7 @@ all = ["utest", "atest"]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
-robotframework = ["7.0", "7.4.2"]
+robotframework = ["7.0", "7.4.2", "7.5"]
 
 [tool.coverage.run]
 source_pkgs = ["Tables", "tests"]
