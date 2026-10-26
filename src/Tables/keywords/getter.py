@@ -12,8 +12,8 @@ from robot.api.exceptions import ContinuableFailure
 from ..general.library_attributes import LibraryAttributes
 from ..utils.file_access import FileAccess
 from ..utils.file_reader import Axis
-from ..utils.file_system import FileSystem
 from ..utils.settings import FileType, TableFormat
+from ..utils.table_filter import TableFilter
 
 
 class Getter(LibraryAttributes):
@@ -21,10 +21,7 @@ class Getter(LibraryAttributes):
         self.library = library
         self.file_reader = file_access.file_reader
         self.file_writer = file_access.file_writer
-
-    @property
-    def _fs(self):
-        return FileSystem()
+        self._table_filter = TableFilter(self.file_reader)
 
     @keyword(tags=["Getter"])
     def read_table(
@@ -238,6 +235,83 @@ class Getter(LibraryAttributes):
         return self.file_reader.convert_dataframe(table_df, return_type)
 
     @keyword(tags=["Getter"])
+    def find_cell_value(
+        self,
+        column_value: str | int,
+        column_assertion: str | int,
+        assertion_operator: AssertionOperator,
+        assertion_expected: Any,
+        return_all: bool = False,
+    ) -> Any | list[Any]:
+        """
+        Finds a cell value in rows where another column satisfies an assertion.
+
+        Args:
+            column_value: Column name or index containing the value to return.
+            column_assertion: Column name or index to evaluate against the assertion.
+            assertion_operator: Any assertion-engine operator except ``then``.
+            assertion_expected: Value used by the assertion. Numeric-looking operands are compared numerically.
+            return_all: Return all matching values instead of only the first one.
+
+        Returns:
+            The first matching value, or a list of all matching values in table order when ``return_all`` is True.
+
+        Raises:
+            ValueError: If no row matches and ``return_all`` is False, or if the operator is unsupported.
+
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Find A Cell Value
+            ${value} =    Tables.Find Cell Value    key2    key3    >=    2
+            ${name} =    Tables.Find Cell Value    name    name    contains    Alice
+        ```
+        """
+        return self._table_filter.find_cell_value(
+            column_value,
+            column_assertion,
+            assertion_operator,
+            assertion_expected,
+            return_all,
+        )
+
+    @keyword(tags=["Getter"])
+    def filter_rows(
+        self,
+        column_assertion: str | int,
+        assertion_operator: AssertionOperator,
+        assertion_expected: Any,
+        return_type: TableFormat = TableFormat["List of lists"],
+    ) -> list[list] | list[dict] | pd.DataFrame:
+        """
+        Returns rows where a selected column satisfies an assertion.
+
+        Args:
+            column_assertion: Column name or index to evaluate against the assertion.
+            assertion_operator: Any assertion-engine operator except ``then``.
+            assertion_expected: Value used by the assertion. Numeric-looking operands are compared numerically.
+            return_type: Choose list of lists, list of dictionaries, or DataFrame.
+
+        Returns:
+            Matching rows in the requested format. Header behavior follows ``Get Table``; no matches return an empty
+            data result, retaining a CSV header in list-of-lists and DataFrame results when applicable.
+
+        ## Example
+        ```robotframework
+        *** Test Cases ***
+        Filter Table Rows
+            @{rows} =    Tables.Filter Rows    key3    >=    2
+            @{names} =    Tables.Filter Rows    name    contains    Alice    List of dicts
+        ```
+        """
+        return self._table_filter.filter_rows(
+            column_assertion,
+            assertion_operator,
+            assertion_expected,
+            return_type,
+        )
+
+    @keyword(tags=["Getter"])
     def get_table_cell(
         self,
         row: int,
@@ -271,12 +345,9 @@ class Getter(LibraryAttributes):
             Get Table Cell    1    name    ==    sascha
         ```
         """
-        cell = None
         current_df = self.file_reader.file_sync.table_storage[self.file_reader.file_sync.current_file].data
         table_df = self.file_reader.validate_table_to_dataframe(data=current_df, row=row, column=column)
-
         column = self.file_reader.cast_column_type(column)
-
         cell = table_df.loc[row, column] if isinstance(column, str) else table_df.iloc[row, column]
         cell = self.file_reader.convert_missing_values(cell)
 

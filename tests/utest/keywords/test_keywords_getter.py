@@ -276,10 +276,6 @@ def test_create_table_with_alias(getter):
     assert alias == "explicit"
 
 
-def test_getter_internal_fs_property(getter):
-    assert getter._fs is not None
-
-
 def test_get_table_returns_dataframe(getter, tmp_path, write_csv):
     path = tmp_path / "data.csv"
     write_csv(path, ROWS)
@@ -305,6 +301,120 @@ def test_getter_assertion_success_paths(getter, tmp_path, write_csv):
         assertion_operator=AssertionOperator["contains"],
         assertion_expected="a",
     )
+
+
+def test_find_cell_value_and_filter_rows(getter, tmp_path, write_csv):
+    path = tmp_path / "lookup.csv"
+    rows = [["key1", "key2", "key3"], ["toto", "titi", 1], ["foo", "bar", 2], ["baz", "qux", 3]]
+    write_csv(path, rows)
+    getter.open_table(path, alias="lookup")
+
+    assert getter.find_cell_value("key2", "key3", AssertionOperator[">="], 2) == "bar"
+    assert getter.find_cell_value("key2", "key3", AssertionOperator[">="], 2, return_all=True) == ["bar", "qux"]
+    assert getter.filter_rows("key3", AssertionOperator[">="], 2) == [
+        rows[0],
+        ["foo", "bar", "2"],
+        ["baz", "qux", "3"],
+    ]
+    assert getter.filter_rows("key3", AssertionOperator[">="], 2, TableFormat["List of dicts"]) == [
+        {"key1": "foo", "key2": "bar", "key3": "2"},
+        {"key1": "baz", "key2": "qux", "key3": "3"},
+    ]
+    dataframe = getter.filter_rows("key3", AssertionOperator[">="], 2, TableFormat.Dataframe)
+    assert dataframe.values.tolist() == [rows[0], ["foo", "bar", "2"], ["baz", "qux", "3"]]
+
+
+def test_find_cell_value_no_match(getter, tmp_path, write_csv):
+    path = tmp_path / "lookup.csv"
+    write_csv(path, [["key1", "key2", "key3"], ["foo", "bar", 2]])
+    getter.open_table(path, alias="lookup")
+
+    with pytest.raises(ValueError, match="No rows matched the assertion"):
+        getter.find_cell_value("key2", "key3", AssertionOperator[">"], 2)
+
+    assert getter.find_cell_value("key2", "key3", AssertionOperator[">"], 2, return_all=True) == []
+    assert getter.filter_rows("key3", AssertionOperator[">"], 2) == [["key1", "key2", "key3"]]
+
+
+def test_find_cell_value_with_ignored_header_and_column_indexes(getter, tmp_path, write_csv):
+    path = tmp_path / "lookup.csv"
+    write_csv(path, [["key1", "key2", "key3"], ["toto", "titi", 1], ["foo", "bar", 2]])
+    getter.open_table(path, alias="lookup")
+    getter.library.scope_stack["ignore_header"].set(True)
+
+    assert getter.find_cell_value(1, 2, AssertionOperator[">="], 2) == "bar"
+    assert getter.filter_rows(2, AssertionOperator[">="], 2) == [["foo", "bar", "2"]]
+
+
+def test_find_cell_value_skips_missing_assertion_values(getter, tmp_path, write_csv):
+    path = tmp_path / "lookup.csv"
+    write_csv(path, [["key1", "key2", "key3"], ["missing", "skip", ""], ["found", "", 2]])
+    getter.open_table(path, alias="lookup")
+    getter.library.scope_stack["missing_as_none"].set(True)
+
+    assert getter.find_cell_value("key2", "key3", AssertionOperator[">="], 2) is None
+    assert getter.find_cell_value("key2", "key3", AssertionOperator[">="], 2, return_all=True) == [None]
+    assert getter.filter_rows("key3", AssertionOperator[">="], 2) == [
+        ["key1", "key2", "key3"],
+        ["found", None, "2"],
+    ]
+
+
+def test_find_cell_value_rejects_invalid_operator(getter, tmp_path, write_csv):
+    path = tmp_path / "lookup.csv"
+    write_csv(path, [["key1", "key2", "key3"], ["foo", "bar", 2]])
+    getter.open_table(path, alias="lookup")
+
+    with pytest.raises(ValueError, match="Unexpected operator for assertion"):
+        getter.filter_rows("key3", "bad", 2)
+
+
+def test_filter_rows_supports_text_operators(getter, tmp_path, write_csv):
+    path = tmp_path / "lookup.csv"
+    write_csv(path, [["name", "city"], ["Alice Smith", "Berlin"], ["Bob Jones", "Boston"]])
+    getter.open_table(path, alias="lookup")
+
+    assert getter.find_cell_value("city", "name", AssertionOperator["contains"], "Smith") == "Berlin"
+    assert getter.filter_rows("name", AssertionOperator["matches"], r"^A.*Smith$") == [
+        ["name", "city"],
+        ["Alice Smith", "Berlin"],
+    ]
+
+
+def test_numeric_string_expectations_keep_integer_precision(getter, tmp_path, write_csv):
+    path = tmp_path / "large-numbers.csv"
+    write_csv(path, [["name", "value"], ["rounded", "9007199254740992"], ["large", "9007199254740993"]])
+    getter.open_table(path, alias="large-numbers")
+
+    assert getter.find_cell_value("name", "value", AssertionOperator[">"], "9007199254740992") == "large"
+
+
+def test_filter_rows_compares_iso_date_strings(getter, tmp_path, write_csv):
+    path = tmp_path / "dates.csv"
+    write_csv(path, [["date", "name"], ["2024-01-01", "new"], ["2023-01-01", "old"]])
+    getter.open_table(path, alias="dates")
+
+    assert getter.find_cell_value("name", "date", AssertionOperator[">="], "2024-01-01") == "new"
+
+
+def test_filter_rows_created_table_preserves_dict_rows(getter):
+    alias = getter.create_table(["name", "age"], alias="created")
+    table_df = getter.file_reader.file_sync.table_storage[alias].data
+    table_df.loc[0] = ["Alice", 30]
+    table_df.loc[1] = ["Bob", 41]
+
+    assert getter.filter_rows(
+        "age", AssertionOperator[">="], 40, TableFormat["List of dicts"]
+    ) == [{"name": "Bob", "age": 41}]
+
+
+def test_filter_rows_header_only_table_by_column_name(getter, tmp_path, write_csv):
+    path = tmp_path / "header-only.csv"
+    write_csv(path, [["name", "age"]])
+    getter.open_table(path, alias="header-only")
+
+    assert getter.find_cell_value("name", "age", AssertionOperator[">="], 18, return_all=True) == []
+    assert getter.filter_rows("age", AssertionOperator[">="], 18) == [["name", "age"]]
 
 
 def test_count_table_parquet_assertions(getter, tmp_path, monkeypatch):
