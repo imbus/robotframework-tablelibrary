@@ -258,7 +258,7 @@ class FileReader(LibraryAttributes):
             return pd.read_parquet(path)
 
     def _parquet_transform_to_iso_timeformat(self, df: DataFrame) -> DataFrame:
-        ts_cols = df.select_dtypes(include=["datetime64[ns]", "datetime64[ns, UTC]"]).columns
+        ts_cols = [col for col in df.columns if pd.api.types.is_datetime64_any_dtype(df[col].dtype)]
         for col in ts_cols:
             df[col] = df[col].dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             df[col] = df[col].str[:-3] + "Z"
