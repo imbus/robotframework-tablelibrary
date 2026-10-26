@@ -83,6 +83,19 @@ Get Table Row - CSV - With Header
     Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
     Tables.Get Table Row    0    contains    age
 
+Find Cell Value And Filter Rows - CSV - With Header
+    Tables.Configure Ignore Header    False
+    Tables.Open Table    ${CURDIR}${/}testdata${/}example_01.csv
+    ${name} =    Tables.Find Cell Value    name    age    >=    40
+    Should Be Equal As Strings    ${name}    marvin
+    @{names} =    Tables.Find Cell Value    name    age    >=    ${35}    return_all=${True}
+    Should Be Equal As Strings    ${names}[0]    marvin
+    Length Should Be    ${names}    ${3}
+    @{rows} =    Tables.Filter Rows    age    >=    ${35}
+    Length Should Be    ${rows}    ${4}
+    @{matching_names} =    Tables.Filter Rows    name    contains    marvin
+    Length Should Be    ${matching_names}    ${2}
+
 Get Row and Column Count - CSV - With Header
     Tables.Configure Ignore Header    False
     VAR    ${file_path}      ${CURDIR}${/}testdata${/}example_01.csv

@@ -161,9 +161,11 @@ class FileReader(LibraryAttributes):
         if isinstance(column_value, str):
             if self.ignore_header:
                 raise TypeError("Column identifier cannot be 'str' type when library setting 'ignore_header' is 'True'!")
-            if column_value not in data.iloc[0].tolist() and column_value not in data.columns:
+            first_row = data.iloc[0].tolist() if not data.empty else []
+            if column_value not in first_row and column_value not in data.columns:
                 raise ValueError(
-                    f"Couldn't find column '{column_value}' in the table. Current columns are: {list(data.iloc[0])}"
+                    f"Couldn't find column '{column_value}' in the table. Current columns are: "
+                    f"{first_row or data.columns.to_list()}"
                 )
 
         elif isinstance(column_value, int):
